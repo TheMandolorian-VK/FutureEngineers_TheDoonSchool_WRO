@@ -110,39 +110,6 @@ Links and documentation for autonomous driving demonstrations.
 
 ---
 
-## Development Timeline
-
-### Phase 1
-
-Research, rule analysis, and concept generation.
-
-### Phase 2
-
-Mechanical design and prototype development.
-
-### Phase 3
-
-Sensor integration and software development.
-
-### Phase 4
-
-Track testing and optimization.
-
-### Phase 5
-
-Competition preparation and documentation.
-
----
-
-## Current Status
-
-Project initialization completed.
-
-Repository created and documentation structure established.
-
-Further updates will be committed throughout the 2026 WRO season.
-
----
 
 ## License
 
