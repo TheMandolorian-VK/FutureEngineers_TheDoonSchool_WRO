@@ -3,8 +3,8 @@
 ## Team Information
 
 **Team Name:** The Doon School Future Engineers
-**Competition:** WRO Future Engineers 2026
-**Category:** Self-Driving Cars
+**Competition:** WRO 2026
+**Category:** Future Engineers
 **School:** The Doon School, Dehradun, India
 
 ---
