@@ -257,7 +257,6 @@ Technologies:
 
 * C++
 * OpenCV
-* TensorFlow Lite
 
 ---
 
