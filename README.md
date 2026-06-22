@@ -450,4 +450,4 @@ All documentation, software, and design files are maintained by the team and may
 
 * World Robot Olympiad Association
 * The Doon School
-* Mentors, teachers, and supporters who contribute to the development of the project
+* Mentors, teachers, supporters who contribute to the development of the project, and Mr. Ravi.
