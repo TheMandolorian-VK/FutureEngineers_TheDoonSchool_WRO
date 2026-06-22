@@ -3,11 +3,11 @@
 ## Team Information
 
 **Team Name:** The Doon School Future Engineers
----
+
 **Competition:** World Robot Olympiad (WRO) 2026
----
+
 **Category:** Future Engineers
----
+
 **School:** The Doon School, Dehradun, India
 
 ---
