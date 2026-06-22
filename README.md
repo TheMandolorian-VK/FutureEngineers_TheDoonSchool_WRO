@@ -59,9 +59,9 @@ FutureEngineers_TheDoonSchool_WRO
 
 | Name | Role                              |
 | ---- | --------------------------------- |
-| TBD  | Mechanical Engineering            |
-| TBD  | Software Engineering              |
-| TBD  | Electronics & Systems Integration |
+| Dhrubo Mishra   | Mechanical Engineering            |
+| Vivaan Kumbhat  | Software Engineering              |
+| Yug Jain        | Electronics & Systems Integration |
 
 ### School
 
