@@ -2,8 +2,7 @@
 
 WRO FUTURE ENGINEERS 2026
 OBSTACLE CHALLENGE
-ESP32 ACTUATOR CONTROLLER
-=========================
+==================
 
 */
 
@@ -11,7 +10,7 @@ ESP32 ACTUATOR CONTROLLER
 // LIBRARIES
 // ==================================================
 
-#include <ESP32Servo.h>
+// #include <ESP32Servo.h>
 
 // ==================================================
 // PINOUTS
@@ -34,7 +33,7 @@ const int RIGHT_IN2_PIN = 33;
 // HARDWARE OBJECTS
 // ==================================================
 
-Servo steeringServo;
+// Servo steeringServo;
 
 // ==================================================
 // VEHICLE CONSTANTS
@@ -48,24 +47,27 @@ const int MAX_RIGHT_STEERING = 30;
 const int MAX_SPEED = 255;
 
 // ==================================================
-// PI VARIABLES
+// PI INPUT VARIABLES
 // ==================================================
 
+// Main output from Pi
 float steeringAngle = 0;
+
+// Speed command
 int driveSpeed = 0;
 
 // ==================================================
-// PILLAR VARIABLES
+// OBSTACLE VARIABLES
 // ==================================================
 
-bool redDetected = false;
-bool greenDetected = false;
+bool redPillarDetected = false;
+bool greenPillarDetected = false;
 
-int redX = 0;
-int greenX = 0;
+int redPillarX = 0;
+int greenPillarX = 0;
 
-float redDistance = 0;
-float greenDistance = 0;
+float redPillarDistance = 0;
+float greenPillarDistance = 0;
 
 // ==================================================
 // STATE MACHINE
@@ -93,47 +95,77 @@ VehicleState currentState = DRIVING;
 // COMMUNICATION
 // ==================================================
 
-void receivePiData()
-{
+void receivePiData();
 
-}
+void parsePacket();
 
 // ==================================================
 // STEERING
 // ==================================================
 
-void setSteeringAngle(float angle)
-{
+void initialiseSteering();
 
-}
+void setSteeringAngle(float angle);
 
-// ==================================================
-// DRIVE
-// ==================================================
-
-void driveForward(int speedValue)
-{
-
-}
-
-void stopVehicle()
-{
-
-}
+void centerSteering();
 
 // ==================================================
-// PILLAR HANDLING
+// MOTOR CONTROL
 // ==================================================
 
-void handleRedPillar()
-{
+void initialiseMotors();
 
-}
+void setMotorSpeed(int speed);
 
-void handleGreenPillar()
-{
+void stopVehicle();
 
-}
+// ==================================================
+// OBSTACLE DETECTION
+// ==================================================
+
+void detectRedPillar();
+
+void detectGreenPillar();
+
+void estimatePillarPosition();
+
+// ==================================================
+// OBSTACLE AVOIDANCE
+// ==================================================
+
+void calculateRedAvoidance();
+
+void calculateGreenAvoidance();
+
+void returnToCenter();
+
+// ==================================================
+// PARKING
+// ==================================================
+
+void detectParkingZone();
+
+void executeParking();
+
+// ==================================================
+// STATE HANDLERS
+// ==================================================
+
+void drivingState();
+
+void redPillarState();
+
+void greenPillarState();
+
+void parkingState();
+
+void finishedState();
+
+// ==================================================
+// DEBUGGING
+// ==================================================
+
+void printDebugData();
 
 // ==================================================
 // SETUP
