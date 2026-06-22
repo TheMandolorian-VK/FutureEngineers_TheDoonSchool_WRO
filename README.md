@@ -79,7 +79,6 @@ Potential components include:
 docs/
 hardware/
 software/
-models/
 images/
 videos/
 ```
