@@ -30,6 +30,9 @@ const int RIGHT_PWM_PIN = 14;
 const int RIGHT_IN1_PIN = 12;
 const int RIGHT_IN2_PIN = 33;
 
+const int LED_GREED_PIN = 2;
+const int LED_RED_PIN   = 4;
+
 // ==================================================
 // HARDWARE OBJECTS
 // ==================================================
@@ -42,8 +45,8 @@ Servo steeringServo;
 
 const int SERVO_CENTER = 90;
 
-const float MAX_LEFT_STEERING  = -30.0f;
-const float MAX_RIGHT_STEERING =  30.0f;
+const float MAX_LEFT_STEERING  = -45.0f;
+const float MAX_RIGHT_STEERING =  45.0f;
 
 const int MAX_SPEED = 255;
 
@@ -114,7 +117,6 @@ void stopVehicle();
 
 void detectRedPillar();
 void detectGreenPillar();
-void estimatePillarPosition();
 
 // ==================================================
 // OBSTACLE AVOIDANCE
@@ -173,7 +175,7 @@ void loop()
     case GREEN_PILLAR: greenPillarState();  break;
     case PARKING:      parkingState();      break;
     case FINISHED:     finishedState();     break;
-  }
+  } 
 
   printDebugData();
 }
@@ -279,11 +281,6 @@ void detectRedPillar()
 }
 
 void detectGreenPillar()
-{
-  // TODO
-}
-
-void estimatePillarPosition()
 {
   // TODO
 }
