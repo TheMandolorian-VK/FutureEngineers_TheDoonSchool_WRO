@@ -59,9 +59,10 @@ FutureEngineers_TheDoonSchool_WRO
 
 | Name | Role                              |
 | ---- | --------------------------------- |
-| Dhrubo Mishra   | Mechanical Engineering            |
-| Vivaan Kumbhat  | Software Engineering              |
-| Yug Jain        | Electronics & Systems Integration |
+| Dhrubo Mishra         | Mechanical Engineering            |
+| Vivaan Kumbhat        | Software Engineering              |
+| Yug Jain              | Electronics & Systems Integration |
+| Mr. Ashutosh Tripathi | Head Mentor                       |
 
 ### School
 
