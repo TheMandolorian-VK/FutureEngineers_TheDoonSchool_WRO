@@ -2,6 +2,7 @@
 
 WRO FUTURE ENGINEERS 2026
 OBSTACLE CHALLENGE
+ESP32 CODE V0.1
 ==================
 
 */
@@ -57,7 +58,7 @@ float steeringAngle = 0;
 int driveSpeed = 0;
 
 // ==================================================
-// OBSTACLE VARIABLES
+// OBSTACLE VARIABLES FROM PI
 // ==================================================
 
 bool redPillarDetected = false;
