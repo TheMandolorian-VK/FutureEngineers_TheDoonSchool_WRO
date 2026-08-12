@@ -1,86 +1,273 @@
+````markdown
 <div align="center">
 
-# Robotics Platform Power Distribution & Component Interconnections
+# Wiring Guide
 
-**Complete power architecture, component interconnections, and signal routing.**
+**Physical wiring, power distribution, pin assignments, and component interconnections for the WRO Future Engineers vehicle.**
 
-[← Project home](../../README.md) · [Hardware](../README.md) · [Electronics](../../electronics/README.md)
+[← Project home](../../README.md) · [Hardware](../README.md) · [Electronics](../../electronics/README.md) · [Diagrams](../../docs/diagrams/README.md)
 
 </div>
 
 ---
 
-This document serves as the master reference for all physical connections, power plans, and pin assignments for the multi-microcontroller robotics platform.
+The `hardware/wiring-guide/` directory contains the physical wiring reference for the robot.
 
-| Reference | Purpose |
+Unlike `docs/diagrams/`, which explains the overall architecture visually, this document focuses on **what connects to what, which pins are used, how power is distributed, and how the final electrical system is verified**.
+
+The wiring configuration will be updated as the physical robot is assembled and tested.
+
+## Hardware
+
+| Component | Function |
 | --- | --- |
-| Power Architecture | Voltage regulation via LM317, rail breakdown, and current management |
-| Interconnections | Pin-to-pin mappings for Pi 4B, ESP32, ToF sensor, and motor driver |
-| Critical Integrations | Star grounding rules, UART crossing, and motor noise decoupling |
+| Raspberry Pi 4B | High-level computation and navigation |
+| Pi Camera 3 Wide | Visual perception |
+| ESP32 | Low-level actuator control |
+| 6-axis IMU | Motion sensing |
+| ToF sensor | Distance sensing |
+| MG996R | Front steering |
+| TB6612FNG | Motor driver |
+| N20 | 6 V, 600 RPM drive motor |
 
-> [!NOTE]
-> This guide defines the definitive power and electronics configuration. Do not deviate from the grounding matrix or bypass decoupling capacitors.
+The drivetrain uses **one N20 motor**, mechanically connected to the rear drive wheels.
 
-## System Overview
+## Controller Architecture
 
-This platform uses an **LM317 adjustable linear voltage regulator** to step down raw input power (e.g., 7.4V 2S LiPo or 9V–12V DC input) down to a stable **5V system rail**. This regulated 5V rail feeds both compute modules (**Raspberry Pi 4B** and **ESP32**) as well as the motor supply voltage (VM) on the **TB6612FNG** motor driver.
+```text
+Pi Camera 3 Wide
+       ↓
+Raspberry Pi 4B
+       │
+       │ USB Serial
+       ↓
+     ESP32
+    /     \
+MG996R   TB6612FNG
+             ↓
+        N20 6V 600RPM
+````
 
-The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**.
+The Raspberry Pi handles perception and navigation.
 
----
+The ESP32 handles low-level steering, motor control, and communication safety.
 
-## Power Distribution Architecture
+## ESP32 Pinout
 
-### LM317 Regulation Stage
+### MG996R Steering
 
-An LM317 adjustable linear regulator is configured to generate a steady **5.0V output**:
-*   **Voltage Divider:** $R_1 = 240\,\Omega$ (between VO and ADJ) and $R_2 = 720\,\Omega$ (between ADJ and GND) yield $V_{\text{out}} = 1.25\text{V} \times (1 + 720/240) = 5.0\text{V}$.
-*   **Input Decoupling:** A $0.1\,\mu\text{F}$ ceramic capacitor placed close to the VI pin suppresses input noise.
-*   **Output Decoupling:** A $10\,\mu\text{F}$ electrolytic capacitor placed across VO and GND stabilizes the regulated 5V output rail.
+```text
+MG996R signal → GPIO 13
+```
 
-### Voltage Rails
+GPIO 13 is the steering control signal. The servo receives power through the appropriate supply rail rather than from the GPIO.
 
-| Rail Name | Voltage | Source | Consumers |
-|---|---|---|---|
-| **V_Raw** | 7.4V – 12V | Battery / DC Supply | LM317 VI (Input) pin |
-| **Main +5V** | 5.0V | LM317 VO (Output) pin | Pi 4B Pin 2/4, ESP32 Vin, TB6612FNG VM |
-| **+3.3V_Pi** | 3.3V | Pi 4B internal LDO | Pi Camera Module 3 Wide |
-| **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, ToF VCC, TB6612FNG VCC (Logic Power) |
+### TB6612FNG
 
----
+```text
+PWMA  → GPIO 25
+AIN1  → GPIO 26
+AIN2  → GPIO 27
+STBY  → GPIO 32
+```
 
-## Detailed Component Interconnections
+The TB6612FNG drives the single N20 motor.
 
-```mermaid
-flowchart TD
-    subgraph Power ["Power Distribution"]
-        battery["Raw Battery / Power Source"]
-        lm317["LM317 Regulator (5V Output)"]
-    end
+### Status LEDs
 
-    subgraph Compute ["Compute & Control"]
-        pi["Raspberry Pi 4B"]
-        esp32["ESP32"]
-    end
+```text
+Green LED → GPIO 2
+Red LED   → GPIO 4
+```
 
-    subgraph Sensing ["Sensing"]
-        camera["Pi Camera 3 Wide"]
-        tof["Time of Flight Sensor"]
-    end
+## Raspberry Pi and Camera
 
-    subgraph Actuation ["Actuation"]
-        driver["TB6612FNG Motor Driver"]
-        motorL["Left N20 Motor"]
-        motorR["Right N20 Motor"]
-    end
+The Pi Camera 3 Wide connects to the Raspberry Pi 4B camera interface.
 
-    battery --> lm317
-    lm317 -->|5V Rail| pi
-    lm317 -->|5V Rail| esp32
-    lm317 -->|5V Rail| driver
-    pi --> camera
-    pi <-->|UART| esp32
-    esp32 -->|I2C| tof
-    esp32 -->|PWM / GPIO| driver
-    driver --> motorL
-    driver --> motorR
+The camera provides the primary visual input for:
+
+* the 3×3 colour-grid system;
+* orange and blue line detection;
+* red and green pillar detection;
+* visual positioning;
+* navigation.
+
+The final camera position and mounting will be recorded after physical assembly.
+
+## Pi ↔ ESP32 Communication
+
+The Raspberry Pi and ESP32 communicate through **USB serial**.
+
+```text
+Raspberry Pi 4B
+      │
+      │ USB
+      ▼
+    ESP32
+```
+
+The current communication speed is:
+
+```text
+115200 baud
+```
+
+Commands use the format:
+
+```text
+CMD,<steering_deg>,<motor_pwm>,<mode>
+```
+
+Example:
+
+```text
+CMD,-15.50,140,DRIVE
+```
+
+Additional commands:
+
+```text
+STOP
+PING
+```
+
+The ESP32 includes a communication watchdog. If valid commands stop arriving, the motor is stopped and the steering is centred.
+
+## Sensor Connections
+
+The vehicle includes a:
+
+* **6-axis IMU** for motion and rotational information;
+* **ToF sensor** for direct distance measurement.
+
+The final sensor wiring will record:
+
+* supply;
+* ground;
+* communication interface;
+* signal pins;
+* physical mounting position.
+
+The exact pin assignments will be added once the final sensor modules and connections are confirmed.
+
+## Power Distribution
+
+The final wiring documentation will distinguish between:
+
+```text
+Power Source
+     │
+     ├── Logic / Compute
+     │      ├── Raspberry Pi
+     │      └── ESP32
+     │
+     ├── Sensors
+     │
+     ├── Motor Driver
+     │      └── N20
+     │
+     └── Steering
+            └── MG996R
+```
+
+The actual battery, regulator, rail voltages, and current requirements will be documented after the final power system is physically verified.
+
+The N20 is a **6 V, 600 RPM motor**, so the motor supply must be compatible with its specification and should not automatically be treated as the same rail used for logic electronics.
+
+The current design record also contains an LM317-based 5 V regulation concept using:
+
+```text
+R1 = 240 Ω
+R2 = 720 Ω
+```
+
+with:
+
+```text
+0.1 µF input decoupling
+10 µF output decoupling
+```
+
+This remains a design reference until the final assembled power architecture is verified.
+
+## Grounding and Cable Routing
+
+The final wiring will use a controlled common-ground arrangement.
+
+Motor and servo current paths should be kept separate from sensitive sensor and logic paths where practical.
+
+Cables should also be routed so that they cannot interfere with:
+
+* steering;
+* wheels;
+* drivetrain;
+* moving mechanical components.
+
+Motor wiring and sensitive signal wiring should be separated where practical.
+
+## Verification
+
+The electrical system will be brought online progressively:
+
+```text
+Power
+  ↓
+ESP32
+  ↓
+Steering
+  ↓
+Motor
+  ↓
+Sensors
+  ↓
+Pi ↔ ESP32
+  ↓
+Complete system
+```
+
+Initial motor tests should be performed with the drive wheels lifted from the ground.
+
+The final verification process will include:
+
+* checking power polarity;
+* measuring supply rails;
+* verifying ESP32 pin assignments;
+* checking motor-driver connections;
+* checking steering connections;
+* checking sensor connections;
+* testing USB communication;
+* checking cable clearance;
+* testing the communication failsafe.
+
+## Reproducibility
+
+The completed wiring documentation will contain the final:
+
+* wiring diagram;
+* pinout;
+* power distribution;
+* sensor connections;
+* component connections;
+* physical wiring evidence;
+* verification results.
+
+Any hardware change must be reflected consistently in the wiring, pinout, firmware, diagrams, and engineering journal.
+
+## Document Boundary
+
+This document is the **physical wiring and connection reference**.
+
+For visual system architecture and engineering diagrams, see:
+
+`docs/diagrams/`
+
+For electrical design decisions and component reasoning, see:
+
+`electronics/`
+
+For mechanical design and fabrication, see:
+
+`design/`
+
+```
+```
