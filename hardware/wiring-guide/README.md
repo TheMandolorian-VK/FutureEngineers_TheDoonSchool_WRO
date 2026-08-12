@@ -10,51 +10,29 @@
 
 ---
 
-This document serves as the master reference for all physical connections, power plans, pin assignments, sensor connections, and critical grounding matrices for the multi-microcontroller robotics platform.
+This document serves as the master reference for all physical connections, power plans, and pin assignments for the multi-microcontroller robotics platform. 
 
-| Reference | Purpose |
-| --- | --- |
-| Power Architecture | Voltage rails, regulation stages, decoupling paths, and current limits |
-| Interconnections | Exact pin-to-pin mappings for Pi 4B, ESP32, ToF sensor, and motor driver |
-| Critical Integrations | Star grounding rules, UART crossing, and mandatory motor noise isolation |
-
-> [!NOTE]
-> This guide defines the definitive power and electronics configuration. Do not deviate from the grounding matrix or bypass the motor EMI isolation capacitors.
+> [!CAUTION]
+> **DIRECT WIRING VOLTAGE WARNING**
+> Because this system does not use a buck regulator, **you cannot use a 7.4V LiPo battery for the logic boards**. Supplying more than 5.25V directly to the Raspberry Pi 4B or ESP32 will instantly destroy them. This guide assumes you are using a **5V USB Power Bank** (or equivalent 5V source) to power the entire system.
 
 ## System Overview
 
-This platform uses a 2S LiPo battery (7.4V nominal) as the primary power source, distributed through a 5V buck regulator to logic-level devices (**Raspberry Pi 4B**, **ESP32**) and a raw battery motor rail to the **TB6612FNG** motor driver. 
+This platform uses a direct 5V power source to drive both logic and motors. The **Raspberry Pi 4B** receives main power (via USB-C) and distributes 5V to the **ESP32** and the **TB6612FNG** motor driver's power rail (VM). 
 
-The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Raspberry Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**. Power domains are strictly isolated to prevent motor noise from corrupting sensor and communication buses.
+The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**. 
 
 ---
 
 ## Power Distribution Architecture
 
-### Primary Power Stages
-
-**Battery to Regulation:**
-*   **LiPo (2S, 7.4V nominal):** Supplies two parallel distribution paths.
-*   **Logic path:** Raw battery → 5V/3A buck regulator (LM2596) → +5V rail.
-*   **Motor path:** Raw battery → TB6612FNG VM pins (unregulated, high current capacity).
-
-**Logic Rail Decoupling:**
-The +5V buck output feeds two independent LDO regulators:
-*   **Raspberry Pi internal LDO:** 5V → 3.3V_Pi (powers Pi and CSI camera).
-*   **ESP32 internal LDO:** 5V → 3.3V_ESP (powers ESP32 core and onboard regulators).
-
-**Motor Power Bus:**
-The VM rail receives raw battery voltage with a 100µF electrolytic capacitor soldered directly across the VM and GND pins of the TB6612FNG. This capacitor is critical — it absorbs voltage transients when the motor load switches on/off, preventing brown-outs on the logic rails.
-
 ### Voltage Rails
 
 | Rail Name | Voltage | Source | Consumers |
 |---|---|---|---|
-| **V_Batt** | 7.4V | LiPo (2S) | Buck regulator input, TB6612FNG VM input |
-| **+5V** | 5V | LM2596 buck output | Pi Vin, ESP32 Vin |
-| **+3.3V_Pi** | 3.3V | Pi 4B internal LDO | Pi SoC, Camera Module 3 Wide |
-| **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, GPIO logic, I2C pull-ups, ToF VCC, TB6612FNG VCC |
-| **VM** | 7.4V (raw) | LiPo (2S) | TB6612FNG motor outputs (AO1, AO2, BO1, BO2) |
+| **Main 5V** | 5V | 5V USB Power Bank (via Pi 4B USB-C) | Pi 4B SoC, ESP32 Vin, TB6612FNG VM (Motor Power) |
+| **+3.3V_Pi** | 3.3V | Pi 4B internal LDO | Pi Camera Module 3 Wide |
+| **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, ToF VCC, TB6612FNG VCC (Logic Power) |
 
 ---
 
@@ -62,14 +40,12 @@ The VM rail receives raw battery voltage with a 100µF electrolytic capacitor so
 
 ```mermaid
 architecture-beta
-    group power[Power Distribution]
+    group power[Power Source]
     group compute[Compute & Control]
     group sensing[Sensing]
     group actuation[Actuation]
 
-    service battery[LiPo Battery 2S 7.4V] in power
-    service buck[5V 3A Buck Regulator] in power
-    service cap_vm[100uF Capacitor VM Bus] in power
+    service usb_power[5V USB Power Bank] in power
 
     service pi[Raspberry Pi 4B] in compute
     service esp32[ESP32] in compute
@@ -81,11 +57,9 @@ architecture-beta
     service motorL[Left N20 Motor] in actuation
     service motorR[Right N20 Motor] in actuation
 
-    battery:R --> L:buck
-    battery:B --> T:cap_vm
-    buck:R --> L:pi
-    buck:B --> T:esp32
-    cap_vm:B --> T:driver
+    usb_power:R --> L:pi
+    pi:B --> T:esp32
+    pi:R --> L:driver
     pi:B --> T:camera
     esp32:R --> L:tof
     esp32:B --> T:driver
