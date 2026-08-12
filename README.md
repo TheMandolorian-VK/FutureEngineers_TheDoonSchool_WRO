@@ -2,6 +2,8 @@
 
 # The Doon School — WRO Future Engineers 2026
 
+![The Doon School — WRO Future Engineers 2026](logo.png)
+
 ### Engineering the autonomous vehicle for the World Robot Olympiad Future Engineers category
 
 ![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
