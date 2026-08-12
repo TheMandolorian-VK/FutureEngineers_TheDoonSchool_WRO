@@ -1,4 +1,3 @@
-````markdown
 <div align="center">
 
 # Wiring Guide
@@ -46,8 +45,6 @@ Raspberry Pi 4B
 MG996R   TB6612FNG
              ↓
         N20 6V 600RPM
-````
-
 The Raspberry Pi handles perception and navigation.
 
 The ESP32 handles low-level steering, motor control, and communication safety.
@@ -269,5 +266,3 @@ For mechanical design and fabrication, see:
 
 `design/`
 
-```
-```
