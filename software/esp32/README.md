@@ -14,12 +14,4 @@
 
 - `obstacleChallenge.ino` — development-stage ESP32 sketch.
 
-> [!WARNING]
-> Pin assignments, actuator directions, and safety behaviour must be verified against the assembled robot before being described as final.
 
-## To document with each verified revision
-
-1. Firmware version and upload date.
-2. Pin mapping and power conditions.
-3. Safety behaviour tested.
-4. Link to a dated test record.
