@@ -1,8 +1,8 @@
 <div align="center">
 
-# The Doon School — WRO Future Engineers 2026
+# The Doon School: WRO Future Engineers 2026
 
-![The Doon School — WRO Future Engineers 2026](logo.png)
+![The Doon School: WRO Future Engineers 2026](logo.png)
 
 ### Engineering the autonomous vehicle for the World Robot Olympiad Future Engineers category
 
@@ -44,7 +44,7 @@ This repository is the public engineering record for **The Doon School Future En
 
 It captures the team's submitted vehicle configuration, software architecture, documentation structure, and engineering process. The vehicle is a 4-wheel autonomous car built to the WRO 2026 Future Engineers rules:
 
-- **One driving axle + one steering actuator** (Rules 11.3, 11.5, 11.13) — differential/per-side drive is disallowed.
+- **One driving axle + one steering actuator** (Rules 11.3, 11.5, 11.13): differential/per-side drive is disallowed.
 - **Envelope:** ≤ 300 × 200 × 300 mm; **mass:** ≤ 1.5 kg (Rules 11.1–11.2).
 - **No wireless** control during the run.
 
@@ -65,7 +65,7 @@ This is the team's **submission design reference**. The final vehicle is intende
 | Mr. Ashutosh Tripathi | Head mentor |
 
 **School:** The Doon School, Dehradun, India
-**Category:** WRO 2026 — Future Engineers
+**Category:** WRO 2026: Future Engineers
 
 ---
 
@@ -120,7 +120,7 @@ Full detail: [`design/README.md`](design/README.md).
 Key points of the submitted configuration:
 
 - **Front Ackermann steering** driven by an MG996R servo. The steering arms, knuckles and tie-rod geometry are built from **LEGO beams and pins** on a front sub-frame, so the Ackermann trapezoid can be re-jigged in 8 mm steps during tuning without re-cutting the chassis. Outer lock was iterated **31° → 40°** to clear the 600 mm corridor 90° corners (see journal Entry 04).
-- **Fully rear-wheel drive** with one N20 6 V 600 RPM motor on the rear axle — Rule 11.13 compliant (one driving axle, no independent side motors). Rear wheels are smaller than the front, producing the rearward tilt described above.
+- **Fully rear-wheel drive** with one N20 6 V 600 RPM motor on the rear axle: Rule 11.13 compliant (one driving axle, no independent side motors). Rear wheels are smaller than the front, producing the rearward tilt described above.
 - **Two-deck 3 mm plywood chassis**, laser-cut in **LightBurn**. Upper deck carries the Raspberry Pi 4B + Camera Module 3 Wide; lower deck carries the 11 V 3S LiPo pack, ESP32 and TB6612FNG. The decks are spaced by **brass standoff offsets**, with LEGO used as adjustable mounting rails.
 - **LightBurn reproducibility:** the chassis is drawn in LightBurn and cut from 3 mm plywood; the editable `.lbrn` master and the portable export [`wooden_plate.dxf`](design/wooden_plate.dxf) define the same geometry so the chassis can be reproduced from the repository alone.
 
@@ -147,7 +147,7 @@ Full detail: [`strategy/README.md`](strategy/README.md) · Pi code: [`software/r
 Two-layer software:
 
 - **Raspberry Pi (`wromain.py`):** camera frames → 3×3 colour grid → per-cell HSV masks (red / green / blue / orange / magenta) → contour detection → target selection → lateral-error **PD steering** → dynamic drive speed. PD (not full PID) is used deliberately: no sustained steady-state error needs the integral term, and D-only damping prevents corner oscillation.
-- **ESP32 (`obstacleChallenge.ino`):** executes bounded commands through a safety state machine with modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`. Fault is entered on serial timeout or invalid command — the vehicle always fails safe.
+- **ESP32 (`obstacleChallenge.ino`):** executes bounded commands through a safety state machine with modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`. Fault is entered on serial timeout or invalid command: the vehicle always fails safe.
 
 **Obstacle Challenge flow:** lane-follow by centring on the corridor (PD on vision offset, ToF wall check) → red pillar pass right / green pillar pass left (colour from camera grid, clearance verified by ToF) → after 3 laps `MODE_PARK` (magenta blocks via camera, IMU heading alignment, ToF depth stop). **Open Challenge:** corner detection from wall geometry + lap counting by orange/blue section lines, then autonomous stop.
 
@@ -174,7 +174,7 @@ Configuration is kept separate from evidence. A design choice is explained in th
 
 ## Visuals
 
-The repository keeps team, vehicle, testing and competition visuals in separate folders so context stays clear. Vehicle views in [`images/robot/`](images/robot/README.md) are **AI-generated concept renders** based on the submitted configuration, each labelled *AI-generated concept render* — they are design-reference views, not photographs. With the WRO India Team informed via call/email, competition-day videos are recorded only on the day of the event and archived in [`videos/README.md`](videos/README.md).
+The repository keeps team, vehicle, testing and competition visuals in separate folders so context stays clear. Vehicle views in [`images/robot/`](images/robot/README.md) are **AI-generated concept renders** based on the submitted configuration, each labelled *AI-generated concept render*: they are design-reference views, not photographs. With the WRO India Team informed via call/email, competition-day videos are recorded only on the day of the event and archived in [`videos/README.md`](videos/README.md).
 
 ---
 
@@ -212,7 +212,7 @@ This repository is built to make the submitted configuration clear to judges, me
 
 ## Robot Visualisations
 
-Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** of the submitted vehicle configuration — design-reference views, not photographs.
+Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** of the submitted vehicle configuration: design-reference views, not photographs.
 
 ---
 

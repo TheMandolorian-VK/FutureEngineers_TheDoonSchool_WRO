@@ -24,7 +24,7 @@ The vehicle uses **front Ackermann steering with a servo** and **fully rear-whee
 
 ## 2. Steering: Ackermann geometry
 
-**Why Ackermann:** at a corner, the inner front wheel must turn tighter than the outer front wheel, so all four wheels roll about a single instant centre. Without this (parallel steering), tyres scrub sideways, grip drops, and the car is unstable at speed — exactly what kills run consistency.
+**Why Ackermann:** at a corner, the inner front wheel must turn tighter than the outer front wheel, so all four wheels roll about a single instant centre. Without this (parallel steering), tyres scrub sideways, grip drops, and the car is unstable at speed: exactly what kills run consistency.
 
 ### Steering mechanism
 
@@ -51,7 +51,7 @@ The 40° lock lets the car execute the sharp 90° corners of the 600 mm corridor
 
 ## 3. Chassis: laser-cut 3 mm plywood (LightBurn)
 
-- **Material:** 3 mm plywood — lighter than acrylic at equal stiffness, damps motor vibration, doesn't crack at screw points, cuts cleanly and fast.
+- **Material:** 3 mm plywood: lighter than acrylic at equal stiffness, damps motor vibration, doesn't crack at screw points, cuts cleanly and fast.
 - **Tool:** school laser cutter, designed in **LightBurn**; the portable export is committed as [`wooden_plate.dxf`](wooden_plate.dxf) and the editable `.lbrn` project is kept with the design records.
 - **Edge treatment:** two thin coats of clear varnish seal the cut edges against moisture and warp.
 - **Alternative considered:** acrylic (cracks under load), fully 3D-printed (slow, less rigid), aluminium (harder to cut, heavier).
@@ -64,7 +64,7 @@ The chassis is drawn in **LightBurn** and cut on the school laser cutter from 3 
 - **Parameters recorded per file:** material (3 mm plywood), kerf compensation, and the cutter's power/speed setting for that material.
 - **Files:** the editable master is the `.lbrn` project (kept with the design records); the portable, version-controlled export is [`wooden_plate.dxf`](wooden_plate.dxf). Both define the same geometry, so another team can reproduce the chassis from the repository alone.
 
-### Double-stack layout — space utilisation
+### Double-stack layout: space utilisation
 
 The 300×200 mm footprint is used vertically to fit the full system:
 
@@ -80,7 +80,7 @@ The two decks are separated and supported by **brass standoff offsets**, giving 
 Instead of drilling new holes for every iteration, we fuse three systems:
 
 - **Wood (plywood decks):** primary structure, laser-cut precisely.
-- **LEGO beams and pins:** universal mounting rails with a precise 8 mm hole grid — sensors, drivers and brackets can be moved in 8 mm steps without re-cutting the chassis. Quick, repeatable repositioning during testing.
+- **LEGO beams and pins:** universal mounting rails with a precise 8 mm hole grid: sensors, drivers and brackets can be moved in 8 mm steps without re-cutting the chassis. Quick, repeatable repositioning during testing.
 - **Brass standoffs / offsets:** set deck spacing and create rigid mounting pillars; brass threads are far more durable than wood screws when parts are repeatedly removed.
 
 This hybrid makes the mechanical design **iterative by construction**: a camera or sensor that needs a different position is moved in minutes, and the change is photographed for the engineering journal.
@@ -90,13 +90,13 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 ## 4. Drive: rear axle, single N20 motor
 
 - **Motor:** N20 6 V 600 RPM micro metal gear motor (spare unit carried).
-- **Transmission:** motor drives the rear axle through the gearbox in a mechanically coupled layout (compliant with Rule 11.13 — drive wheels are physically connected through the axle; no independent side motors).
+- **Transmission:** motor drives the rear axle through the gearbox in a mechanically coupled layout (compliant with Rule 11.13: drive wheels are physically connected through the axle; no independent side motors).
 - **Wheel:** front wheels ~40 mm diameter, high-traction rubber; **rear wheels are smaller**, matched to the smaller rear N20. The rear bias lightens the drive end and produces the slight rearward chassis tilt described in §1; the axle is mechanically coupled (Rule 11.13 compliant: one driving axle, no independent side motors).
 
 ### Speed / torque reasoning
 
-- **Speed:** 3 laps ≈ 36–40 m; at 0.55 m/s cruise ≈ 66–72 s — well inside the 3-minute round, leaving margin for corners and parking. N20 free-run at 600 RPM ≈ 1.2 m/s theoretical; we cruise below it for consistency.
-- **Torque:** rolling resistance for 1.3 kg ≈ 1.3–2.6 N → required torque ≈ 0.03–0.06 kg·cm at the wheel. N20 stall torque ≈ 0.8–1.0 kg·cm — >10× margin. The design is speed-limited, not torque-limited, which is correct for a flat, low-friction mat.
+- **Speed:** 3 laps ≈ 36–40 m; at 0.55 m/s cruise ≈ 66–72 s: well inside the 3-minute round, leaving margin for corners and parking. N20 free-run at 600 RPM ≈ 1.2 m/s theoretical; we cruise below it for consistency.
+- **Torque:** rolling resistance for 1.3 kg ≈ 1.3–2.6 N → required torque ≈ 0.03–0.06 kg·cm at the wheel. N20 stall torque ≈ 0.8–1.0 kg·cm: >10× margin. The design is speed-limited, not torque-limited, which is correct for a flat, low-friction mat.
 
 ---
 

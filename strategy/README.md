@@ -42,7 +42,7 @@ MG996R steering servo + TB6612FNG → N20 drive motor
 
 - **Lane keeping:** centre the vehicle on the corridor using the vision centring error + VL53L0X wall-distance check. Speed is reduced when a wall is closer than the safety margin (proximity-driven speed control).
 - **Corners:** detect the corner by wall geometry; steer with the PD controller; near the 40° lock the gain is softened to avoid jerky transitions.
-- **Lap counting:** count crossings of section boundary markers (orange/blue lines) — 8 sections per lap.
+- **Lap counting:** count crossings of section boundary markers (orange/blue lines): 8 sections per lap.
 - **Finish:** after 3 laps, stop autonomously inside the finish section and hold position.
 
 ## 3. Obstacle Challenge strategy (3 laps + pillars + parking)
@@ -63,7 +63,7 @@ MG996R steering servo + TB6612FNG → N20 drive motor
 | Case | Behaviour |
 | --- | --- |
 | Line/colour lost | Re-acquire by a slow sweep, then resume |
-| Serial timeout Pi ↔ ESP32 | `MODE_FAULT` — safe stop (fails safe by design) |
+| Serial timeout Pi ↔ ESP32 | `MODE_FAULT`: safe stop (fails safe by design) |
 | Pillar too close | Emergency bias away from pillar |
 | Parking overshoot | Small IMU-controlled reverse steps |
 | Wall too close (600 mm corridor) | Speed reduction + steer correction |

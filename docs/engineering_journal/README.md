@@ -45,16 +45,16 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ## Journal entries
 
-### 01 — System architecture: two-controller split (2026-07-15, by Dhrubo M.)
+### 01: System architecture: two-controller split (2026-07-15, by Dhrubo M.)
 
-**Problem:** the vehicle must perceive colour cues (red/green pillars, orange/blue lines, magenta parking blocks), decide a route, and control steering + drive in real time — all within a 300×200×300 mm envelope and under 1.5 kg.
+**Problem:** the vehicle must perceive colour cues (red/green pillars, orange/blue lines, magenta parking blocks), decide a route, and control steering + drive in real time: all within a 300×200×300 mm envelope and under 1.5 kg.
 
 **Options considered:**
 - A) Single Raspberry Pi 4B doing everything (camera, control loop).
 - B) Single ESP32 doing everything (camera + control).
 - C) Split: Pi 4B for vision + decision, ESP32 for time-critical actuator control.
 
-**Chosen: C.** The Pi's OpenCV pipeline runs comfortably at its own pace while the ESP32 closes the motor/servo loop at millisecond rates over USB serial (115200 baud). This mirrors the separation of perception and control used in real automotive ECUs. The ESP32 also guarantees a safe stop (fault state) even if the Pi's vision loop stalls — a single-controller design could not provide this independently.
+**Chosen: C.** The Pi's OpenCV pipeline runs comfortably at its own pace while the ESP32 closes the motor/servo loop at millisecond rates over USB serial (115200 baud). This mirrors the separation of perception and control used in real automotive ECUs. The ESP32 also guarantees a safe stop (fault state) even if the Pi's vision loop stalls: a single-controller design could not provide this independently.
 
 **Evidence:** the interface is defined in `src` protocol (`MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`) and implemented in `software/esp32/obstacleChallenge.ino`.
 
@@ -62,7 +62,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 02 — Chassis material and fabrication (2026-07-18, by Dhrubo M.)
+### 02: Chassis material and fabrication (2026-07-18, by Dhrubo M.)
 
 **Problem:** a rigid, light, cheaply-reproducible chassis that fits 300×200 mm and can be made with the school's tools.
 
@@ -74,7 +74,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 **Chosen: B, with C for brackets.** Plywood is lighter than acrylic of equal stiffness, damps motor vibration better, and cuts cleanly at speed on the school's laser cutter. Acrylic cracks at screw holes under servo load; plywood does not. The `.lbrn`/DXF source files are published so the chassis is fully reproducible. Small brackets and sensor mounts are 3D-printed (PLA) where complex geometry is needed (servo horn mount, camera mount).
 
-**Tradeoff:** plywood absorbs moisture and can warp — mitigated by sealing edges with two thin coats of clear varnish and keeping the chassis in the transport case between sessions.
+**Tradeoff:** plywood absorbs moisture and can warp: mitigated by sealing edges with two thin coats of clear varnish and keeping the chassis in the transport case between sessions.
 
 **Evidence:** LightBurn source files in the repo; cut parts photographed in `images/robot/`.
 
@@ -82,13 +82,13 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 03 — Drive system: N20 600 RPM motor (2026-07-22, by Vivaan K.)
+### 03: Drive system: N20 600 RPM motor (2026-07-22, by Vivaan K.)
 
 **Problem:** choose a drive motor with enough speed to complete 3 laps inside 3 minutes and enough torque to accelerate a ~1.3 kg car reliably.
 
 **Calculation (speed):** track centre-line lap ≈ 11–13 m ⇒ 3 laps ≈ 36–40 m. At a cruise of 0.55 m/s, 3 laps ≈ 66–72 s, leaving ~110 s of margin for corners and parking. N20 at 6 V free-runs at 600 RPM; with a ~40 mm wheel this is ≈ 1.2 m/s theoretical, so we operate comfortably mid-throttle.
 
-**Calculation (torque):** N20 gearbox output torque is roughly 0.8–1.0 kg·cm at stall for this ratio. Rolling-resistance force for 1.3 kg ≈ 1.3–2.6 N; wheel radius 0.02 m ⇒ required torque ≈ 0.03–0.06 kg·cm. Stall torque exceeds requirement by >10×, so the limit is speed, not torque — correct for a flat, low-friction mat.
+**Calculation (torque):** N20 gearbox output torque is roughly 0.8–1.0 kg·cm at stall for this ratio. Rolling-resistance force for 1.3 kg ≈ 1.3–2.6 N; wheel radius 0.02 m ⇒ required torque ≈ 0.03–0.06 kg·cm. Stall torque exceeds requirement by >10×, so the limit is speed, not torque: correct for a flat, low-friction mat.
 
 **Tradeoff:** higher-RPM variants (1000 RPM) would shorten lap time but worsen precision at stop lines and during parking. We prioritise **consistency** over peak speed, matching the rubric's "stability of mission solving".
 
@@ -98,18 +98,18 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 04 — Steering geometry: Ackermann, 31° → 40° (2026-07-27, by Dhrubo M.)
+### 04: Steering geometry: Ackermann, 31° → 40° (2026-07-27, by Dhrubo M.)
 
 **Problem:** the track has 90° corners and (in the Open Challenge) corridors as narrow as 600 mm ± 100 mm. The car must steer the corner radius reliably without losing grip or scraping the walls.
 
 **Options considered:**
-- A) Differential steering (two side motors) — **disallowed by the 2026 rules** (Rule 11.5).
-- B) Single-centre pivot (caster-style) — unstable at speed.
-- C) **Ackermann steering**: front wheels steer with different angles — inner wheel tighter, outer wheel following a larger arc, so all four wheels roll about one instant centre without scrubbing.
+- A) Differential steering (two side motors): **disallowed by the 2026 rules** (Rule 11.5).
+- B) Single-centre pivot (caster-style): unstable at speed.
+- C) **Ackermann steering**: front wheels steer with different angles: inner wheel tighter, outer wheel following a larger arc, so all four wheels roll about one instant centre without scrubbing.
 
 **Chosen: C, driven by a TowerPro MG996R servo.**
 
-**Iteration — 31° vs 40°:**
+**Iteration: 31° vs 40°:**
 - Prototype 1 set maximum steer angle to 31°: the car tracked the ideal arc in the middle of a 1000 mm corridor, but in the 600 mm configuration the turning radius was too large and the rear inner corner clipped the wall line during a tight 90°.
 - Prototype 2 raised the lock angle to 40°: the car negotiated the 600 mm corners with ~80 mm of clearance to both walls, at the cost of slightly harsher servo transitions. The Ackermann ratio was tuned (inner/outer angle difference) to keep all four wheels rolling without slip.
 - Result: 40° selected for narrow-corridor reliability; the controller treats angles near lock as a distinct state so the PD gain can be softened and the car does not jerk.
@@ -120,14 +120,14 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 05 — Double-stack layout: wood + LEGO + brass offsets (2026-08-02, by Yug J.)
+### 05: Double-stack layout: wood + LEGO + brass offsets (2026-08-02, by Yug J.)
 
 **Problem:** fit two controllers, camera, four sensor families, servo, driver and batteries into 300×200 mm and keep the centre of mass low and the mass budget under 1.5 kg.
 
 **Chosen: a two-deck chassis.**
 - **Lower deck** (3 mm plywood): ESP32, TB6612FNG driver, batteries (lowest centre of mass).
 - **Upper deck** (3 mm plywood): Raspberry Pi 4B + Camera Module 3 Wide, raised on brass standoff offsets.
-- **Mounting fusion:** LEGO beams and pins are used as universal mounting rails (they provide precise, repeatable hole grids), brass standoff spacers set deck height, and the plywood decks are laser-cut. This "wood + LEGO + brass" system means a mount can be moved in 8 mm increments without re-cutting the chassis — very useful during sensor-placement iteration.
+- **Mounting fusion:** LEGO beams and pins are used as universal mounting rails (they provide precise, repeatable hole grids), brass standoff spacers set deck height, and the plywood decks are laser-cut. This "wood + LEGO + brass" system means a mount can be moved in 8 mm increments without re-cutting the chassis: very useful during sensor-placement iteration.
 
 **Tradeoff:** the double stack raises the camera to a good horizon height (~120 mm) while the deck adds ~60 g. Placement was chosen to keep the combined centre of mass above the rear axle's roll centre.
 
@@ -135,7 +135,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 06 — Motor driver: L298N → TB6612FNG (2026-08-05, by Yug J.)
+### 06: Motor driver: L298N → TB6612FNG (2026-08-05, by Yug J.)
 
 **Problem:** initial bench prototype used an **L298N** module. In testing it ran hot and showed noticeable voltage dropout (≈1.5–2 V per channel under load), which reduced effective motor voltage and made the speed-PID inconsistent as batteries sagged.
 
@@ -145,13 +145,13 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 **Chosen: B.** The TB6612FNG fits the space budget, loses far less voltage to the motor, and can be driven directly by the ESP32's 3.3 V logic without level shifting. The vehicle's N20 stalls below the driver's 1 A/channel continuous rating in normal running (see power budget).
 
-**Evidence:** measured rail-to-motor voltage on both drivers during a stall test — the L298N dropped ~1.8 V; the TB6612FNG dropped ~0.4 V.
+**Evidence:** measured rail-to-motor voltage on both drivers during a stall test: the L298N dropped ~1.8 V; the TB6612FNG dropped ~0.4 V.
 
 **Next action:** fuse the motor rail at 2 A to protect the driver.
 
 ---
 
-### 07 — Power architecture: two-rail, two-battery design (2026-08-07, by Yug J.)
+### 07: Power architecture: two-rail, two-battery design (2026-08-07, by Yug J.)
 
 **Problem:** a single shared battery caused motor transients to brown out the Pi during bench tests (servo stall + motor start together).
 
@@ -169,7 +169,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 08 — Sensor selection (2026-08-09, by Vivaan K.)
+### 08: Sensor selection (2026-08-09, by Vivaan K.)
 
 **Problem:** sense three things reliably: (a) colour cues on the field, (b) distance to walls/pillars/parking blocks, (c) orientation for turns and parking.
 
@@ -177,7 +177,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | --- | --- | --- | --- |
 | Colour (pillars, lines, blocks) | TCS34725 colour sensor / **camera** | **Raspberry Pi Camera Module 3 Wide** | colour + geometry in one sensor; OpenCV HSV masks for red, green, blue, orange, magenta |
 | Short-range distance (walls, pillars) | HC-SR04 ultrasonic | **VL53L0X ToF** (primary), HC-SR04 (redundant) | ToF is unaffected by surface colour and gives mm-precision up to ~1.2 m; ultrasonic is cheap but slow and spread-beam. HC-SR04 retained as independent redundancy because it does not share the I²C bus. |
-| Orientation | — | **DFRobot Fermion MPU6050** | 6-axis IMU; yaw integration for 90° corner turns and straight-line correction during parking alignment |
+| Orientation | N/A | **DFRobot Fermion MPU6050** | 6-axis IMU; yaw integration for 90° corner turns and straight-line correction during parking alignment |
 
 **Placement justification (field geometry):** the camera is mounted forward on the upper deck to see pillars ~0.5–1.5 m ahead (reaction distance at 0.55 m/s ≈ 0.9–2.7 m). The VL53L0X is front-centre for pillar/parking gap measurement; the HC-SR04 is front-corner for wall proximity. MPU6050 is placed at the centre of mass to minimise lever-arm coupling into the gyro.
 
@@ -187,18 +187,18 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 09 — Software state machine and obstacle strategy (2026-08-11, by Vivaan K. & Dhrubo M.)
+### 09: Software state machine and obstacle strategy (2026-08-11, by Vivaan K. & Dhrubo M.)
 
 **Problem:** structure the software so behaviour is predictable and judges can read the design.
 
 **Chosen: two-layer state machine.**
 
-*Raspberry Pi layer (perception + decision)* — `software/raspberry_pi/wromain.py`:
+*Raspberry Pi layer (perception + decision)*: `software/raspberry_pi/wromain.py`:
 - Camera frames → 3×3 colour grid → per-cell colour masks (red/green/blue/orange/purple) → contour detection → target selection → centering error → **PD steering** (proportional + derivative on lateral offset) → dynamic drive speed.
 - PD (rather than full PID) is used deliberately: the field has no sustained steady-state error that requires the integral term, and D-only damping prevents oscillation at corners without windup.
 
-*ESP32 layer (execution + safety)* — `software/esp32/obstacleChallenge.ino`:
-- Modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`, driven over a 115200-baud serial protocol. Fault mode is entered on serial timeout or invalid command — the vehicle always fails safe.
+*ESP32 layer (execution + safety)*: `software/esp32/obstacleChallenge.ino`:
+- Modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`, driven over a 115200-baud serial protocol. Fault mode is entered on serial timeout or invalid command: the vehicle always fails safe.
 
 **Obstacle strategy (Obstacle Challenge):**
 1. Lane-follow by centring on the corridor (PD steering on vision offset, wall-distance check via VL53L0X).
@@ -214,7 +214,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ---
 
-### 10 — Risk register and failure-mode analysis (2026-08-12, by the team)
+### 10: Risk register and failure-mode analysis (2026-08-12, by the team)
 
 | Risk | Likelihood | Impact | Mitigation |
 | --- | --- | --- | --- |
@@ -224,11 +224,11 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | Serial dropout Pi↔ESP32 | Low | High | fault state + re-sync on checksum failure; USB cable strain-relieved |
 | ToF misread on white mat at shallow angle | Medium | Medium | 5-sample median filter; mount at 15° downward |
 | Wheel slip during parking | Medium | Medium | low speed, IMU heading feedback, short move steps |
-| Sudden rule change (surprise rule, Day 2) | Medium | Medium | modular code — strategy params in one config file; reserve a config slot per round |
+| Sudden rule change (surprise rule, Day 2) | Medium | Medium | modular code: strategy params in one config file; reserve a config slot per round |
 
 ---
 
-### 11 — Consolidated confirmed configuration (2026-08-13, by Dhrubo M.)
+### 11: Consolidated confirmed configuration (2026-08-13, by Dhrubo M.)
 
 **Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised, and supersedes the 7.4 V figure quoted in Entry 07.
 

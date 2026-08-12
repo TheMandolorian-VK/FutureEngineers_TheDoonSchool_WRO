@@ -8,7 +8,7 @@
 - Bill of materials published in `electronics/`.
 - Testing framework and test plan (T1–T10) published.
 - Robot visualizations labelled as AI-generated concept renders showing the intended competition-day look.
-- Videos note: recordings are for competition day only; none made yet (vehicle in development stage) — WRO India Team informed via calls/emails.
+- Videos note: recordings are for competition day only; none made yet (vehicle in development stage): WRO India Team informed via calls/emails.
 
 ## v0.2 (2026-08-05)
 

@@ -52,7 +52,7 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 | 4 | Dual Motor Driver Module **TB6612FNG** (1 A) | 1 | Drive motor H-bridge (replaces L298N) | Owned |
 | 5 | **N20 6 V 600 RPM** Micro Metal Gear Motor | 1 + spare | Rear-axle drive | Owned |
 | 6 | **TowerPro MG996R** Digital High Torque Servo | 1 + spare | Ackermann steering | Owned |
-| 7 | **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU — yaw for corners, parking alignment | Owned |
+| 7 | **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU: yaw for corners, parking alignment | Owned |
 | 8 | **VL53L0X** ToF Laser Distance Sensor | 1 | Front distance: pillars, parking gap | Owned |
 | 9 | HC-SR04 ultrasonic | 1 | Redundant wall/obstacle proximity | Owned |
 | 10 | 11 V 3S LiPo pack (motor/servo rail regulated to ~6–7.4 V; logic rail regulated to 5 V) | 1 | Two-rail power from one pack (WRO Appendix D guidance) | Owned |
@@ -87,7 +87,7 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 
 Measured values will be recorded in the testing records as each rail is verified.
 
-## 3. Interface plan (summary — full pin map in wiring guide)
+## 3. Interface plan (summary: full pin map in wiring guide)
 
 | Interface | Path | Notes |
 | --- | --- | --- |

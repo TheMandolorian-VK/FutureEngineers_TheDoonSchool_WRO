@@ -24,7 +24,7 @@
 
 Use one dated file per meaningful decision or test. Keep the source of each claim clear: **plan**, **calculation**, **simulation**, **observation**, or **measurement**.
 
-## What the evaluators see (WRO 2026 rubric — max 30 points)
+## What the evaluators see (WRO 2026 rubric: max 30 points)
 
 | Criterion | Max | Where the evidence lives |
 | --- | --- | --- |

@@ -25,4 +25,4 @@ For every record, state the date, what was observed, the configuration used, and
 | E5 | 2026-08-11 | Software | ESP32 serial protocol + fail-safe verified on bench (MODE_FAULT on timeout) | testing T5 |
 
 > [!NOTE]
-> The archive grows as the development cycle continues. Evidence is added when observed — simulated or predicted results are never recorded as physical-test evidence.
+> The archive grows as the development cycle continues. Evidence is added when observed: simulated or predicted results are never recorded as physical-test evidence.
