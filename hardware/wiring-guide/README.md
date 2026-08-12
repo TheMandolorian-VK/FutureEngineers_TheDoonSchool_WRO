@@ -39,30 +39,33 @@ The ESP32 serves as the primary motor and sensor controller (reading the Time of
 ## Detailed Component Interconnections
 
 ```mermaid
-architecture-beta
-    group power[Power Source]
-    group compute[Compute & Control]
-    group sensing[Sensing]
-    group actuation[Actuation]
+flowchart TD
+    subgraph Power ["Power Source"]
+        usb_power["5V USB Power Bank"]
+    end
 
-    service usb_power[5V USB Power Bank] in power
+    subgraph Compute ["Compute & Control"]
+        pi["Raspberry Pi 4B"]
+        esp32["ESP32"]
+    end
 
-    service pi[Raspberry Pi 4B] in compute
-    service esp32[ESP32] in compute
+    subgraph Sensing ["Sensing"]
+        camera["Pi Camera 3 Wide"]
+        tof["Time of Flight Sensor"]
+    end
 
-    service tof[Time of Flight Sensor] in sensing
-    service camera[Pi Camera 3 Wide] in sensing
+    subgraph Actuation ["Actuation"]
+        driver["TB6612FNG Motor Driver"]
+        motorL["Left N20 Motor"]
+        motorR["Right N20 Motor"]
+    end
 
-    service driver[TB6612FNG Motor Driver] in actuation
-    service motorL[Left N20 Motor] in actuation
-    service motorR[Right N20 Motor] in actuation
-
-    usb_power:R --> L:pi
-    pi:B --> T:esp32
-    pi:R --> L:driver
-    pi:B --> T:camera
-    esp32:R --> L:tof
-    esp32:B --> T:driver
-    tof:B --> T:driver
-    driver:B --> T:motorL
-    driver:B --> T:motorR
+    usb_power --> pi
+    pi --> esp32
+    pi --> driver
+    pi --> camera
+    esp32 --> tof
+    esp32 --> driver
+    tof --> driver
+    driver --> motorL
+    driver --> motorR
