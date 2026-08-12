@@ -4,7 +4,7 @@
 
 **Dated records from official events and clearly labelled practice runs.**
 
-[← Vehicle photos](../README.md) · [Run videos](../../video/README.md)
+[← Images](../README.md) · [Videos](../../videos/README.md)
 
 </div>
 

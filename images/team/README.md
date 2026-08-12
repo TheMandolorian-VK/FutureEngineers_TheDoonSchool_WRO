@@ -4,7 +4,7 @@
 
 **The people behind The Doon School Future Engineers project.**
 
-[← Project home](../README.md) · [Vehicle photos](../v-photos/README.md)
+[← Images](../README.md) · [← Project home](../../README.md)
 
 </div>
 

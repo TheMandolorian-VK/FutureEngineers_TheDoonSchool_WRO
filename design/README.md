@@ -19,4 +19,4 @@ This folder will hold the team’s original layout sketches, dimensions, steerin
 | Assembly | Build sequence and materials once verified |
 
 > [!NOTE]
-> This folder defines the submitted mechanical configuration and its supporting design records. Fabrication files (DXF/STEP/STL) live in [models/](../models/README.md); measured results in [docs/testing/](../docs/testing/README.md).
+> This folder defines the submitted mechanical configuration and its supporting design records.

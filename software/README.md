@@ -15,8 +15,8 @@
 
 | Component | Intended responsibility | Location |
 | --- | --- | --- |
-| Raspberry Pi | High-level perception and decision logic | [pi](pi/README.md) |
-| ESP32 | Low-level actuator control and communication | [esp32/motor_control](esp32/motor_control/README.md) |
+| Raspberry Pi | High-level perception and decision logic | [raspberry_pi](raspberry_pi/README.md) |
+| ESP32 | Low-level actuator control and communication | [esp32](esp32/README.md) |
 
 ## Change discipline
 

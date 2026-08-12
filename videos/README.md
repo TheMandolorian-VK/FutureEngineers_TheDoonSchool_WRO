@@ -4,7 +4,7 @@
 
 **Run videos, demonstrations, and project presentations.**
 
-[← Project home](../README.md) · [Test visuals](../v-photos/testing/README.md) · [Video manifest](video.md)
+[← Project home](../README.md) · [Test visuals](../images/testing/README.md)
 
 </div>
 

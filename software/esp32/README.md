@@ -4,7 +4,7 @@
 
 **Low-level actuator control and communication code.**
 
-[← Software](../../README.md) · [Hardware wiring](../../../schemes/wiring-guide/README.md)
+[← Software](../README.md) · [Hardware wiring](../../hardware/wiring/README.md)
 
 </div>
 
