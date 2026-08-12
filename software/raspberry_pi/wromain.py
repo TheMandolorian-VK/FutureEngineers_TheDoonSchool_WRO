@@ -3,59 +3,51 @@
 WRO FUTURE ENGINEERS 2026
 THE DOON SCHOOL
 
-RASPBERRY PI VISION + ESP32 CONTROL
-Version: 1.0
+RASPBERRY PI AUTONOMOUS CONTROLLER
+Version 2.0
 
-SYSTEM
-------
+HARDWARE
+--------
 Raspberry Pi 4B
-    |
-    +-- Pi Camera 3 Wide
-    |
-    +-- OpenCV vision
-    |
-    +-- PD steering
-    |
-    +-- USB serial
-            |
-            v
-        ESP32
-            |
-            +-- MG996R steering servo
-            |
-            +-- TB6612FNG
-                    |
-                    +-- N20 6V 600RPM drive motor
+Pi Camera 3 Wide
+6-axis IMU
+VL ToF distance sensor
+USB-connected ESP32
 
-CURRENT PHASE
+ESP32 HARDWARE
+--------------
+MG996R steering servo
+TB6612FNG
+1x N20 6V 600RPM drive motor
+
+WRO STRATEGY
+------------
+RED PILLAR   -> PASS RIGHT
+GREEN PILLAR -> PASS LEFT
+
+VISION
+------
+3x3 structured colour grid
+Red / Green / Purple / Orange / Blue / Black
+
+TRACK
+-----
+Orange and blue track lines are detected independently from
+the pillar system.
+
+CONTROL
+-------
+PD steering controller
+
+COMMUNICATION
 -------------
-This version integrates the existing computer-vision system with
-the ESP32 low-level controller.
+Raspberry Pi -> USB Serial -> ESP32
 
-Implemented:
-    - Camera handling
-    - 3x3 colour grid
-    - Red / Green / Blue / Purple / Orange detection
-    - Black detection
-    - Object contour detection
-    - Target selection
-    - Centering error
-    - PD steering
-    - Dynamic drive speed
-    - USB serial ESP32 communication
-    - Serial communication fail-safe
+NOT CLAIMED FINAL
+-----------------
+Exact IMU driver and VL ToF driver are deliberately isolated until
+the exact sensor boards/modules and bus configuration are confirmed.
 
-NOT YET IMPLEMENTED
--------------------
-    - WRO orange/blue line following
-    - IMU sensor fusion
-    - VL ToF integration
-    - Lap counting
-    - Full red/green pillar strategy
-    - Parallel parking
-
-These will be added after the basic Pi -> ESP32 control loop is
-physically verified.
 ====================================================================
 """
 
@@ -65,11 +57,16 @@ physically verified.
 
 import sys
 import time
+import math
 
 import cv2
 import numpy as np
-import serial
-import serial.tools.list_ports
+
+try:
+    import serial
+    import serial.tools.list_ports
+except ImportError:
+    serial = None
 
 
 # ============================================================
@@ -80,20 +77,8 @@ CAMERA_INDEX = 0
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
-
 CAMERA_FPS_REQUEST = 60
 
-# None = automatically select an appropriate backend.
-#
-# Linux:
-#     V4L2
-#
-# Windows:
-#     DirectShow
-#
-# macOS:
-#     AVFoundation
-#
 CAMERA_BACKEND_OVERRIDE = None
 
 CAMERA_OPEN_RETRIES = 3
@@ -106,43 +91,20 @@ CAMERA_OPEN_RETRY_DELAY_S = 0.5
 
 SERIAL_BAUD = 115200
 
-# Set this manually if automatic detection selects the wrong
-# serial device.
-#
-# Example on Raspberry Pi:
-#
-#     SERIAL_PORT_OVERRIDE = "/dev/ttyUSB0"
-#
-# or:
-#
-#     SERIAL_PORT_OVERRIDE = "/dev/ttyACM0"
-#
 SERIAL_PORT_OVERRIDE = None
 
 SERIAL_CONNECT_RETRIES = 5
 SERIAL_CONNECT_DELAY_S = 1.0
 
-# The camera may run at ~60 FPS, but we do not need to send
-# motor commands at that rate.
 ESP32_COMMAND_HZ = 25.0
-ESP32_COMMAND_PERIOD = 1.0 / ESP32_COMMAND_HZ
+ESP32_COMMAND_PERIOD = (
+    1.0 / ESP32_COMMAND_HZ
+)
 
 
 # ============================================================
-# GRID
+# IMAGE GRID
 # ============================================================
-
-# Vertical:
-#
-# TOP       = 40%
-# MIDDLE    = 20%
-# BOTTOM    = 40%
-#
-# Horizontal:
-#
-# LEFT      = 30%
-# CENTER    = 40%
-# RIGHT     = 30%
 
 TOP_RATIO = 0.40
 MIDDLE_RATIO = 0.20
@@ -164,40 +126,33 @@ GAUSSIAN_SIGMA = 0
 
 MORPH_KERNEL_SIZE = 5
 
-# Minimum contour area to accept.
 MIN_AREA = 100
 
 
 # ============================================================
-# CENTERING
+# VISION DEADZONE
 # ============================================================
 
 CENTER_DEADZONE = 0.05
 
 
 # ============================================================
-# DEVELOPMENT DISTANCE ESTIMATION
+# DISTANCE ESTIMATION
 # ============================================================
-
-# Temporary monocular distance estimate.
 #
-# This remains part of the development vision system.
+# Temporary monocular estimate.
 #
-# The VL ToF sensor will later become part of the actual distance
-# estimation / sensor-fusion system.
+# VL ToF integration is deliberately isolated until its exact
+# sensor module/interface is confirmed.
+# ============================================================
 
 KNOWN_OBJECT_HEIGHT_CM = 20.0
 FOCAL_LENGTH_PX = 700.0
 
 
 # ============================================================
-# PD STEERING
+# PD CONTROLLER
 # ============================================================
-
-# Starting values only.
-#
-# These are NOT final calibrated values.
-# Tune on the physical robot.
 
 KP = 32.0
 KD = 10.0
@@ -205,34 +160,56 @@ KD = 10.0
 STEERING_MIN_DEG = -45.0
 STEERING_MAX_DEG = 45.0
 
-# Maximum derivative contribution before limiting.
 MAX_DERIVATIVE = 3.0
 
-_previous_error = 0.0
-_previous_error_time = None
+previous_error = 0.0
+previous_error_time = None
 
 
 # ============================================================
-# DRIVE SPEED
+# SPEED
 # ============================================================
-
-# Initial development values.
-#
-# PWM:
-#     0   = stopped
-#     255 = maximum commanded PWM
 
 BASE_SPEED = 165
 
-MIN_SPEED = 80
-MAX_SPEED = 220
+MIN_SPEED = 75
+MAX_SPEED = 210
 
-# Reduce speed when steering demand becomes large.
-CORNER_SPEED_REDUCTION = 70
+STEERING_SPEED_REDUCTION = 80
 
 
 # ============================================================
-# COLOR CENTERS
+# PILLAR STRATEGY
+# ============================================================
+
+# WRO:
+#
+# RED   -> pass RIGHT
+# GREEN -> pass LEFT
+
+PILLAR_BIAS_DEG = 12.0
+
+PILLAR_CLOSE_DISTANCE_CM = 45.0
+
+PILLAR_MIN_AREA = 250
+
+
+# ============================================================
+# TRACK LINE STRATEGY
+# ============================================================
+
+LINE_MIN_AREA = 80
+
+# The bottom part of the image is most useful for immediate
+# lane-position estimation.
+LINE_ROI_TOP = 0.55
+
+ORANGE_LINE_WEIGHT = 1.0
+BLUE_LINE_WEIGHT = 1.0
+
+
+# ============================================================
+# COLOUR CENTERS
 #
 # OpenCV HSV:
 #
@@ -275,7 +252,7 @@ COLOR_CENTERS = {
 
 
 # ============================================================
-# COLOR GRID
+# 3x3 GRID COLOUR RULES
 # ============================================================
 
 GRID_COLORS = {
@@ -330,7 +307,7 @@ GRID_COLORS = {
 
 
 # ============================================================
-# BLACK GRID
+# BLACK GRID RULES
 # ============================================================
 
 BLACK_GRID = {
@@ -349,40 +326,55 @@ BLACK_GRID = {
 
 
 # ============================================================
-# SERIAL COMMUNICATION CLASS
+# NAVIGATION STATE
+# ============================================================
+
+class NavigationMode:
+    SEARCH = "SEARCH"
+    TRACK = "TRACK"
+    RED_PILLAR = "RED_PILLAR"
+    GREEN_PILLAR = "GREEN_PILLAR"
+    PARK = "PARK"
+    FINISH = "FINISH"
+    STOP = "STOP"
+
+
+current_navigation_mode = (
+    NavigationMode.SEARCH
+)
+
+
+# ============================================================
+# LAP STATE
+# ============================================================
+
+lap_count = 0
+
+# These are structural placeholders until the start-line/section
+# sensor geometry is calibrated on the actual field.
+start_zone_detected = False
+previous_start_zone = False
+
+# Prevent multiple counts from one visual detection.
+last_lap_event_time = 0.0
+
+LAP_EVENT_COOLDOWN_S = 3.0
+
+TARGET_LAPS = 3
+
+
+# ============================================================
+# SERIAL CONTROLLER
 # ============================================================
 
 class ESP32Controller:
-    """
-    USB serial interface between Raspberry Pi and ESP32.
-
-    Protocol:
-
-        CMD,<steering_deg>,<motor_pwm>,<mode>
-
-    Example:
-
-        CMD,-12.50,180,DRIVE
-
-    Additional commands:
-
-        STOP
-        PING
-
-    ESP32 responses include:
-
-        ACK,CMD
-        ACK,STOP
-        PONG
-        STATUS,...
-        ERR,...
-    """
 
     def __init__(
         self,
         port=None,
         baudrate=115200,
     ):
+
         self.port_override = port
         self.baudrate = baudrate
 
@@ -394,23 +386,20 @@ class ESP32Controller:
         self.last_response = ""
 
     # --------------------------------------------------------
-    # FIND USB SERIAL DEVICE
+    # Find serial port
     # --------------------------------------------------------
 
     def find_port(self):
-        """
-        Automatically find a likely ESP32 USB serial port.
-        """
 
         if self.port_override:
             return self.port_override
 
+        if serial is None:
+            return None
+
         ports = list(
             serial.tools.list_ports.comports()
         )
-
-        if not ports:
-            return None
 
         candidates = []
 
@@ -430,14 +419,12 @@ class ESP32Controller:
                 port.manufacturer or ""
             ).lower()
 
-            # Generic USB serial device
             if "usb" in device:
                 score += 2
 
             if "usb" in description:
                 score += 2
 
-            # Common ESP32 USB-to-UART bridges
             if "cp210" in description:
                 score += 3
 
@@ -450,7 +437,6 @@ class ESP32Controller:
             if "ch340" in manufacturer:
                 score += 3
 
-            # Some boards expose ESP32 explicitly.
             if "esp32" in description:
                 score += 5
 
@@ -468,13 +454,24 @@ class ESP32Controller:
             reverse=True
         )
 
-        return candidates[0][1]
+        if candidates:
+            return candidates[0][1]
+
+        return None
 
     # --------------------------------------------------------
-    # CONNECT
+    # Connect
     # --------------------------------------------------------
 
     def connect(self):
+
+        if serial is None:
+
+            print(
+                "WARNING: pyserial is not installed."
+            )
+
+            return False
 
         for attempt in range(
             1,
@@ -486,8 +483,7 @@ class ESP32Controller:
             if port is None:
 
                 print(
-                    "WARNING: ESP32 USB serial device "
-                    f"not found "
+                    "WARNING: ESP32 not found "
                     f"(attempt {attempt}/"
                     f"{SERIAL_CONNECT_RETRIES})"
                 )
@@ -501,8 +497,8 @@ class ESP32Controller:
             try:
 
                 print(
-                    f"Attempting ESP32 connection "
-                    f"on {port}..."
+                    f"Connecting ESP32 on "
+                    f"{port}..."
                 )
 
                 self.serial = serial.Serial(
@@ -512,8 +508,7 @@ class ESP32Controller:
                     write_timeout=0.05,
                 )
 
-                # Some ESP32 boards reset when the
-                # USB serial connection is opened.
+                # USB serial may reset the ESP32.
                 time.sleep(2.0)
 
                 self.serial.reset_input_buffer()
@@ -533,8 +528,8 @@ class ESP32Controller:
             ) as exc:
 
                 print(
-                    f"WARNING: failed to connect "
-                    f"to {port}: {exc}"
+                    f"WARNING: ESP32 connection "
+                    f"failed: {exc}"
                 )
 
                 self.serial = None
@@ -547,28 +542,16 @@ class ESP32Controller:
         return False
 
     # --------------------------------------------------------
-    # SEND DRIVE COMMAND
+    # Send command
     # --------------------------------------------------------
 
     def send(
         self,
         steering_deg,
         motor_pwm,
-        mode="DRIVE",
+        mode,
         force=False,
     ):
-        """
-        Send a motor/steering command.
-
-        steering_deg:
-            -45 .. +45
-
-        motor_pwm:
-            -255 .. +255
-
-        mode:
-            DRIVE / PARK / STOP / FINISH
-        """
 
         if (
             not self.connected
@@ -578,7 +561,6 @@ class ESP32Controller:
 
         now = time.perf_counter()
 
-        # Rate limit command transmission.
         if (
             not force
             and (
@@ -603,15 +585,13 @@ class ESP32Controller:
                 -255,
                 min(
                     255,
-                    int(motor_pwm),
+                    motor_pwm,
                 ),
             )
         )
 
-        mode = str(mode).upper()
-
         packet = (
-            f"CMD,"
+            "CMD,"
             f"{steering_deg:.2f},"
             f"{motor_pwm},"
             f"{mode}\n"
@@ -637,7 +617,8 @@ class ESP32Controller:
         ) as exc:
 
             print(
-                f"ERROR: ESP32 write failed: {exc}"
+                f"ERROR: ESP32 serial failure: "
+                f"{exc}"
             )
 
             self.connected = False
@@ -645,7 +626,7 @@ class ESP32Controller:
             return False
 
     # --------------------------------------------------------
-    # STOP
+    # Stop
     # --------------------------------------------------------
 
     def stop(self):
@@ -666,16 +647,15 @@ class ESP32Controller:
 
             time.sleep(0.05)
 
-            self.poll()
-
         except (
             serial.SerialException,
             OSError,
         ):
+
             pass
 
     # --------------------------------------------------------
-    # PING
+    # Ping
     # --------------------------------------------------------
 
     def ping(self):
@@ -710,23 +690,22 @@ class ESP32Controller:
                         self.serial.readline()
                     )
 
-                    if data:
-
-                        response = (
-                            data
-                            .decode(
-                                "ascii",
-                                errors="ignore",
-                            )
-                            .strip()
+                    response = (
+                        data
+                        .decode(
+                            "ascii",
+                            errors="ignore",
                         )
+                        .strip()
+                    )
 
-                        self.last_response = (
-                            response
-                        )
+                    self.last_response = (
+                        response
+                    )
 
-                        if response == "PONG":
-                            return True
+                    if response == "PONG":
+
+                        return True
 
             return False
 
@@ -740,7 +719,7 @@ class ESP32Controller:
             return False
 
     # --------------------------------------------------------
-    # READ AVAILABLE ESP32 RESPONSES
+    # Poll responses
     # --------------------------------------------------------
 
     def poll(self):
@@ -776,11 +755,10 @@ class ESP32Controller:
 
                 self.last_response = response
 
-                # Only print errors.
-                # ACK/STATUS traffic is intentionally
-                # kept quiet during normal operation.
+                if response.startswith(
+                    "ERR"
+                ):
 
-                if response.startswith("ERR"):
                     print(
                         f"ESP32: {response}"
                     )
@@ -793,7 +771,7 @@ class ESP32Controller:
             self.connected = False
 
     # --------------------------------------------------------
-    # CLOSE
+    # Close
     # --------------------------------------------------------
 
     def close(self):
@@ -812,52 +790,42 @@ class ESP32Controller:
 
 
 # ============================================================
-# STARTUP VALIDATION
+# CONFIG VALIDATION
 # ============================================================
 
 def validate_config():
 
-    # --------------------------------------------------------
-    # Grid ratio validation
-    # --------------------------------------------------------
-
-    ratio_sum_v = (
+    vertical_sum = (
         TOP_RATIO
         + MIDDLE_RATIO
         + BOTTOM_RATIO
     )
 
-    ratio_sum_h = (
+    horizontal_sum = (
         LEFT_RATIO
         + CENTER_RATIO
         + RIGHT_RATIO
     )
 
     if not np.isclose(
-        ratio_sum_v,
+        vertical_sum,
         1.0,
     ):
 
         raise ValueError(
             "Vertical grid ratios "
-            f"must sum to 1.0, "
-            f"got {ratio_sum_v}"
+            "must sum to 1.0"
         )
 
     if not np.isclose(
-        ratio_sum_h,
+        horizontal_sum,
         1.0,
     ):
 
         raise ValueError(
             "Horizontal grid ratios "
-            f"must sum to 1.0, "
-            f"got {ratio_sum_h}"
+            "must sum to 1.0"
         )
-
-    # --------------------------------------------------------
-    # Expected grid cells
-    # --------------------------------------------------------
 
     expected_cells = {
         f"{row}_{column}"
@@ -879,8 +847,8 @@ def validate_config():
     ):
 
         raise ValueError(
-            "GRID_COLORS is missing "
-            "or has extra grid cells"
+            "GRID_COLORS does not contain "
+            "exactly the 9 required cells."
         )
 
     if (
@@ -889,31 +857,26 @@ def validate_config():
     ):
 
         raise ValueError(
-            "BLACK_GRID is missing "
-            "or has extra grid cells"
+            "BLACK_GRID does not contain "
+            "exactly the 9 required cells."
         )
 
-    # --------------------------------------------------------
-    # Colour reference validation
-    # --------------------------------------------------------
-
-    for cell, colors in (
+    for cell, colours in (
         GRID_COLORS.items()
     ):
 
-        for color in colors:
+        for colour in colours:
 
-            if color not in COLOR_CENTERS:
+            if colour not in COLOR_CENTERS:
 
                 raise ValueError(
-                    f"GRID_COLORS['{cell}'] "
-                    f"references unknown color "
-                    f"'{color}'"
+                    f"Unknown colour "
+                    f"'{colour}' in {cell}"
                 )
 
 
 # ============================================================
-# CAMERA
+# CAMERA BACKEND
 # ============================================================
 
 def pick_default_backend():
@@ -925,11 +888,15 @@ def pick_default_backend():
 
         return CAMERA_BACKEND_OVERRIDE
 
-    if sys.platform.startswith("win"):
+    if sys.platform.startswith(
+        "win"
+    ):
 
         return cv2.CAP_DSHOW
 
-    if sys.platform.startswith("linux"):
+    if sys.platform.startswith(
+        "linux"
+    ):
 
         return cv2.CAP_V4L2
 
@@ -978,11 +945,8 @@ def open_camera():
         cap.release()
 
         print(
-            "WARNING: camera index "
-            f"{CAMERA_INDEX} failed "
-            f"to open "
-            f"(backend={backend}, "
-            f"attempt {attempt}/"
+            f"WARNING: camera open failed "
+            f"(attempt {attempt}/"
             f"{CAMERA_OPEN_RETRIES})"
         )
 
@@ -990,7 +954,6 @@ def open_camera():
             CAMERA_OPEN_RETRY_DELAY_S
         )
 
-    # Last resort.
     cap = cv2.VideoCapture(
         CAMERA_INDEX,
         cv2.CAP_ANY,
@@ -1021,7 +984,7 @@ def open_camera():
 
 
 # ============================================================
-# GRID COORDINATES
+# GRID
 # ============================================================
 
 def get_grid(
@@ -1059,6 +1022,44 @@ def get_grid(
         x_left,
         x_right,
     )
+
+
+def get_cell(
+    cx,
+    cy,
+    width,
+    height,
+):
+
+    (
+        y_top,
+        y_middle,
+        x_left,
+        x_right,
+    ) = get_grid(
+        width,
+        height,
+    )
+
+    if cy < y_top:
+        row = "top"
+
+    elif cy < y_middle:
+        row = "middle"
+
+    else:
+        row = "bottom"
+
+    if cx < x_left:
+        column = "left"
+
+    elif cx < x_right:
+        column = "center"
+
+    else:
+        column = "right"
+
+    return f"{row}_{column}"
 
 
 # ============================================================
@@ -1103,13 +1104,19 @@ def clean_mask(mask):
     return mask
 
 
+# ============================================================
+# COLOUR MASK
+# ============================================================
+
 def create_color_mask(
     hsv,
     color,
     tolerance,
 ):
 
-    center = COLOR_CENTERS[color]
+    center = COLOR_CENTERS[
+        color
+    ]
 
     h = center["h"]
     s = center["s"]
@@ -1132,10 +1139,9 @@ def create_color_mask(
         v - tolerance * 2,
     )
 
-    # Red wraps around the HSV hue boundary.
     if color == "red":
 
-        mask1 = cv2.inRange(
+        mask_a = cv2.inRange(
             hsv,
             np.array(
                 [
@@ -1153,7 +1159,7 @@ def create_color_mask(
             ),
         )
 
-        mask2 = cv2.inRange(
+        mask_b = cv2.inRange(
             hsv,
             np.array(
                 [
@@ -1171,13 +1177,11 @@ def create_color_mask(
             ),
         )
 
-        mask = cv2.bitwise_or(
-            mask1,
-            mask2,
-        )
-
         return clean_mask(
-            mask
+            cv2.bitwise_or(
+                mask_a,
+                mask_b,
+            )
         )
 
     lower = np.array(
@@ -1202,16 +1206,18 @@ def create_color_mask(
         ]
     )
 
-    mask = cv2.inRange(
-        hsv,
-        lower,
-        upper,
-    )
-
     return clean_mask(
-        mask
+        cv2.inRange(
+            hsv,
+            lower,
+            upper,
+        )
     )
 
+
+# ============================================================
+# BLACK MASK
+# ============================================================
 
 def create_black_mask(
     hsv,
@@ -1231,44 +1237,45 @@ def create_black_mask(
         ),
     )
 
-    mask = cv2.inRange(
-        hsv,
-        np.array(
-            [
-                0,
-                0,
-                0,
-            ]
-        ),
-        np.array(
-            [
-                179,
-                255,
-                value_limit,
-            ]
-        ),
-    )
-
     return clean_mask(
-        mask
+        cv2.inRange(
+            hsv,
+            np.array(
+                [
+                    0,
+                    0,
+                    0,
+                ]
+            ),
+            np.array(
+                [
+                    179,
+                    255,
+                    value_limit,
+                ]
+            ),
+        )
     )
 
 
 # ============================================================
-# FIND CONTOURS
+# CONTOUR EXTRACTION
 # ============================================================
 
 def detect_objects(
     mask,
     color,
-    x_offset,
-    y_offset,
+    x_offset=0,
+    y_offset=0,
+    min_area=MIN_AREA,
 ):
 
-    contours, _ = cv2.findContours(
-        mask,
-        cv2.RETR_EXTERNAL,
-        cv2.CHAIN_APPROX_SIMPLE,
+    contours, _ = (
+        cv2.findContours(
+            mask,
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
     )
 
     detections = []
@@ -1279,7 +1286,7 @@ def detect_objects(
             contour
         )
 
-        if area < MIN_AREA:
+        if area < min_area:
             continue
 
         x, y, w, h = (
@@ -1292,7 +1299,7 @@ def detect_objects(
             contour
         )
 
-        if moments["m00"] != 0:
+        if moments["m00"]:
 
             cx = (
                 moments["m10"]
@@ -1328,17 +1335,25 @@ def detect_objects(
         detections.append(
             {
                 "color": color,
-                "contour": global_contour,
+                "contour":
+                    global_contour,
+
                 "area": area,
 
-                "x": x + x_offset,
-                "y": y + y_offset,
+                "x":
+                    x + x_offset,
+
+                "y":
+                    y + y_offset,
 
                 "w": w,
                 "h": h,
 
-                "cx": cx + x_offset,
-                "cy": cy + y_offset,
+                "cx":
+                    cx + x_offset,
+
+                "cy":
+                    cy + y_offset,
             }
         )
 
@@ -1354,6 +1369,7 @@ def estimate_distance(
 ):
 
     if pixel_height <= 0:
+
         return None
 
     return (
@@ -1364,7 +1380,293 @@ def estimate_distance(
 
 
 # ============================================================
-# CENTERING
+# PILLAR DETECTION
+# ============================================================
+
+def detect_pillars(
+    detections
+):
+
+    red = [
+        d
+        for d in detections
+        if (
+            d["color"] == "red"
+            and d["area"]
+            >= PILLAR_MIN_AREA
+        )
+    ]
+
+    green = [
+        d
+        for d in detections
+        if (
+            d["color"] == "green"
+            and d["area"]
+            >= PILLAR_MIN_AREA
+        )
+    ]
+
+    red_target = (
+        max(
+            red,
+            key=lambda d: (
+                d["area"]
+                * 0.6
+                +
+                d["cy"]
+                * 0.4
+            ),
+        )
+        if red
+        else None
+    )
+
+    green_target = (
+        max(
+            green,
+            key=lambda d: (
+                d["area"]
+                * 0.6
+                +
+                d["cy"]
+                * 0.4
+            ),
+        )
+        if green
+        else None
+    )
+
+    return (
+        red_target,
+        green_target,
+    )
+
+
+# ============================================================
+# TRACK LINE DETECTION
+# ============================================================
+
+def detect_track_lines(
+    hsv,
+    width,
+    height,
+    tolerance,
+):
+
+    """
+    Detect orange and blue WRO track lines in the lower
+    camera region.
+
+    The WRO rules specify orange and blue lines as 20 mm
+    track markings.
+
+    Returns:
+        left_line
+        right_line
+        primary_line
+    """
+
+    roi_y = int(
+        height
+        * LINE_ROI_TOP
+    )
+
+    roi = hsv[
+        roi_y:height,
+        0:width
+    ]
+
+    orange_mask = (
+        create_color_mask(
+            roi,
+            "orange",
+            tolerance,
+        )
+    )
+
+    blue_mask = (
+        create_color_mask(
+            roi,
+            "blue",
+            tolerance,
+        )
+    )
+
+    orange_objects = (
+        detect_objects(
+            orange_mask,
+            "ORANGE_LINE",
+            0,
+            roi_y,
+            LINE_MIN_AREA,
+        )
+    )
+
+    blue_objects = (
+        detect_objects(
+            blue_mask,
+            "BLUE_LINE",
+            0,
+            roi_y,
+            LINE_MIN_AREA,
+        )
+    )
+
+    lines = (
+        orange_objects
+        + blue_objects
+    )
+
+    # Ignore tiny / extremely narrow noise.
+    lines = [
+        line
+        for line in lines
+        if (
+            line["w"] >= 5
+            and line["h"] >= 5
+        )
+    ]
+
+    if not lines:
+
+        return (
+            None,
+            None,
+            None,
+            orange_mask,
+            blue_mask,
+        )
+
+    # Calculate the x position of each detected line.
+    for line in lines:
+
+        line["center_x"] = (
+            line["cx"]
+        )
+
+    left_candidates = [
+        line
+        for line in lines
+        if line["center_x"]
+        < width * 0.50
+    ]
+
+    right_candidates = [
+        line
+        for line in lines
+        if line["center_x"]
+        >= width * 0.50
+    ]
+
+    left_line = (
+        max(
+            left_candidates,
+            key=lambda d:
+                d["area"],
+        )
+        if left_candidates
+        else None
+    )
+
+    right_line = (
+        max(
+            right_candidates,
+            key=lambda d:
+                d["area"],
+        )
+        if right_candidates
+        else None
+    )
+
+    primary_line = max(
+        lines,
+        key=lambda d:
+            d["area"],
+    )
+
+    return (
+        left_line,
+        right_line,
+        primary_line,
+        orange_mask,
+        blue_mask,
+    )
+
+
+# ============================================================
+# LANE ERROR
+# ============================================================
+
+def calculate_line_error(
+    left_line,
+    right_line,
+    width,
+):
+
+    image_center = (
+        width / 2.0
+    )
+
+    if (
+        left_line is not None
+        and right_line is not None
+    ):
+
+        lane_center = (
+            left_line["center_x"]
+            + right_line["center_x"]
+        ) / 2.0
+
+    elif left_line is not None:
+
+        # A single left line implies
+        # the car should remain to its right.
+        estimated_lane_width = (
+            width * 0.40
+        )
+
+        lane_center = (
+            left_line["center_x"]
+            + estimated_lane_width
+        )
+
+    elif right_line is not None:
+
+        estimated_lane_width = (
+            width * 0.40
+        )
+
+        lane_center = (
+            right_line["center_x"]
+            - estimated_lane_width
+        )
+
+    else:
+
+        return None
+
+    error_pixels = (
+        lane_center
+        - image_center
+    )
+
+    error_normalized = (
+        error_pixels
+        / image_center
+    )
+
+    return max(
+        -1.0,
+        min(
+            1.0,
+            error_normalized,
+        ),
+    )
+
+
+# ============================================================
+# CENTRING
 # ============================================================
 
 def calculate_centering(
@@ -1373,28 +1675,25 @@ def calculate_centering(
 ):
 
     center = (
-        frame_width
-        / 2.0
+        frame_width / 2.0
     )
 
     error_pixels = (
-        cx
-        - center
+        cx - center
     )
 
-    error_normalized = (
+    normalized = (
         error_pixels
         / center
     )
 
-    if (
-        abs(error_normalized)
-        <= CENTER_DEADZONE
-    ):
+    if abs(
+        normalized
+    ) <= CENTER_DEADZONE:
 
         direction = "CENTER"
 
-    elif error_normalized < 0:
+    elif normalized < 0:
 
         direction = "LEFT"
 
@@ -1404,37 +1703,35 @@ def calculate_centering(
 
     return (
         error_pixels,
-        error_normalized,
+        normalized,
         direction,
     )
 
 
 # ============================================================
-# PD CONTROLLER
+# PD
 # ============================================================
 
 def reset_pd():
 
-    global _previous_error
-    global _previous_error_time
+    global previous_error
+    global previous_error_time
 
-    _previous_error = 0.0
-    _previous_error_time = None
+    previous_error = 0.0
+    previous_error_time = None
 
 
-def calculate_pd_steering(
+def calculate_pd(
     error,
     now=None,
 ):
 
-    global _previous_error
-    global _previous_error_time
+    global previous_error
+    global previous_error_time
 
     if now is None:
-
         now = time.perf_counter()
 
-    # Apply centre deadzone.
     if (
         abs(error)
         <= CENTER_DEADZONE
@@ -1442,9 +1739,8 @@ def calculate_pd_steering(
 
         error = 0.0
 
-    # First sample: no derivative yet.
     if (
-        _previous_error_time
+        previous_error_time
         is None
     ):
 
@@ -1454,10 +1750,10 @@ def calculate_pd_steering(
 
         dt = (
             now
-            - _previous_error_time
+            - previous_error_time
         )
 
-        if dt <= 0.0:
+        if dt <= 0:
 
             derivative = 0.0
 
@@ -1465,7 +1761,7 @@ def calculate_pd_steering(
 
             derivative = (
                 error
-                - _previous_error
+                - previous_error
             ) / dt
 
             derivative = max(
@@ -1489,32 +1785,124 @@ def calculate_pd_steering(
         ),
     )
 
-    _previous_error = error
-    _previous_error_time = now
+    previous_error = error
+    previous_error_time = now
 
     return output
 
 
 # ============================================================
-# DRIVE SPEED
+# PILLAR SIDE BIAS
 # ============================================================
 
-def calculate_drive_speed(
+def apply_pillar_strategy(
     steering_deg,
+    pillar_color,
+    pillar_x,
+    width,
+):
+
+    if pillar_color == "red":
+
+        # RED -> pass RIGHT.
+        #
+        # Steering away from the pillar means moving right
+        # when the pillar is on the left/forward path.
+        required_side = "RIGHT"
+
+        bias = PILLAR_BIAS_DEG
+
+    elif pillar_color == "green":
+
+        # GREEN -> pass LEFT.
+        required_side = "LEFT"
+
+        bias = -PILLAR_BIAS_DEG
+
+    else:
+
+        return (
+            steering_deg,
+            "NONE",
+        )
+
+    # Bias can be reduced when the pillar is already on
+    # the required side.
+
+    image_center = (
+        width / 2.0
+    )
+
+    if required_side == "RIGHT":
+
+        if pillar_x < image_center:
+
+            steering_deg += bias
+
+        else:
+
+            steering_deg += (
+                bias * 0.35
+            )
+
+    elif required_side == "LEFT":
+
+        if pillar_x > image_center:
+
+            steering_deg += bias
+
+        else:
+
+            steering_deg += (
+                bias * 0.35
+            )
+
+    steering_deg = max(
+        STEERING_MIN_DEG,
+        min(
+            STEERING_MAX_DEG,
+            steering_deg,
+        ),
+    )
+
+    return (
+        steering_deg,
+        required_side,
+    )
+
+
+# ============================================================
+# SPEED CONTROL
+# ============================================================
+
+def calculate_speed(
+    steering_deg,
+    pillar_active=False,
+    distance=None,
 ):
 
     steering_fraction = (
         abs(steering_deg)
-        / 45.0
+        / STEERING_MAX_DEG
     )
 
     speed = (
         BASE_SPEED
-        - (
-            CORNER_SPEED_REDUCTION
-            * steering_fraction
-        )
+        -
+        STEERING_SPEED_REDUCTION
+        * steering_fraction
     )
+
+    if pillar_active:
+
+        speed -= 15
+
+    if (
+        distance is not None
+        and distance < 30.0
+    ):
+
+        speed -= 25
 
     speed = max(
         MIN_SPEED,
@@ -1528,15 +1916,126 @@ def calculate_drive_speed(
 
 
 # ============================================================
-# GET GRID CELL
+# LAP TRACKING
 # ============================================================
 
-def get_cell(
-    cx,
-    cy,
-    width,
-    height,
+def update_lap_counter(
+    start_section_visible,
 ):
+
+    global lap_count
+    global previous_start_zone
+    global last_lap_event_time
+
+    now = time.perf_counter()
+
+    entered = (
+        start_section_visible
+        and not previous_start_zone
+    )
+
+    if entered:
+
+        if (
+            now
+            - last_lap_event_time
+            > LAP_EVENT_COOLDOWN_S
+        ):
+
+            if lap_count < TARGET_LAPS:
+
+                lap_count += 1
+
+                last_lap_event_time = now
+
+    previous_start_zone = (
+        start_section_visible
+    )
+
+
+# ============================================================
+# FUTURE IMU INTERFACE
+# ============================================================
+
+class IMUInterface:
+
+    """
+    Interface placeholder for the 6-axis IMU.
+
+    Once the exact IMU board/model is confirmed, the implementation
+    goes here.
+
+    Expected useful outputs:
+
+        gyro_z_dps
+        accel_x
+        accel_y
+        accel_z
+
+    A 6-axis IMU does NOT provide magnetometer heading directly.
+    The gyro can provide yaw-rate damping for the PD controller.
+    """
+
+    def __init__(self):
+
+        self.available = False
+
+        self.gyro_z_dps = 0.0
+
+        self.accel_x = 0.0
+        self.accel_y = 0.0
+        self.accel_z = 0.0
+
+    def update(self):
+
+        # Hardware-specific implementation will be inserted here.
+        return False
+
+    def get_yaw_rate(self):
+
+        return self.gyro_z_dps
+
+
+# ============================================================
+# FUTURE TOF INTERFACE
+# ============================================================
+
+class ToFInterface:
+
+    """
+    Interface placeholder for the VL ToF sensor.
+
+    Exact implementation depends on the confirmed sensor
+    breakout/model and bus interface.
+
+    distance_cm:
+        None when unavailable.
+    """
+
+    def __init__(self):
+
+        self.available = False
+        self.distance_cm = None
+
+    def update(self):
+
+        # Hardware-specific implementation will be inserted here.
+        return False
+
+    def get_distance(self):
+
+        return self.distance_cm
+
+
+# ============================================================
+# DEBUG DRAWING
+# ============================================================
+
+def draw_grid(frame):
+
+    height, width = (
+        frame.shape[:2]
+    )
 
     (
         y_top,
@@ -1548,54 +2047,130 @@ def get_cell(
         height,
     )
 
-    if cy < y_top:
+    lines = (
+        (
+            (0, y_top),
+            (width, y_top),
+        ),
 
-        row = "top"
+        (
+            (0, y_middle),
+            (width, y_middle),
+        ),
 
-    elif cy < y_middle:
+        (
+            (x_left, 0),
+            (x_left, height),
+        ),
 
-        row = "middle"
-
-    else:
-
-        row = "bottom"
-
-    if cx < x_left:
-
-        column = "left"
-
-    elif cx < x_right:
-
-        column = "center"
-
-    else:
-
-        column = "right"
-
-    return (
-        f"{row}_{column}"
+        (
+            (x_right, 0),
+            (x_right, height),
+        ),
     )
 
+    for p1, p2 in lines:
 
-# ============================================================
-# DRAWING - DETECTION
-# ============================================================
+        cv2.line(
+            frame,
+            p1,
+            p2,
+            (0, 255, 255),
+            GRID_LINE_THICKNESS,
+            cv2.LINE_AA,
+        )
+
+
+def draw_labels(frame):
+
+    height, width = (
+        frame.shape[:2]
+    )
+
+    (
+        y_top,
+        y_middle,
+        x_left,
+        x_right,
+    ) = get_grid(
+        width,
+        height,
+    )
+
+    labels = (
+        (
+            "TOP 40%",
+            10,
+            30,
+        ),
+
+        (
+            "MIDDLE 20%",
+            10,
+            y_top + 30,
+        ),
+
+        (
+            "BOTTOM 40%",
+            10,
+            y_middle + 30,
+        ),
+
+        (
+            "LEFT 30%",
+            10,
+            height - 15,
+        ),
+
+        (
+            "CENTER 40%",
+            x_left + 15,
+            height - 15,
+        ),
+
+        (
+            "RIGHT 30%",
+            x_right + 10,
+            height - 15,
+        ),
+    )
+
+    for text, x, y in labels:
+
+        cv2.putText(
+            frame,
+            text,
+            (
+                x,
+                y,
+            ),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.55,
+            (255, 255, 255),
+            2,
+        )
+
 
 def draw_detection(
     frame,
     detection,
+    label=None,
 ):
 
-    x, y, w, h = (
-        int(
-            detection[key]
-        )
-        for key in (
-            "x",
-            "y",
-            "w",
-            "h",
-        )
+    x = int(
+        detection["x"]
+    )
+
+    y = int(
+        detection["y"]
+    )
+
+    w = int(
+        detection["w"]
+    )
+
+    h = int(
+        detection["h"]
     )
 
     cx = int(
@@ -1631,26 +2206,15 @@ def draw_detection(
         -1,
     )
 
-    distance = (
-        estimate_distance(h)
-    )
+    if label is None:
 
-    if distance is None:
-
-        text = (
-            f"{detection['color']}"
-        )
-
-    else:
-
-        text = (
-            f"{detection['color']} "
-            f"{distance:.0f}cm"
+        label = (
+            detection["color"]
         )
 
     cv2.putText(
         frame,
-        text,
+        label,
         (
             x,
             max(
@@ -1666,253 +2230,22 @@ def draw_detection(
 
 
 # ============================================================
-# DRAWING - CONTOUR OUTLINE
-# ============================================================
-
-def draw_outline(
-    frame,
-    detection,
-):
-
-    cv2.drawContours(
-        frame,
-        [
-            detection["contour"]
-        ],
-        -1,
-        (255, 255, 255),
-        3,
-    )
-
-    cx = int(
-        detection["cx"]
-    )
-
-    cy = int(
-        detection["cy"]
-    )
-
-    cv2.circle(
-        frame,
-        (
-            cx,
-            cy,
-        ),
-        5,
-        (255, 255, 255),
-        -1,
-    )
-
-
-# ============================================================
-# DRAWING - GRID
-# ============================================================
-
-def draw_grid(frame):
-
-    height, width = (
-        frame.shape[:2]
-    )
-
-    (
-        y_top,
-        y_middle,
-        x_left,
-        x_right,
-    ) = get_grid(
-        width,
-        height,
-    )
-
-    grid_lines = (
-        (
-            (
-                0,
-                y_top,
-            ),
-            (
-                width,
-                y_top,
-            ),
-        ),
-
-        (
-            (
-                0,
-                y_middle,
-            ),
-            (
-                width,
-                y_middle,
-            ),
-        ),
-
-        (
-            (
-                x_left,
-                0,
-            ),
-            (
-                x_left,
-                height,
-            ),
-        ),
-
-        (
-            (
-                x_right,
-                0,
-            ),
-            (
-                x_right,
-                height,
-            ),
-        ),
-    )
-
-    for pt1, pt2 in grid_lines:
-
-        cv2.line(
-            frame,
-            pt1,
-            pt2,
-            (0, 255, 255),
-            GRID_LINE_THICKNESS,
-            cv2.LINE_AA,
-        )
-
-
-# ============================================================
-# DRAWING - GRID LABELS
-# ============================================================
-
-def draw_labels(frame):
-
-    height, width = (
-        frame.shape[:2]
-    )
-
-    (
-        y_top,
-        y_middle,
-        x_left,
-        x_right,
-    ) = get_grid(
-        width,
-        height,
-    )
-
-    cv2.putText(
-        frame,
-        "TOP 40%",
-        (
-            10,
-            30,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 255, 255),
-        2,
-    )
-
-    cv2.putText(
-        frame,
-        "MIDDLE 20%",
-        (
-            10,
-            y_top + 30,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (255, 255, 255),
-        2,
-    )
-
-    cv2.putText(
-        frame,
-        "BOTTOM 40%",
-        (
-            10,
-            y_middle + 30,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 255, 255),
-        2,
-    )
-
-    cv2.putText(
-        frame,
-        "LEFT 30%",
-        (
-            10,
-            height - 15,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (255, 255, 255),
-        2,
-    )
-
-    cv2.putText(
-        frame,
-        "CENTER 40%",
-        (
-            x_left + 15,
-            height - 15,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (255, 255, 255),
-        2,
-    )
-
-    cv2.putText(
-        frame,
-        "RIGHT 30%",
-        (
-            x_right + 10,
-            height - 15,
-        ),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (255, 255, 255),
-        2,
-    )
-
-
-# ============================================================
 # MAIN
 # ============================================================
 
 def main():
 
-    # --------------------------------------------------------
-    # Validate configuration.
-    # --------------------------------------------------------
-
     validate_config()
-
-    # --------------------------------------------------------
-    # Open camera.
-    # --------------------------------------------------------
 
     cap = open_camera()
 
     if cap is None:
 
         print(
-            f"ERROR: Camera index "
-            f"{CAMERA_INDEX} could not "
-            f"be opened after "
-            f"{CAMERA_OPEN_RETRIES} attempts."
+            "ERROR: Camera could not be opened."
         )
 
         return
-
-    # --------------------------------------------------------
-    # Connect ESP32.
-    # --------------------------------------------------------
 
     esp32 = ESP32Controller(
         port=SERIAL_PORT_OVERRIDE,
@@ -1925,35 +2258,30 @@ def main():
 
     if esp32_connected:
 
-        print(
-            "Testing ESP32 communication..."
-        )
-
         if esp32.ping():
 
             print(
-                "ESP32 PING successful."
+                "ESP32: PONG"
             )
 
         else:
 
             print(
-                "WARNING: ESP32 PING failed."
+                "WARNING: ESP32 ping failed."
             )
 
     else:
 
         print(
-            "WARNING: ESP32 is not connected."
+            "WARNING: ESP32 unavailable. "
+            "Starting vision-only mode."
         )
 
-        print(
-            "Vision will continue in "
-            "development mode."
-        )
+    imu = IMUInterface()
+    tof = ToFInterface()
 
     # --------------------------------------------------------
-    # Debug windows.
+    # Debug windows
     # --------------------------------------------------------
 
     cv2.namedWindow(
@@ -1971,10 +2299,6 @@ def main():
         cv2.WINDOW_NORMAL,
     )
 
-    # --------------------------------------------------------
-    # HSV tolerance control.
-    # --------------------------------------------------------
-
     cv2.createTrackbar(
         "Tolerance",
         "WRO Vision",
@@ -1983,25 +2307,17 @@ def main():
         lambda x: None,
     )
 
-    # --------------------------------------------------------
-    # FPS timing.
-    # --------------------------------------------------------
-
     previous_time = (
         time.perf_counter()
     )
-
-    # --------------------------------------------------------
-    # MAIN LOOP.
-    # --------------------------------------------------------
 
     try:
 
         while True:
 
-            # ------------------------------------------------
-            # Capture frame.
-            # ------------------------------------------------
+            # =================================================
+            # CAMERA
+            # =================================================
 
             ret, frame = (
                 cap.read()
@@ -2010,23 +2326,14 @@ def main():
             if not ret:
 
                 print(
-                    "ERROR: Could not "
-                    "read camera frame."
+                    "ERROR: camera frame read failed."
                 )
 
                 break
 
-            # ------------------------------------------------
-            # Frame dimensions.
-            # ------------------------------------------------
-
             height, width = (
                 frame.shape[:2]
             )
-
-            # ------------------------------------------------
-            # Tolerance.
-            # ------------------------------------------------
 
             tolerance = (
                 cv2.getTrackbarPos(
@@ -2035,23 +2342,20 @@ def main():
                 )
             )
 
-            # ------------------------------------------------
-            # Grid.
-            # ------------------------------------------------
+            # =================================================
+            # SENSOR UPDATE
+            # =================================================
 
-            (
-                y_top,
-                y_middle,
-                x_left,
-                x_right,
-            ) = get_grid(
-                width,
-                height,
+            imu.update()
+            tof.update()
+
+            tof_distance = (
+                tof.get_distance()
             )
 
-            # ------------------------------------------------
-            # Pre-process frame.
-            # ------------------------------------------------
+            # =================================================
+            # VISION
+            # =================================================
 
             blurred = smooth(
                 frame
@@ -2061,10 +2365,6 @@ def main():
                 blurred,
                 cv2.COLOR_BGR2HSV,
             )
-
-            # ------------------------------------------------
-            # Full-frame debug mask.
-            # ------------------------------------------------
 
             full_mask = np.zeros(
                 (
@@ -2076,9 +2376,19 @@ def main():
 
             detections = []
 
-            # ------------------------------------------------
-            # Grid rows.
-            # ------------------------------------------------
+            # =================================================
+            # 3x3 GRID
+            # =================================================
+
+            (
+                y_top,
+                y_middle,
+                x_left,
+                x_right,
+            ) = get_grid(
+                width,
+                height,
+            )
 
             rows = (
                 (
@@ -2100,10 +2410,6 @@ def main():
                 ),
             )
 
-            # ------------------------------------------------
-            # Grid columns.
-            # ------------------------------------------------
-
             columns = (
                 (
                     "left",
@@ -2124,10 +2430,6 @@ def main():
                 ),
             )
 
-            # ------------------------------------------------
-            # Process every grid cell.
-            # ------------------------------------------------
-
             for (
                 row_name,
                 y1,
@@ -2140,17 +2442,15 @@ def main():
                     x2,
                 ) in columns:
 
-                    cell = (
+                    cell_name = (
                         f"{row_name}_"
                         f"{column_name}"
                     )
 
-                    roi_hsv = (
-                        hsv[
-                            y1:y2,
-                            x1:x2
-                        ]
-                    )
+                    roi_hsv = hsv[
+                        y1:y2,
+                        x1:x2
+                    ]
 
                     cell_mask = np.zeros(
                         (
@@ -2161,17 +2461,19 @@ def main():
                     )
 
                     # ----------------------------------------
-                    # Expected colours for this cell.
+                    # Expected colours
                     # ----------------------------------------
 
-                    for color in (
-                        GRID_COLORS[cell]
+                    for colour in (
+                        GRID_COLORS[
+                            cell_name
+                        ]
                     ):
 
                         mask = (
                             create_color_mask(
                                 roi_hsv,
-                                color,
+                                colour,
                                 tolerance,
                             )
                         )
@@ -2186,17 +2488,20 @@ def main():
                         detections.extend(
                             detect_objects(
                                 mask,
-                                color,
+                                colour,
                                 x1,
                                 y1,
+                                MIN_AREA,
                             )
                         )
 
                     # ----------------------------------------
-                    # Black mask where allowed.
+                    # Black
                     # ----------------------------------------
 
-                    if BLACK_GRID[cell]:
+                    if BLACK_GRID[
+                        cell_name
+                    ]:
 
                         mask = (
                             create_black_mask(
@@ -2218,227 +2523,433 @@ def main():
                                 "BLACK",
                                 x1,
                                 y1,
+                                MIN_AREA,
                             )
                         )
-
-                    # ----------------------------------------
-                    # Store mask.
-                    # ----------------------------------------
 
                     full_mask[
                         y1:y2,
                         x1:x2
                     ] = cell_mask
 
-            # ------------------------------------------------
-            # Draw all detections.
-            # ------------------------------------------------
+            # =================================================
+            # PILARS
+            # =================================================
 
-            for detection in detections:
+            (
+                red_pillar,
+                green_pillar,
+            ) = detect_pillars(
+                detections
+            )
 
-                draw_detection(
-                    frame,
-                    detection,
+            # =================================================
+            # TRACK LINES
+            # =================================================
+
+            (
+                left_line,
+                right_line,
+                primary_line,
+                orange_mask,
+                blue_mask,
+            ) = detect_track_lines(
+                hsv,
+                width,
+                height,
+                tolerance,
+            )
+
+            line_error = (
+                calculate_line_error(
+                    left_line,
+                    right_line,
+                    width,
+                )
+            )
+
+            # =================================================
+            # NAVIGATION DECISION
+            # =================================================
+
+            steering_error = 0.0
+
+            pillar_active = False
+
+            active_pillar = None
+
+            pillar_side = "NONE"
+
+            distance = tof_distance
+
+            # -------------------------------------------------
+            # Prefer pillars when clearly detected.
+            # -------------------------------------------------
+
+            if (
+                red_pillar is not None
+                or
+                green_pillar is not None
+            ):
+
+                pillar_active = True
+
+                if (
+                    red_pillar is not None
+                    and
+                    green_pillar is not None
+                ):
+
+                    # Choose the nearer/stronger image target.
+                    red_score = (
+                        red_pillar["area"]
+                        * 0.6
+                        +
+                        red_pillar["cy"]
+                        * 0.4
+                    )
+
+                    green_score = (
+                        green_pillar["area"]
+                        * 0.6
+                        +
+                        green_pillar["cy"]
+                        * 0.4
+                    )
+
+                    if (
+                        red_score
+                        >= green_score
+                    ):
+
+                        active_pillar = (
+                            red_pillar
+                        )
+
+                    else:
+
+                        active_pillar = (
+                            green_pillar
+                        )
+
+                elif red_pillar is not None:
+
+                    active_pillar = (
+                        red_pillar
+                    )
+
+                else:
+
+                    active_pillar = (
+                        green_pillar
+                    )
+
+                pillar_colour = (
+                    active_pillar[
+                        "color"
+                    ]
                 )
 
-            # ------------------------------------------------
-            # Current development target selection.
-            #
-            # NOTE:
-            # This is intentionally the same basic target
-            # selection strategy as the existing development
-            # version.
-            #
-            # It will later be replaced with explicit WRO
-            # line/pillar strategy.
-            # ------------------------------------------------
-
-            pillars = [
-                detection
-                for detection in detections
-                if detection["color"] != "BLACK"
-            ]
-
-            target = None
-
-            if pillars:
-
-                target = max(
-                    pillars,
-                    key=lambda d:
-                        (
-                            d["area"]
-                            * 0.65
-                            +
-                            d["cy"]
-                            * 0.35
-                        ),
+                _, pillar_error, _ = (
+                    calculate_centering(
+                        active_pillar[
+                            "cx"
+                        ],
+                        width,
+                    )
                 )
 
-            # ------------------------------------------------
-            # Navigation variables.
-            # ------------------------------------------------
-
-            direction = "SEARCH"
-
-            steering_deg = 0.0
-
-            center_error = 0.0
-
-            distance = None
-
-            target_cell = "NONE"
-
-            motor_pwm = 0
-
-            mode = "STOP"
-
-            # ------------------------------------------------
-            # Target found.
-            # ------------------------------------------------
-
-            if target is not None:
+                steering_error = (
+                    pillar_error
+                )
 
                 (
                     _,
-                    center_error,
-                    direction,
-                ) = calculate_centering(
-                    target["cx"],
+                    pillar_side,
+                ) = apply_pillar_strategy(
+                    0.0,
+                    pillar_colour,
+                    active_pillar[
+                        "cx"
+                    ],
                     width,
                 )
 
-                # --------------------------------------------
-                # PD steering.
-                # --------------------------------------------
-
-                steering_deg = (
-                    calculate_pd_steering(
-                        center_error
-                    )
+                current_navigation_mode = (
+                    NavigationMode.RED_PILLAR
+                    if pillar_colour
+                    == "red"
+                    else
+                    NavigationMode.GREEN_PILLAR
                 )
 
-                # --------------------------------------------
-                # Distance estimate.
-                # --------------------------------------------
-
-                distance = (
+                pillar_distance = (
                     estimate_distance(
-                        target["h"]
+                        active_pillar["h"]
                     )
                 )
 
-                # --------------------------------------------
-                # Grid cell.
-                # --------------------------------------------
+                if (
+                    distance is None
+                ):
 
-                target_cell = (
-                    get_cell(
-                        target["cx"],
-                        target["cy"],
-                        width,
-                        height,
+                    distance = (
+                        pillar_distance
                     )
+
+            # -------------------------------------------------
+            # Otherwise follow track.
+            # -------------------------------------------------
+
+            elif line_error is not None:
+
+                steering_error = (
+                    line_error
                 )
 
-                # --------------------------------------------
-                # Motor speed.
-                # --------------------------------------------
-
-                motor_pwm = (
-                    calculate_drive_speed(
-                        steering_deg
-                    )
+                current_navigation_mode = (
+                    NavigationMode.TRACK
                 )
 
-                mode = "DRIVE"
+            # -------------------------------------------------
+            # Nothing detected.
+            # -------------------------------------------------
 
             else:
 
-                # No target -> don't continue driving blindly.
+                steering_error = 0.0
+
+                current_navigation_mode = (
+                    NavigationMode.SEARCH
+                )
+
                 reset_pd()
+
+            # =================================================
+            # PD
+            # =================================================
+
+            if (
+                current_navigation_mode
+                != NavigationMode.SEARCH
+            ):
+
+                steering_deg = (
+                    calculate_pd(
+                        steering_error
+                    )
+                )
+
+            else:
 
                 steering_deg = 0.0
 
-                motor_pwm = 0
+            # =================================================
+            # PILLAR BIAS
+            # =================================================
 
-                mode = "STOP"
+            if active_pillar is not None:
 
-            # ------------------------------------------------
-            # Send command to ESP32.
-            # ------------------------------------------------
+                steering_deg, pillar_side = (
+                    apply_pillar_strategy(
+                        steering_deg,
+                        active_pillar[
+                            "color"
+                        ],
+                        active_pillar[
+                            "cx"
+                        ],
+                        width,
+                    )
+                )
+
+            # =================================================
+            # SPEED
+            # =================================================
+
+            motor_pwm = (
+                calculate_speed(
+                    steering_deg,
+                    pillar_active,
+                    distance,
+                )
+            )
+
+            mode = "DRIVE"
+
+            # =================================================
+            # DEBUG TARGET
+            # =================================================
+
+            target_cell = "NONE"
+
+            if active_pillar is not None:
+
+                target_cell = get_cell(
+                    active_pillar[
+                        "cx"
+                    ],
+                    active_pillar[
+                        "cy"
+                    ],
+                    width,
+                    height,
+                )
+
+            elif primary_line is not None:
+
+                target_cell = get_cell(
+                    primary_line[
+                        "cx"
+                    ],
+                    primary_line[
+                        "cy"
+                    ],
+                    width,
+                    height,
+                )
+
+            # =================================================
+            # LAP STATE
+            # =================================================
+            #
+            # Do not claim a lap here yet.
+            #
+            # The exact field-specific start-zone detector needs
+            # calibration against the actual starting section.
+            #
+            # This function is ready for that detector.
+            # =================================================
+
+            update_lap_counter(
+                start_zone_detected
+            )
+
+            # If target lap count is reached, transition toward
+            # parking/finish logic once the parking detector exists.
+            if lap_count >= TARGET_LAPS:
+
+                current_navigation_mode = (
+                    NavigationMode.PARK
+                )
+
+                mode = "PARK"
+
+            # =================================================
+            # SEND ESP32 COMMAND
+            # =================================================
 
             if esp32.connected:
 
                 esp32.send(
-                    steering_deg=(
-                        steering_deg
-                    ),
-                    motor_pwm=(
-                        motor_pwm
-                    ),
-                    mode=mode,
+                    steering_deg,
+                    motor_pwm,
+                    mode,
                 )
 
-            # ------------------------------------------------
-            # Create outline debug image.
-            # ------------------------------------------------
+            # =================================================
+            # DEBUG DRAWING
+            # =================================================
 
             outline = (
                 frame.copy()
             )
 
-            for detection in detections:
+            for detection in (
+                detections
+            ):
 
-                draw_outline(
+                draw_detection(
                     outline,
                     detection,
                 )
 
-            # ------------------------------------------------
-            # Highlight target.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Draw orange / blue line candidates.
+            # -------------------------------------------------
 
-            if target is not None:
+            if left_line is not None:
 
-                cx = int(
-                    target["cx"]
-                )
-
-                cy = int(
-                    target["cy"]
-                )
-
-                # Target centre.
                 cv2.circle(
                     outline,
                     (
-                        cx,
-                        cy,
+                        int(
+                            left_line[
+                                "center_x"
+                            ]
+                        ),
+                        int(
+                            left_line[
+                                "cy"
+                            ]
+                        ),
                     ),
-                    15,
-                    (0, 255, 255),
-                    3,
-                )
-
-                # Error line from image centre.
-                cv2.line(
-                    outline,
-                    (
-                        width // 2,
-                        cy,
-                    ),
-                    (
-                        cx,
-                        cy,
-                    ),
+                    10,
                     (0, 255, 255),
                     2,
                 )
 
-            # ------------------------------------------------
+            if right_line is not None:
+
+                cv2.circle(
+                    outline,
+                    (
+                        int(
+                            right_line[
+                                "center_x"
+                            ]
+                        ),
+                        int(
+                            right_line[
+                                "cy"
+                            ]
+                        ),
+                    ),
+                    10,
+                    (255, 255, 0),
+                    2,
+                )
+
+            # -------------------------------------------------
+            # Draw lane centre.
+            # -------------------------------------------------
+
+            if (
+                left_line is not None
+                and
+                right_line is not None
+            ):
+
+                lane_center = int(
+                    (
+                        left_line[
+                            "center_x"
+                        ]
+                        +
+                        right_line[
+                            "center_x"
+                        ]
+                    )
+                    / 2.0
+                )
+
+                cv2.line(
+                    outline,
+                    (
+                        lane_center,
+                        height - 20,
+                    ),
+                    (
+                        width // 2,
+                        height - 20,
+                    ),
+                    (0, 255, 255),
+                    3,
+                )
+
+            # -------------------------------------------------
             # Draw grid.
-            # ------------------------------------------------
+            # -------------------------------------------------
 
             draw_grid(
                 frame
@@ -2452,85 +2963,146 @@ def main():
                 frame
             )
 
-            # ------------------------------------------------
-            # Labels.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Highlight pillar.
+            # -------------------------------------------------
 
-            if target is not None:
+            if active_pillar is not None:
 
-                target_label = (
-                    "TARGET: "
-                    f"{target['color'].upper()}"
+                px = int(
+                    active_pillar[
+                        "cx"
+                    ]
                 )
 
-            else:
-
-                target_label = (
-                    "TARGET: NONE"
+                py = int(
+                    active_pillar[
+                        "cy"
+                    ]
                 )
+
+                cv2.circle(
+                    outline,
+                    (
+                        px,
+                        py,
+                    ),
+                    18,
+                    (0, 255, 255),
+                    3,
+                )
+
+                cv2.line(
+                    outline,
+                    (
+                        width // 2,
+                        py,
+                    ),
+                    (
+                        px,
+                        py,
+                    ),
+                    (0, 255, 255),
+                    2,
+                )
+
+            # -------------------------------------------------
+            # Distance label.
+            # -------------------------------------------------
 
             if distance is not None:
 
-                distance_label = (
-                    f"DISTANCE: "
+                distance_text = (
                     f"{distance:.1f} cm"
                 )
 
             else:
 
-                distance_label = (
-                    "DISTANCE: --"
-                )
+                distance_text = "--"
 
-            # ------------------------------------------------
-            # ESP32 status.
-            # ------------------------------------------------
-
-            if esp32.connected:
-
-                esp32_label = (
-                    "ESP32: CONNECTED"
-                )
-
-            else:
-
-                esp32_label = (
-                    "ESP32: DISCONNECTED"
-                )
-
-            # ------------------------------------------------
-            # Debug panel.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Panel
+            # -------------------------------------------------
 
             panel = [
-                target_label,
+                (
+                    "MODE: "
+                    f"{current_navigation_mode}"
+                ),
 
-                f"CELL: "
-                f"{target_cell}",
+                (
+                    "PILLAR: "
+                    (
+                        active_pillar[
+                            "color"
+                        ].upper()
+                        if active_pillar
+                        is not None
+                        else "NONE"
+                    )
+                ),
 
-                f"ERROR: "
-                f"{center_error:+.3f}",
+                (
+                    "PASS: "
+                    f"{pillar_side}"
+                ),
 
-                f"DIRECTION: "
-                f"{direction}",
+                (
+                    "CELL: "
+                    f"{target_cell}"
+                ),
 
-                f"STEERING: "
-                f"{steering_deg:+.1f} deg",
+                (
+                    "LINE ERROR: "
+                    f"{(
+                        line_error
+                        if line_error
+                        is not None
+                        else 0.0
+                    ):+.3f}"
+                ),
 
-                f"MOTOR: "
-                f"{motor_pwm}",
+                (
+                    "STEERING: "
+                    f"{steering_deg:+.1f} deg"
+                ),
 
-                distance_label,
+                (
+                    "MOTOR: "
+                    f"{motor_pwm}"
+                ),
 
-                f"TOLERANCE: "
-                f"{tolerance}",
+                (
+                    "TOF: "
+                    f"{distance_text}"
+                ),
 
-                esp32_label,
+                (
+                    "LAPS: "
+                    f"{lap_count}/"
+                    f"{TARGET_LAPS}"
+                ),
+
+                (
+                    "IMU: "
+                    (
+                        "AVAILABLE"
+                        if imu.available
+                        else
+                        "NOT CONNECTED"
+                    )
+                ),
+
+                (
+                    "ESP32: "
+                    (
+                        "CONNECTED"
+                        if esp32.connected
+                        else
+                        "DISCONNECTED"
+                    )
+                ),
             ]
-
-            # ------------------------------------------------
-            # Panel background.
-            # ------------------------------------------------
 
             cv2.rectangle(
                 frame,
@@ -2539,19 +3111,17 @@ def main():
                     50,
                 ),
                 (
-                    360,
-                    50
-                    + len(panel)
-                    * 25
-                    + 15,
+                    390,
+                    (
+                        50
+                        + len(panel)
+                        * 24
+                        + 15
+                    ),
                 ),
                 (0, 0, 0),
                 -1,
             )
-
-            # ------------------------------------------------
-            # Panel text.
-            # ------------------------------------------------
 
             for i, text in enumerate(
                 panel
@@ -2562,18 +3132,18 @@ def main():
                     text,
                     (
                         20,
-                        75
-                        + i * 25,
+                        73
+                        + i * 24,
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    0.55,
+                    0.48,
                     (255, 255, 255),
                     2,
                 )
 
-            # ------------------------------------------------
-            # FPS.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # FPS
+            # -------------------------------------------------
 
             now = (
                 time.perf_counter()
@@ -2605,10 +3175,6 @@ def main():
                 2,
             )
 
-            # ------------------------------------------------
-            # Outline title.
-            # ------------------------------------------------
-
             cv2.putText(
                 outline,
                 "ACTUAL CONTOURS",
@@ -2622,9 +3188,9 @@ def main():
                 2,
             )
 
-            # ------------------------------------------------
-            # Mask display.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Mask
+            # -------------------------------------------------
 
             mask_display = (
                 cv2.cvtColor(
@@ -2639,20 +3205,20 @@ def main():
 
             cv2.putText(
                 mask_display,
-                "LEGAL MASK",
+                "COLOUR / BLACK MASK",
                 (
                     10,
                     30,
                 ),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
+                0.65,
                 (255, 255, 255),
                 2,
             )
 
-            # ------------------------------------------------
-            # Show windows.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Windows
+            # -------------------------------------------------
 
             cv2.imshow(
                 "WRO Vision",
@@ -2669,32 +3235,29 @@ def main():
                 outline,
             )
 
-            # ------------------------------------------------
-            # Keyboard input.
-            # ------------------------------------------------
+            # -------------------------------------------------
+            # Keyboard
+            # -------------------------------------------------
 
             key = (
                 cv2.waitKey(1)
                 & 0xFF
             )
 
-            # ESC.
+            # ESC
             if key == 27:
 
                 break
 
-            # ------------------------------------------------
-            # Manual emergency stop from keyboard.
-            # ------------------------------------------------
-
+            # SPACE = emergency stop
             if key == ord(" "):
 
                 if esp32.connected:
 
                     esp32.send(
-                        steering_deg=0.0,
-                        motor_pwm=0,
-                        mode="STOP",
+                        0.0,
+                        0,
+                        "STOP",
                         force=True,
                     )
 
@@ -2702,17 +3265,12 @@ def main():
 
     finally:
 
-        # ----------------------------------------------------
-        # ALWAYS STOP ROBOT FIRST.
-        # ----------------------------------------------------
-
         try:
 
             if esp32.connected:
 
                 print(
-                    "Sending STOP "
-                    "to ESP32..."
+                    "Sending STOP..."
                 )
 
                 esp32.stop()
@@ -2727,7 +3285,7 @@ def main():
 
 
 # ============================================================
-# ENTRY POINT
+# PROGRAM ENTRY
 # ============================================================
 
 if __name__ == "__main__":

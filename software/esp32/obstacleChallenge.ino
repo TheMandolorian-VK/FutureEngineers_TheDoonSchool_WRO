@@ -4,53 +4,40 @@
  * THE DOON SCHOOL
  *
  * ESP32 LOW-LEVEL VEHICLE CONTROLLER
- * Version: 1.0
+ * Version 2.0
  * ============================================================
  *
  * HARDWARE
  * --------
- * MCU:
- *   ESP32
+ * ESP32
+ * MG996R steering servo
+ * 1x N20 6V 600RPM drive motor
+ * TB6612FNG motor driver
  *
- * STEERING:
- *   MG996R servo
- *
- * DRIVE:
- *   1x N20 geared DC motor
- *   6 V
- *   600 RPM
- *   Mechanically connected to both rear wheels
- *
- * MOTOR DRIVER:
- *   TB6612FNG
- *
- * COMMUNICATION:
- *   Raspberry Pi 4B <-> ESP32
- *   USB Serial
+ * COMMUNICATION
+ * -------------
+ * Raspberry Pi 4B <-> USB <-> ESP32
+ * 115200 baud
  *
  * ARCHITECTURE
  * ------------
  * Raspberry Pi:
- *   - Computer vision
- *   - Line detection
- *   - Pillar detection
- *   - IMU processing
- *   - ToF processing
+ *   - Camera perception
+ *   - Orange/blue line detection
+ *   - Red/green pillar detection
  *   - PD steering
- *   - High-level navigation
+ *   - IMU / ToF fusion
+ *   - WRO navigation state
+ *   - Lap counting
+ *   - Parking
  *
  * ESP32:
- *   - Receive command
- *   - Validate command
- *   - Set steering
- *   - Set motor speed
- *   - Communication timeout safety
+ *   - Receive validated actuator commands
+ *   - Control MG996R
+ *   - Control single N20 through TB6612FNG
+ *   - Communication watchdog
+ *   - Emergency stop
  *
- * ============================================================
- */
-
-/* ============================================================
- * LIBRARIES
  * ============================================================
  */
 
@@ -60,108 +47,105 @@
 /* ============================================================
  * PINOUT
  * ============================================================
- *
- * These retain the useful pins from the original prototype.
- *
- * TB6612FNG:
- *   PWMA -> GPIO 25
- *   AIN1 -> GPIO 26
- *   AIN2 -> GPIO 27
- *   STBY -> GPIO 32
- *
- * MG996R:
- *   Signal -> GPIO 13
- *
- * STATUS:
- *   Green LED -> GPIO 2
- *   Red LED   -> GPIO 4
- *
- * IMPORTANT:
- *   TB6612 motor power and MG996R servo power should not be
- *   taken directly from an ESP32 GPIO.
- *
- * ============================================================
  */
 
-// ----------------------------
-// Steering
-// ----------------------------
+// -------------------------
+// MG996R steering
+// -------------------------
 
 const int SERVO_PIN = 13;
 
-// ----------------------------
-// TB6612FNG - Channel A
-// ----------------------------
+// -------------------------
+// TB6612FNG Channel A
+// -------------------------
 
 const int MOTOR_PWM_PIN  = 25;
 const int MOTOR_IN1_PIN  = 26;
 const int MOTOR_IN2_PIN  = 27;
 const int MOTOR_STBY_PIN = 32;
 
-// ----------------------------
+// -------------------------
 // Status LEDs
-// ----------------------------
+// -------------------------
 
 const int LED_GREEN_PIN = 2;
 const int LED_RED_PIN   = 4;
 
-
 /* ============================================================
- * SERVO CONFIGURATION
- * ============================================================
- */
-
-Servo steeringServo;
-
-// Mechanical steering command limits.
-// These are logical steering angles, not guaranteed physical
-// Ackermann angles until calibration is completed.
-
-const float STEERING_MIN_DEG = -45.0f;
-const float STEERING_MAX_DEG =  45.0f;
-
-// Servo position corresponding to straight ahead.
-const int SERVO_CENTER_DEG = 90;
-
-// Safe initial pulse range.
-// These should be calibrated on the actual MG996R installation.
-const int SERVO_MIN_US = 1000;
-const int SERVO_MAX_US = 2000;
-
-float currentSteeringDeg = 0.0f;
-
-
-/* ============================================================
- * MOTOR CONFIGURATION
- * ============================================================
- */
-
-const int MOTOR_MAX_PWM = 255;
-
-// Change these during physical calibration if the motor runs
-// backwards relative to the commanded direction.
-const bool MOTOR_REVERSED = false;
-
-int currentMotorPWM = 0;
-
-
-/* ============================================================
- * SERIAL CONFIGURATION
+ * SERIAL
  * ============================================================
  */
 
 const unsigned long SERIAL_BAUD = 115200;
 
-// Maximum allowed time without a valid command.
-//
-// The Pi will continuously send commands while the vehicle is
-// running. If communication stops for this period, the ESP32
-// stops the motor and centers the steering.
+// Robot stops if the Pi disappears.
+const unsigned long COMMAND_TIMEOUT_MS = 350;
 
-const unsigned long COMMAND_TIMEOUT_MS = 300;
+// Debug output interval.
+const unsigned long DEBUG_INTERVAL_MS = 1000;
+
+/* ============================================================
+ * STEERING
+ * ============================================================
+ */
+
+Servo steeringServo;
+
+const float STEERING_MIN_DEG = -45.0f;
+const float STEERING_MAX_DEG =  45.0f;
+
+const int SERVO_CENTER_DEG = 90;
+
+// Conservative starting pulse range.
+// Must be calibrated against the actual MG996R installation.
+const int SERVO_MIN_US = 1000;
+const int SERVO_MAX_US = 2000;
+
+float currentSteeringDeg = 0.0f;
+
+/*
+ * Change to true if the physical steering direction is reversed.
+ */
+const bool STEERING_REVERSED = false;
+
+/* ============================================================
+ * DRIVE MOTOR
+ * ============================================================
+ */
+
+const int MOTOR_MAX_PWM = 255;
+
+/*
+ * Change to true if the motor rotates opposite to the desired
+ * forward direction.
+ */
+const bool MOTOR_REVERSED = false;
+
+int currentMotorPWM = 0;
+
+/* ============================================================
+ * VEHICLE MODE
+ * ============================================================
+ */
+
+enum VehicleMode
+{
+    MODE_STOP,
+    MODE_DRIVE,
+    MODE_PARK,
+    MODE_FINISH,
+    MODE_FAULT
+};
+
+VehicleMode currentMode = MODE_STOP;
+
+/* ============================================================
+ * COMMUNICATION WATCHDOG
+ * ============================================================
+ */
 
 unsigned long lastValidCommandTime = 0;
-
+unsigned long lastDebugTime = 0;
 
 /* ============================================================
  * SERIAL INPUT BUFFER
@@ -172,43 +156,6 @@ const size_t SERIAL_BUFFER_SIZE = 128;
 
 char serialBuffer[SERIAL_BUFFER_SIZE];
 size_t serialBufferIndex = 0;
-
-
-/* ============================================================
- * VEHICLE MODES
- * ============================================================
- *
- * The Pi decides what the robot should be doing.
- *
- * DRIVE:
- *   Normal autonomous driving.
- *
- * PARK:
- *   Parking manoeuvre commanded by Pi.
- *
- * STOP:
- *   Immediate stop.
- *
- * FINISH:
- *   Run completed; remain stopped.
- *
- * FAULT:
- *   Internal communication timeout / invalid operating state.
- *
- * ============================================================
- */
-
-enum VehicleMode
-{
-    MODE_DRIVE,
-    MODE_PARK,
-    MODE_STOP,
-    MODE_FINISH,
-    MODE_FAULT
-};
-
-VehicleMode currentMode = MODE_STOP;
-
 
 /* ============================================================
  * FUNCTION DECLARATIONS
@@ -229,7 +176,7 @@ void stopMotor();
 void receiveSerial();
 void processSerialLine(char *line);
 
-bool parseCommand(char *line);
+bool parseDriveCommand(char *line);
 void processStopCommand();
 void processPingCommand();
 
@@ -240,7 +187,6 @@ void enterFaultState();
 // Status
 void updateStatusLEDs();
 void printStatus();
-
 
 /* ============================================================
  * SETUP
@@ -260,10 +206,10 @@ void setup()
     initialiseServo();
     initialiseMotorDriver();
 
-    currentMode = MODE_STOP;
-
     stopMotor();
     centerSteering();
+
+    currentMode = MODE_STOP;
 
     lastValidCommandTime = millis();
 
@@ -271,14 +217,13 @@ void setup()
     Serial.println("========================================");
     Serial.println("WRO FUTURE ENGINEERS 2026");
     Serial.println("THE DOON SCHOOL");
-    Serial.println("ESP32 LOW-LEVEL CONTROLLER V1.0");
+    Serial.println("ESP32 CONTROLLER V2.0");
     Serial.println("========================================");
     Serial.println("READY");
 }
 
-
 /* ============================================================
- * MAIN LOOP
+ * LOOP
  * ============================================================
  */
 
@@ -290,17 +235,15 @@ void loop()
 
     updateStatusLEDs();
 
-    // Keep status output slow enough that it does not flood
-    // the same serial interface used for commands.
-    static unsigned long lastStatusTime = 0;
-
-    if (millis() - lastStatusTime >= 1000)
+    if (
+        millis() - lastDebugTime
+        >= DEBUG_INTERVAL_MS
+    )
     {
-        lastStatusTime = millis();
+        lastDebugTime = millis();
         printStatus();
     }
 }
-
 
 /* ============================================================
  * SERVO INITIALISATION
@@ -320,7 +263,6 @@ void initialiseServo()
     centerSteering();
 }
 
-
 /* ============================================================
  * SERVO CONTROL
  * ============================================================
@@ -328,37 +270,32 @@ void initialiseServo()
 
 void setSteeringAngle(float angleDeg)
 {
-    // Clamp logical command.
     angleDeg = constrain(
         angleDeg,
         STEERING_MIN_DEG,
         STEERING_MAX_DEG
     );
 
+    if (STEERING_REVERSED)
+    {
+        angleDeg = -angleDeg;
+    }
+
     currentSteeringDeg = angleDeg;
 
-    /*
-     * Convert:
-     *
-     * -45 deg -> 45 servo degrees
-     *   0 deg -> 90 servo degrees
-     * +45 deg -> 135 servo degrees
-     */
-
-    float servoAngle =
+    float servoPosition =
         SERVO_CENTER_DEG + angleDeg;
 
-    servoAngle = constrain(
-        servoAngle,
+    servoPosition = constrain(
+        servoPosition,
         45.0f,
         135.0f
     );
 
     steeringServo.write(
-        (int)round(servoAngle)
+        (int)round(servoPosition)
     );
 }
-
 
 void centerSteering()
 {
@@ -369,9 +306,8 @@ void centerSteering()
     );
 }
 
-
 /* ============================================================
- * TB6612FNG INITIALISATION
+ * TB6612 INITIALISATION
  * ============================================================
  */
 
@@ -382,15 +318,26 @@ void initialiseMotorDriver()
     pinMode(MOTOR_IN2_PIN, OUTPUT);
     pinMode(MOTOR_STBY_PIN, OUTPUT);
 
-    // Keep driver disabled during startup.
-    digitalWrite(MOTOR_STBY_PIN, LOW);
+    digitalWrite(
+        MOTOR_STBY_PIN,
+        LOW
+    );
 
-    digitalWrite(MOTOR_IN1_PIN, LOW);
-    digitalWrite(MOTOR_IN2_PIN, LOW);
+    digitalWrite(
+        MOTOR_IN1_PIN,
+        LOW
+    );
 
-    analogWrite(MOTOR_PWM_PIN, 0);
+    digitalWrite(
+        MOTOR_IN2_PIN,
+        LOW
+    );
+
+    analogWrite(
+        MOTOR_PWM_PIN,
+        0
+    );
 }
-
 
 /* ============================================================
  * MOTOR CONTROL
@@ -412,37 +359,52 @@ void setMotorPWM(int pwm)
 
     currentMotorPWM = pwm;
 
-    // Enable TB6612.
-    digitalWrite(MOTOR_STBY_PIN, HIGH);
+    if (pwm == 0)
+    {
+        stopMotor();
+        return;
+    }
+
+    digitalWrite(
+        MOTOR_STBY_PIN,
+        HIGH
+    );
 
     if (pwm > 0)
     {
-        // Forward
-        digitalWrite(MOTOR_IN1_PIN, HIGH);
-        digitalWrite(MOTOR_IN2_PIN, LOW);
+        digitalWrite(
+            MOTOR_IN1_PIN,
+            HIGH
+        );
+
+        digitalWrite(
+            MOTOR_IN2_PIN,
+            LOW
+        );
 
         analogWrite(
             MOTOR_PWM_PIN,
             pwm
         );
     }
-    else if (pwm < 0)
+    else
     {
-        // Reverse
-        digitalWrite(MOTOR_IN1_PIN, LOW);
-        digitalWrite(MOTOR_IN2_PIN, HIGH);
+        digitalWrite(
+            MOTOR_IN1_PIN,
+            LOW
+        );
+
+        digitalWrite(
+            MOTOR_IN2_PIN,
+            HIGH
+        );
 
         analogWrite(
             MOTOR_PWM_PIN,
             -pwm
         );
     }
-    else
-    {
-        stopMotor();
-    }
 }
-
 
 /* ============================================================
  * MOTOR STOP
@@ -458,35 +420,43 @@ void stopMotor()
         0
     );
 
-    digitalWrite(MOTOR_IN1_PIN, LOW);
-    digitalWrite(MOTOR_IN2_PIN, LOW);
+    digitalWrite(
+        MOTOR_IN1_PIN,
+        LOW
+    );
 
-    // Standby disables the H-bridge.
-    digitalWrite(MOTOR_STBY_PIN, LOW);
+    digitalWrite(
+        MOTOR_IN2_PIN,
+        LOW
+    );
+
+    digitalWrite(
+        MOTOR_STBY_PIN,
+        LOW
+    );
 }
 
-
 /* ============================================================
- * SERIAL RECEIVE
+ * USB SERIAL RECEIVE
  * ============================================================
  *
- * USB serial protocol:
+ * COMMAND:
  *
  * CMD,<steering_deg>,<motor_pwm>,<mode>
  *
- * Example:
+ * Examples:
  *
- * CMD,-12.5,180,DRIVE
+ * CMD,0,150,DRIVE
+ * CMD,-17.5,140,DRIVE
+ * CMD,20,90,PARK
+ * CMD,0,0,FINISH
  *
- * Meaning:
- *
- * steering = -12.5 degrees
- * motor    = PWM 180
- * mode     = DRIVE
- *
- * Additional commands:
+ * Emergency:
  *
  * STOP
+ *
+ * Test:
+ *
  * PING
  *
  * ============================================================
@@ -496,22 +466,25 @@ void receiveSerial()
 {
     while (Serial.available() > 0)
     {
-        char incoming = (char)Serial.read();
+        char incoming =
+            (char)Serial.read();
 
-        // Ignore CR from Windows-style line endings.
         if (incoming == '\r')
         {
             continue;
         }
 
-        // End of packet.
         if (incoming == '\n')
         {
-            serialBuffer[serialBufferIndex] = '\0';
+            serialBuffer[
+                serialBufferIndex
+            ] = '\0';
 
             if (serialBufferIndex > 0)
             {
-                processSerialLine(serialBuffer);
+                processSerialLine(
+                    serialBuffer
+                );
             }
 
             serialBufferIndex = 0;
@@ -519,181 +492,243 @@ void receiveSerial()
             continue;
         }
 
-        // Add character if there is room.
-        if (serialBufferIndex < SERIAL_BUFFER_SIZE - 1)
+        if (
+            serialBufferIndex
+            < SERIAL_BUFFER_SIZE - 1
+        )
         {
-            serialBuffer[serialBufferIndex++] = incoming;
+            serialBuffer[
+                serialBufferIndex++
+            ] = incoming;
         }
         else
         {
-            // Packet too large.
             serialBufferIndex = 0;
 
-            Serial.println("ERR,BUFFER_OVERFLOW");
+            Serial.println(
+                "ERR,BUFFER_OVERFLOW"
+            );
         }
     }
 }
 
-
 /* ============================================================
- * SERIAL COMMAND PROCESSING
+ * PROCESS COMMAND
  * ============================================================
  */
 
 void processSerialLine(char *line)
 {
-    if (strncmp(line, "CMD,", 4) == 0)
+    if (
+        strncmp(
+            line,
+            "CMD,",
+            4
+        ) == 0
+    )
     {
-        if (parseCommand(line))
+        if (
+            parseDriveCommand(line)
+        )
         {
-            lastValidCommandTime = millis();
+            lastValidCommandTime =
+                millis();
 
-            Serial.println("ACK,CMD");
+            Serial.println(
+                "ACK,CMD"
+            );
         }
 
         return;
     }
 
-    if (strcmp(line, "STOP") == 0)
+    if (
+        strcmp(
+            line,
+            "STOP"
+        ) == 0
+    )
     {
         processStopCommand();
         return;
     }
 
-    if (strcmp(line, "PING") == 0)
+    if (
+        strcmp(
+            line,
+            "PING"
+        ) == 0
+    )
     {
         processPingCommand();
         return;
     }
 
-    Serial.println("ERR,UNKNOWN_COMMAND");
+    Serial.println(
+        "ERR,UNKNOWN_COMMAND"
+    );
 }
 
-
 /* ============================================================
- * COMMAND PARSER
- * ============================================================
- *
- * CMD,<steering_deg>,<motor_pwm>,<mode>
- *
- * Examples:
- *
- * CMD,0,150,DRIVE
- * CMD,-20,180,DRIVE
- * CMD,15,100,PARK
- * CMD,0,0,STOP
- *
+ * PARSE DRIVE COMMAND
  * ============================================================
  */
 
-bool parseCommand(char *line)
+bool parseDriveCommand(
+    char *line
+)
 {
     char *token;
 
-    // ---------------------------------------------------------
-    // Token 0: CMD
-    // ---------------------------------------------------------
+    // CMD
+    token = strtok(
+        line,
+        ","
+    );
 
-    token = strtok(line, ",");
+    if (
+        token == nullptr
+        ||
+        strcmp(token, "CMD") != 0
+    )
+    {
+        Serial.println(
+            "ERR,BAD_PREFIX"
+        );
+
+        return false;
+    }
+
+    // Steering
+    token = strtok(
+        nullptr,
+        ","
+    );
 
     if (token == nullptr)
     {
+        Serial.println(
+            "ERR,MISSING_STEERING"
+        );
+
         return false;
     }
 
-    if (strcmp(token, "CMD") != 0)
-    {
-        return false;
-    }
-
-    // ---------------------------------------------------------
-    // Token 1: steering angle
-    // ---------------------------------------------------------
-
-    token = strtok(nullptr, ",");
-
-    if (token == nullptr)
-    {
-        Serial.println("ERR,MISSING_STEERING");
-        return false;
-    }
-
-    float newSteering = atof(token);
+    float newSteering =
+        atof(token);
 
     if (!isfinite(newSteering))
     {
-        Serial.println("ERR,BAD_STEERING");
+        Serial.println(
+            "ERR,BAD_STEERING"
+        );
+
         return false;
     }
 
-    // ---------------------------------------------------------
-    // Token 2: motor PWM
-    // ---------------------------------------------------------
-
-    token = strtok(nullptr, ",");
+    // Motor
+    token = strtok(
+        nullptr,
+        ","
+    );
 
     if (token == nullptr)
     {
-        Serial.println("ERR,MISSING_SPEED");
+        Serial.println(
+            "ERR,MISSING_MOTOR"
+        );
+
         return false;
     }
 
-    int newMotorPWM = atoi(token);
+    int newMotorPWM =
+        atoi(token);
 
     if (
-        newMotorPWM < -MOTOR_MAX_PWM ||
-        newMotorPWM > MOTOR_MAX_PWM
+        newMotorPWM
+        < -MOTOR_MAX_PWM
+        ||
+        newMotorPWM
+        > MOTOR_MAX_PWM
     )
     {
-        Serial.println("ERR,BAD_SPEED");
+        Serial.println(
+            "ERR,BAD_MOTOR"
+        );
+
         return false;
     }
 
-    // ---------------------------------------------------------
-    // Token 3: mode
-    // ---------------------------------------------------------
-
-    token = strtok(nullptr, ",");
+    // Mode
+    token = strtok(
+        nullptr,
+        ","
+    );
 
     if (token == nullptr)
     {
-        Serial.println("ERR,MISSING_MODE");
+        Serial.println(
+            "ERR,MISSING_MODE"
+        );
+
         return false;
     }
 
     VehicleMode newMode;
 
-    if (strcmp(token, "DRIVE") == 0)
+    if (
+        strcmp(
+            token,
+            "DRIVE"
+        ) == 0
+    )
     {
         newMode = MODE_DRIVE;
     }
-    else if (strcmp(token, "PARK") == 0)
+    else if (
+        strcmp(
+            token,
+            "PARK"
+        ) == 0
+    )
     {
         newMode = MODE_PARK;
     }
-    else if (strcmp(token, "STOP") == 0)
-    {
-        newMode = MODE_STOP;
-    }
-    else if (strcmp(token, "FINISH") == 0)
+    else if (
+        strcmp(
+            token,
+            "FINISH"
+        ) == 0
+    )
     {
         newMode = MODE_FINISH;
     }
+    else if (
+        strcmp(
+            token,
+            "STOP"
+        ) == 0
+    )
+    {
+        newMode = MODE_STOP;
+    }
     else
     {
-        Serial.println("ERR,BAD_MODE");
+        Serial.println(
+            "ERR,BAD_MODE"
+        );
+
         return false;
     }
 
-    // ---------------------------------------------------------
-    // Apply command
-    // ---------------------------------------------------------
-
     currentMode = newMode;
 
-    // FINISH and STOP always override movement.
+    lastValidCommandTime =
+        millis();
+
     if (
-        currentMode == MODE_STOP ||
+        currentMode == MODE_STOP
+        ||
         currentMode == MODE_FINISH
     )
     {
@@ -703,16 +738,19 @@ bool parseCommand(char *line)
         return true;
     }
 
-    // Normal movement command.
-    setSteeringAngle(newSteering);
-    setMotorPWM(newMotorPWM);
+    setSteeringAngle(
+        newSteering
+    );
+
+    setMotorPWM(
+        newMotorPWM
+    );
 
     return true;
 }
 
-
 /* ============================================================
- * STOP COMMAND
+ * STOP
  * ============================================================
  */
 
@@ -723,11 +761,13 @@ void processStopCommand()
     stopMotor();
     centerSteering();
 
-    lastValidCommandTime = millis();
+    lastValidCommandTime =
+        millis();
 
-    Serial.println("ACK,STOP");
+    Serial.println(
+        "ACK,STOP"
+    );
 }
-
 
 /* ============================================================
  * PING
@@ -736,60 +776,65 @@ void processStopCommand()
 
 void processPingCommand()
 {
-    Serial.println("PONG");
+    Serial.println(
+        "PONG"
+    );
 }
 
-
 /* ============================================================
- * COMMUNICATION FAILSAFE
+ * FAILSAFE
  * ============================================================
  */
 
 void updateFailsafe()
 {
     if (
-        millis() - lastValidCommandTime
+        millis()
+        - lastValidCommandTime
         > COMMAND_TIMEOUT_MS
     )
     {
-        // Do not continuously modify the state if already stopped.
-        if (currentMode != MODE_FAULT)
+        if (
+            currentMode
+            != MODE_FAULT
+        )
         {
             enterFaultState();
         }
     }
 }
 
-
 /* ============================================================
- * ENTER FAULT
+ * FAULT STATE
  * ============================================================
  */
 
 void enterFaultState()
 {
-    currentMode = MODE_FAULT;
+    currentMode =
+        MODE_FAULT;
 
     stopMotor();
     centerSteering();
 }
 
-
 /* ============================================================
- * STATUS LEDs
+ * STATUS LED
  * ============================================================
  */
 
 void updateStatusLEDs()
 {
-    bool communicationOK =
+    bool healthy =
         (
-            millis() - lastValidCommandTime
+            millis()
+            - lastValidCommandTime
             <= COMMAND_TIMEOUT_MS
         );
 
     if (
-        communicationOK &&
+        healthy
+        &&
         currentMode != MODE_FAULT
     )
     {
@@ -817,7 +862,6 @@ void updateStatusLEDs()
     }
 }
 
-
 /* ============================================================
  * DEBUG STATUS
  * ============================================================
@@ -825,22 +869,22 @@ void updateStatusLEDs()
 
 void printStatus()
 {
-    Serial.print("STATUS,");
-
-    Serial.print("mode=");
+    Serial.print(
+        "STATUS,mode="
+    );
 
     switch (currentMode)
     {
+        case MODE_STOP:
+            Serial.print("STOP");
+            break;
+
         case MODE_DRIVE:
             Serial.print("DRIVE");
             break;
 
         case MODE_PARK:
             Serial.print("PARK");
-            break;
-
-        case MODE_STOP:
-            Serial.print("STOP");
             break;
 
         case MODE_FINISH:
@@ -852,25 +896,29 @@ void printStatus()
             break;
     }
 
-    Serial.print(",");
+    Serial.print(
+        ",steering="
+    );
 
-    Serial.print("steering=");
     Serial.print(
         currentSteeringDeg,
         1
     );
 
-    Serial.print(",");
+    Serial.print(
+        ",motor="
+    );
 
-    Serial.print("motor=");
     Serial.print(
         currentMotorPWM
     );
 
-    Serial.print(",");
+    Serial.print(
+        ",command_age_ms="
+    );
 
-    Serial.print("age_ms=");
     Serial.println(
-        millis() - lastValidCommandTime
+        millis()
+        - lastValidCommandTime
     );
 }
