@@ -55,7 +55,7 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 | 7 | **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU — yaw for corners, parking alignment | Owned |
 | 8 | **VL53L0X** ToF Laser Distance Sensor | 1 | Front distance: pillars, parking gap | Owned |
 | 9 | HC-SR04 ultrasonic | 1 | Redundant wall/obstacle proximity | Owned |
-| 10 | 2S LiPo (motor rail) + battery (logic rail) | 2 | Two-rail power (Appendix D guidance) | Owned |
+| 10 | 11 V 3S LiPo pack (motor/servo rail regulated to ~6–7.4 V; logic rail regulated to 5 V) | 1 | Two-rail power from one pack (WRO Appendix D guidance) | Owned |
 | 11 | 5 V regulator / buck | 2 | Logic rail regulation | Owned |
 | 12 | MG996R servo horn + Ackermann links (3D-printed) | 1 set | Steering linkage | Printed |
 | 13 | 3 mm plywood decks (LightBurn-cut) + brass standoffs | 1 set | Chassis (see [design](../design/README.md)) | Cut |
@@ -66,13 +66,13 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 
 | Rail | Source | Consumers | Protection |
 | --- | --- | --- | --- |
-| Motor rail | 2S LiPo 7.4 V | N20 motor, MG996R servo | 2 A fuse |
-| Logic rail | Battery → 5 V regulator | Pi 4B, ESP32, HC-SR04, VL53L0X, MPU6050 | 2 A fuse |
+| Motor/servo rail | 11 V 3S LiPo pack → buck-regulated to ~6–7.4 V | N20 motor, MG996R servo | 2 A fuse |
+| Logic rail | 11 V pack → 5 V buck regulator | Pi 4B, ESP32, HC-SR04, VL53L0X, MPU6050 | 2 A fuse |
 
 - **Star grounding:** all logic grounds meet at one point; motor ground returns separately to its pack negative. Motor/servo currents never flow through the logic reference.
 - **Decoupling:** 0.1 µF ceramic on every IC VCC; 100 µF electrolytic on the 5 V rail.
 - **Failure handling:** logic-rail brownout → ESP32 enters `MODE_FAULT` and stops the vehicle.
-- The current design also includes an **LM317-based 5 V regulation concept** (R1 = 240 Ω, R2 = 720 Ω; 0.1 µF input / 10 µF output decoupling). Its final implementation, input supply, current capability, and thermal performance will be verified once the physical power system is assembled.
+- The logic rail is produced by a **5 V buck regulator** from the 11 V pack (an earlier LM317 concept, R1 = 240 Ω / R2 = 720 Ω with 0.1 µF input / 10 µF output decoupling, was dropped because the 11 V input would make the linear regulator run hot). Final regulation, current capability, and thermal performance will be verified once the physical power system is assembled.
 
 ### Power budget (estimated, to be measured)
 

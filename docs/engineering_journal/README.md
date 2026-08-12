@@ -20,7 +20,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | 2. Power & Sensor Architecture | Power budget, sensor tradeoffs, calibration | Entries 06–08 |
 | 3. Software Architecture & Obstacle Strategy | State machine, algorithm justification, tuning | Entry 09 |
 | 4. Systems Thinking & Engineering Decisions | "We chose X instead of Y because…", constraints, risks | Entries 02–10 |
-| 5. Reproducibility & GitHub Quality | README ≥5000 chars, commits, CAD, wiring, code | Root README + `models/`, `schemes/` |
+| 5. Reproducibility & GitHub Quality | README ≥5000 chars, commits, CAD, wiring, code | Root README + [`design/wooden_plate.dxf`](../../design/wooden_plate.dxf), [`hardware/wiring-guide/`](../../hardware/wiring-guide/README.md) |
 
 ---
 
@@ -38,6 +38,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | 08 | 2026-08-09 | Sensor selection: camera, HC-SR04, VL53L0X, MPU6050 | 2, 4 |
 | 09 | 2026-08-11 | Software state machine and obstacle strategy | 3, 4 |
 | 10 | 2026-08-12 | Risk register and failure-mode analysis | 4 |
+| 11 | 2026-08-13 | Consolidated confirmed configuration (11 V 3S, rear tilt, LEGO Ackermann) | 1, 2, 4, 5 |
 
 > [!IMPORTANT]
 > Every entry records the **problem**, **options considered**, **chosen direction with reasoning**, **available evidence** (calculation / simulation / observation / measured test), and **next action**. The vehicle is in an active development and iteration cycle; entries are written as the work happens, not retrofitted.
@@ -130,7 +131,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 **Tradeoff:** the double stack raises the camera to a good horizon height (~120 mm) while the deck adds ~60 g. Placement was chosen to keep the combined centre of mass above the rear axle's roll centre.
 
-**Next action:** measure the actual mass and CG; publish the CAD in `models/`.
+**Next action:** measure the actual mass and CG; the chassis CAD is committed as `design/wooden_plate.dxf`.
 
 ---
 
@@ -164,7 +165,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 **Failure consideration:** if the logic rail browns out, the ESP32's `MODE_FAULT` logic stops the vehicle rather than letting it run uncontrolled.
 
-**Next action:** record measured currents per rail in `other/power_budget.md` as each subsystem is verified.
+**Next action:** record measured currents per rail in the power section of `electronics/README.md` as each subsystem is verified.
 
 ---
 
@@ -224,6 +225,26 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | ToF misread on white mat at shallow angle | Medium | Medium | 5-sample median filter; mount at 15° downward |
 | Wheel slip during parking | Medium | Medium | low speed, IMU heading feedback, short move steps |
 | Sudden rule change (surprise rule, Day 2) | Medium | Medium | modular code — strategy params in one config file; reserve a config slot per round |
+
+---
+
+### 11 — Consolidated confirmed configuration (2026-08-13, by Dhrubo M.)
+
+**Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised, and supersedes the 7.4 V figure quoted in Entry 07.
+
+**Confirmed configuration:**
+- **Structure:** laser-cut 3 mm plywood double-stack chassis (LightBurn source → `design/wooden_plate.dxf`), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting + steering rails.
+- **Decks:** upper deck = Raspberry Pi 4B + Camera Module 3 Wide; lower deck = 11 V 3S LiPo pack + ESP32 + TB6612FNG.
+- **Drive:** fully rear-wheel drive, one N20 6 V 600 RPM motor on the rear axle (Rule 11.3/11.13 compliant: one driving axle, no independent side motors). Rear wheels and the rear N20 are smaller than the front wheels, giving the chassis a slight rearward tilt.
+- **Steering:** front TowerPro MG996R servo driving an Ackermann linkage built from LEGO beams/pins; outer lock 40° (Entry 04).
+- **Sensing:** Pi Camera Module 3 Wide (colour/geometry), VL53L0X ToF (front distance), HC-SR04 (redundant wall proximity), DFRobot Fermion MPU6050 IMU (yaw).
+- **Power:** single 11 V 3S LiPo → motor/servo rail bucked to ~6–7.4 V for N20 + MG996R; logic rail bucked to 5 V for Pi/ESP32/sensors (two-rail, star-grounded, fused).
+
+**Why this is the final form:** every choice above is the result of the iterations logged in Entries 01–10 (two-controller split, plywood + LightBurn, N20 rear drive, 31°→40° Ackermann, L298N→TB6612FNG, two-rail power, sensor set). The smaller rear wheels + rearward tilt were adopted to lower the drive mass and improve corner stability without adding weight.
+
+**Evidence:** chassis DXF and wiring guide committed in the repository; physical build and measured values to be added to `docs/testing/README.md` and `evidence/README.md` as on-mat testing proceeds.
+
+**Next action:** complete on-mat integration tests (T3–T10) and record measured rail currents and lap times.
 
 ---
 

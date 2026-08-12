@@ -18,7 +18,7 @@ Three constraints drive every mechanical choice:
 2. **Envelope & mass:** ≤ 300×200×300 mm and ≤ 1.5 kg (Rules 11.1–11.2).
 3. **Reproducibility:** everything must be rebuildable from files in this repository (LightBurn/DXF, STL, BOM).
 
-The vehicle uses **front Ackermann steering with a servo** and **rear-axle drive with one N20 motor**, on a **laser-cut 3 mm plywood double-stack chassis**.
+The vehicle uses **front Ackermann steering with a servo** and **fully rear-wheel drive with one N20 motor**, on a **laser-cut 3 mm plywood double-stack chassis**. The rear N20 and its wheels are deliberately smaller than the front wheels, which lowers the drive/steering mass and gives the chassis a slight rearward (backward) tilt for stability through the 90° corners.
 
 ---
 
@@ -29,7 +29,7 @@ The vehicle uses **front Ackermann steering with a servo** and **rear-axle drive
 ### Steering mechanism
 
 - **Actuator:** TowerPro MG996R digital servo (high torque, metal gears).
-- **Linkage:** servo horn → tie rod → steering knuckles (3D-printed), forming the Ackermann trapezoid.
+- **Linkage:** servo horn → tie rod → steering knuckles (3D-printed), forming the Ackermann trapezoid. The steering arms, knuckles and tie-rod geometry are built from **LEGO beams and pins** on a front sub-frame, giving an adjustable, repeatable Ackermann trapezoid that can be re-jigged in 8 mm steps during tuning without re-cutting the chassis.
 - **Geometry parameters (current):**
   - Maximum outer-wheel steer angle: **31°** (prototype 1)
   - Maximum outer-wheel steer angle: **40°** (prototype 2, current)
@@ -52,9 +52,17 @@ The 40° lock lets the car execute the sharp 90° corners of the 600 mm corridor
 ## 3. Chassis: laser-cut 3 mm plywood (LightBurn)
 
 - **Material:** 3 mm plywood — lighter than acrylic at equal stiffness, damps motor vibration, doesn't crack at screw points, cuts cleanly and fast.
-- **Tool:** school laser cutter, designed in **LightBurn** (source `.lbrn` + exported DXF/PDF published in `models/chassis/`).
+- **Tool:** school laser cutter, designed in **LightBurn**; the portable export is committed as [`wooden_plate.dxf`](wooden_plate.dxf) and the editable `.lbrn` project is kept with the design records.
 - **Edge treatment:** two thin coats of clear varnish seal the cut edges against moisture and warp.
 - **Alternative considered:** acrylic (cracks under load), fully 3D-printed (slow, less rigid), aluminium (harder to cut, heavier).
+
+### LightBurn cut workflow (reproducibility)
+
+The chassis is drawn in **LightBurn** and cut on the school laser cutter from 3 mm plywood. Reproducibility (Criterion 5) depends on the cut files carrying everything needed to re-cut the chassis identically:
+
+- **Layers:** the lower deck carries the drivetrain/electronics cut-outs; the upper deck carries the Pi + camera-mount cut-outs and the brass-standoff holes.
+- **Parameters recorded per file:** material (3 mm plywood), kerf compensation, and the cutter's power/speed setting for that material.
+- **Files:** the editable master is the `.lbrn` project (kept with the design records); the portable, version-controlled export is [`wooden_plate.dxf`](wooden_plate.dxf). Both define the same geometry, so another team can reproduce the chassis from the repository alone.
 
 ### Double-stack layout — space utilisation
 
@@ -62,7 +70,7 @@ The 300×200 mm footprint is used vertically to fit the full system:
 
 | Deck | Contents | Why |
 | --- | --- | --- |
-| **Lower deck** | ESP32, TB6612FNG motor driver, batteries | Low centre of mass, short motor/servo wiring |
+| **Lower deck** | 11 V 3S LiPo pack, ESP32, TB6612FNG motor driver | Battery low for CG; short motor/servo wiring; servo + drive currents kept off the logic reference |
 | **Upper deck** | Raspberry Pi 4B, Camera Module 3 Wide | Camera horizon height ~120 mm; Pi clear of motor noise sources |
 
 The two decks are separated and supported by **brass standoff offsets**, giving a rigid, ventilated sandwich that uses the height envelope efficiently.
@@ -83,7 +91,7 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 
 - **Motor:** N20 6 V 600 RPM micro metal gear motor (spare unit carried).
 - **Transmission:** motor drives the rear axle through the gearbox in a mechanically coupled layout (compliant with Rule 11.13 — drive wheels are physically connected through the axle; no independent side motors).
-- **Wheel:** ~40 mm diameter, high-traction rubber.
+- **Wheel:** front wheels ~40 mm diameter, high-traction rubber; **rear wheels are smaller**, matched to the smaller rear N20. The rear bias lightens the drive end and produces the slight rearward chassis tilt described in §1; the axle is mechanically coupled (Rule 11.13 compliant: one driving axle, no independent side motors).
 
 ### Speed / torque reasoning
 
@@ -103,7 +111,7 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 | Raspberry Pi 4B | Upper deck | Vision processing, high-level decisions |
 | ESP32 | Lower deck | Real-time motor/servo control, safety state machine |
 | MG996R servo | Front axle, centre | Drives Ackermann linkage; shortest linkage run |
-| Batteries | Lower deck, rear | Low CG; counterbalances steering assembly |
+| 11 V 3S LiPo battery | Lower deck, rear | Low CG; counterbalances steering assembly; sole energy source for the motor/servo rail |
 
 ---
 
