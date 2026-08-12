@@ -15,7 +15,7 @@
 
 | Area | Purpose | Status |
 | --- | --- | --- |
-| [Wiring](wiring/README.md) | Connection diagrams and pin tables | Interface record |
+| [Wiring](wiring-guide/README.md) | Connection diagrams, power architecture, pin tables | Interface record |
 
 ## Evidence standard
 

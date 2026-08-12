@@ -64,7 +64,7 @@ The communication interface, packet format, power rails, controller mounting, an
 
 The mobility objective is a compact and serviceable vehicle whose steering response can be tuned and reproduced. The submitted layout uses front steering and rear propulsion, giving the team a direct relationship between a desired turn and a steering-servo command. Mechanical design priorities are secure mounting, accessible maintenance, predictable steering travel, and weight distribution that supports traction and stable cornering.
 
-The design record is structured to hold dimensions, mounting photographs, steering travel, turning observations, and revision notes. The repository intentionally does not contain CAD/STL directories because the submitted configuration does not rely on 3D-printed parts.
+The design record is structured to hold dimensions, mounting photographs, steering travel, turning observations, and revision notes. CAD/STL and laser-cut fabrication files are organised in [models/](models/README.md), with design reasoning in [design/](design/README.md).
 
 | Design topic | Why it matters | Documentation record |
 | --- | --- | --- |
@@ -86,19 +86,19 @@ The ESP32 source contains servo and motor-control constants, bounded steering ta
 
 | Subsystem | System role | Repository location | Configuration area |
 | --- | --- | --- | --- |
-| Camera/vision | Observe course features and coloured markers | [Raspberry Pi code](software/raspberry_pi/README.md) | Perception |
-| Raspberry Pi | Run perception and decision logic | [software/raspberry_pi/](software/raspberry_pi/README.md) | High-level controller |
-| ESP32 | Command steering and drive outputs | [software/esp32/](software/esp32/README.md) | Low-level controller |
+| Camera/vision | Observe course features and coloured markers | [Raspberry Pi code](src/pi/README.md) | Perception |
+| Raspberry Pi | Run perception and decision logic | [src/pi/](src/pi/README.md) | High-level controller |
+| ESP32 | Command steering and drive outputs | [src/esp32/motor_control/](src/esp32/motor_control/README.md) | Low-level controller |
 | Power system | Supply and protect electronics | [electronics/](electronics/README.md) | Power |
-| Wiring record | Show power and signal connections | [hardware/wiring/](hardware/wiring/README.md) | Interfaces |
+| Wiring record | Show power and signal connections | [schemes/wiring-guide/](schemes/wiring-guide/README.md) | Interfaces |
 
 ## 🧭 Software & Obstacle Management
 
 The software is organised around clearly separated responsibilities. The high-level Raspberry Pi layer handles camera input and perception. The ESP32 layer handles actuator commands and state transitions. Keeping the interface explicit allows a perception change to be evaluated without silently changing motor behaviour and makes debugging more understandable.
 
-The `software/raspberry_pi/wromain.cpp` file contains the colour-detection module. It opens a camera feed, uses HSV ranges for red and green, filters small contours, and displays visual labels. Path planning, controller communication, and distance handling are maintained as distinct parts of the architecture, with their behaviour documented through the strategy and test records.
+The `src/pi/wromain.cpp` file contains the colour-detection module. It opens a camera feed, uses HSV ranges for red and green, filters small contours, and displays visual labels. Path planning, controller communication, and distance handling are maintained as distinct parts of the architecture, with their behaviour documented through the strategy and test records.
 
-The `software/esp32/obstacleChallenge.ino` file defines states named `DRIVING`, `RED_PILLAR`, `GREEN_PILLAR`, `PARKING`, and `FINISHED`, plus steering and motor helper functions. Communication, detection, parking, and debugging are separated into named functions so their implementation can be tracked clearly. The state model documents software organisation, while run evidence is stored separately in the testing and video areas.
+The `src/esp32/motor_control/obstacleChallenge.ino` file defines states named `DRIVING`, `RED_PILLAR`, `GREEN_PILLAR`, `PARKING`, and `FINISHED`, plus steering and motor helper functions. Communication, detection, parking, and debugging are separated into named functions so their implementation can be tracked clearly. The state model documents software organisation, while run evidence is stored separately in the testing and video areas.
 
 ### Intended decision sequence
 
@@ -129,15 +129,15 @@ Each test record includes the date, objective, vehicle/software version, setup, 
 | Design decision | [Engineering journal](docs/engineering_journal/README.md) | Date, author, options, rationale |
 | Proposed diagram | [Diagrams](docs/diagrams/README.md) | **Proposed** and version |
 | Physical/software test | [Testing](docs/testing/README.md) | Date, setup, method, observation |
-| Test visual | [Test images](images/testing/README.md) | Date and conditions |
-| Vehicle view | [Robot images](images/robot/README.md) | Render or dated photograph |
-| Run video | [Videos](videos/README.md) | Date, challenge, setup, outcome |
+| Test visual | [Test photos](v-photos/testing/README.md) | Date and conditions |
+| Vehicle view | [Vehicle photos](v-photos/README.md) | Render or dated photograph |
+| Run video | [Video manifest](video/video.md) | Date, challenge, setup, outcome |
 
 ## 🖼️ Team & Vehicle Visuals
 
 The repository keeps team, vehicle, testing, and competition visuals in separate locations so that their context stays clear. Team imagery is used with the consent of the people pictured. Vehicle views use descriptive front, rear, left, right, top, and bottom filenames.
 
-With organiser guidance, near-1:1 AI visualisations are used as the vehicle's design-reference views. Each image is labelled **AI-generated concept render**, so it is not confused with a photograph or a test image. The view filenames are `front.*`, `rear.*`, `left.*`, `right.*`, `top.*`, and `bottom.*` inside [images/robot/](images/robot/README.md).
+With organiser guidance, near-1:1 AI visualisations are used as the vehicle's design-reference views. Each image is labelled **AI-generated concept render**, so it is not confused with a photograph or a test image. The view filenames are `front.*`, `rear.*`, `left.*`, `right.*`, `top.*`, and `bottom.*` inside [v-photos/](v-photos/README.md). Team identification photos live in [t-photos/](t-photos/README.md).
 
 ## 🔧 Build, Upload & Reproduction Plan
 
@@ -156,16 +156,21 @@ This repository is designed to make the submitted configuration clear to judges,
 | 📐 [`design/`](design/) | Vehicle layout, mechanical decisions, dimensions | Configuration |
 | ⚡ [`electronics/`](electronics/) | Components, power plan, wiring, pin assignments | System reference |
 | 🧭 [`strategy/`](strategy/) | Open/Obstacle Challenge logic and flow diagrams | Decision architecture |
-| 💻 [`software/`](software/) | Raspberry Pi and ESP32 source code | Control software |
+| 💻 [`src/pi/`](src/pi/README.md) | Raspberry Pi perception and decision source | Control software |
+| 💻 [`src/esp32/motor_control/`](src/esp32/motor_control/README.md) | ESP32 actuator and communication source | Control software |
+| 🔌 [`schemes/`](schemes/README.md) | Wiring diagrams, power architecture, schematics | Interface record |
+| 🖨️ [`models/`](models/README.md) | CAD, STL, and laser-cut fabrication files | Fabrication |
 | 📘 [`docs/`](docs/) | Engineering journal, diagrams, testing records | Engineering record |
-| 🖼️ [`images/`](images/) | Team, vehicle, and test visuals | Visual reference |
-| 🎥 [`videos/`](videos/) | Dated run and presentation videos | Run records |
+| 🖼️ [`t-photos/`](t-photos/README.md) | Team photographs and identification | Visual reference |
+| 🚗 [`v-photos/`](v-photos/README.md) | Vehicle, testing, and competition photos | Visual reference |
+| 🎥 [`video/`](video/README.md) | Dated run and presentation videos | Run records |
+| 📊 [`other/`](other/README.md) | BOM, power budget, PID tuning log, test log | Engineering data |
 | 🧾 [`evidence/`](evidence/) | Dated reviews, calibration, and test summaries | Evidence archive |
 | 📚 [`resources/`](resources/) | Rules, datasheets, and permitted references | References |
 
 ## 🎨 Robot Visualizations
 
-Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** based on the team's submitted vehicle configuration. They are design-reference views, not photographs.
+Visuals in [`v-photos/`](v-photos/README.md) are **AI-generated concept renders** based on the team's submitted vehicle configuration. They are design-reference views, not photographs.
 
 ## 📏 Documentation Standard
 

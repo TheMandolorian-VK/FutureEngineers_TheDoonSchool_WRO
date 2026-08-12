@@ -4,7 +4,7 @@
 
 **How the team plans to reason about the Open and Obstacle Challenges.**
 
-[← Project home](../README.md) · [Software](../software/README.md) · [Diagrams](../docs/diagrams/README.md)
+[← Project home](../README.md) · [Source code](../src/README.md) · [Diagrams](../docs/diagrams/README.md)
 
 </div>
 
