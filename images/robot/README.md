@@ -11,7 +11,7 @@
 ---
 
 > [!IMPORTANT]
-> Images in this folder are **AI-generated concept renders** based on the team’s submitted vehicle configuration. They are design-reference views, not photographs.
+> Images in this folder are **AI-generated concept renders** as agreed upon by the WRO India Team and the DOon School team. It is based on the team’s submitted vehicle configuration. They are design-reference views, not photographs.
 
 ## Submission view set
 
