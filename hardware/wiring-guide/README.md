@@ -10,27 +10,40 @@
 
 ---
 
-This document serves as the master reference for all physical connections, power plans, and pin assignments for the multi-microcontroller robotics platform. 
+This document serves as the master reference for all physical connections, power plans, and pin assignments for the multi-microcontroller robotics platform.
 
-> [!CAUTION]
-> **DIRECT WIRING VOLTAGE WARNING**
-> Because this system does not use a buck regulator, **you cannot use a 7.4V LiPo battery for the logic boards**. Supplying more than 5.25V directly to the Raspberry Pi 4B or ESP32 will instantly destroy them. This guide assumes you are using a **5V USB Power Bank** (or equivalent 5V source) to power the entire system.
+| Reference | Purpose |
+| --- | --- |
+| Power Architecture | Voltage regulation via LM317, rail breakdown, and current management |
+| Interconnections | Pin-to-pin mappings for Pi 4B, ESP32, ToF sensor, and motor driver |
+| Critical Integrations | Star grounding rules, UART crossing, and motor noise decoupling |
+
+> [!NOTE]
+> This guide defines the definitive power and electronics configuration. Do not deviate from the grounding matrix or bypass decoupling capacitors.
 
 ## System Overview
 
-This platform uses a direct 5V power source to drive both logic and motors. The **Raspberry Pi 4B** receives main power (via USB-C) and distributes 5V to the **ESP32** and the **TB6612FNG** motor driver's power rail (VM). 
+This platform uses an **LM317 adjustable linear voltage regulator** to step down raw input power (e.g., 7.4V 2S LiPo or 9V–12V DC input) down to a stable **5V system rail**. This regulated 5V rail feeds both compute modules (**Raspberry Pi 4B** and **ESP32**) as well as the motor supply voltage (VM) on the **TB6612FNG** motor driver.
 
-The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**. 
+The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**.
 
 ---
 
 ## Power Distribution Architecture
 
+### LM317 Regulation Stage
+
+An LM317 adjustable linear regulator is configured to generate a steady **5.0V output**:
+*   **Voltage Divider:** $R_1 = 240\,\Omega$ (between VO and ADJ) and $R_2 = 720\,\Omega$ (between ADJ and GND) yield $V_{\text{out}} = 1.25\text{V} \times (1 + 720/240) = 5.0\text{V}$.
+*   **Input Decoupling:** A $0.1\,\mu\text{F}$ ceramic capacitor placed close to the VI pin suppresses input noise.
+*   **Output Decoupling:** A $10\,\mu\text{F}$ electrolytic capacitor placed across VO and GND stabilizes the regulated 5V output rail.
+
 ### Voltage Rails
 
 | Rail Name | Voltage | Source | Consumers |
 |---|---|---|---|
-| **Main 5V** | 5V | 5V USB Power Bank (via Pi 4B USB-C) | Pi 4B SoC, ESP32 Vin, TB6612FNG VM (Motor Power) |
+| **V_Raw** | 7.4V – 12V | Battery / DC Supply | LM317 VI (Input) pin |
+| **Main +5V** | 5.0V | LM317 VO (Output) pin | Pi 4B Pin 2/4, ESP32 Vin, TB6612FNG VM |
 | **+3.3V_Pi** | 3.3V | Pi 4B internal LDO | Pi Camera Module 3 Wide |
 | **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, ToF VCC, TB6612FNG VCC (Logic Power) |
 
@@ -40,8 +53,9 @@ The ESP32 serves as the primary motor and sensor controller (reading the Time of
 
 ```mermaid
 flowchart TD
-    subgraph Power ["Power Source"]
-        usb_power["5V USB Power Bank"]
+    subgraph Power ["Power Distribution"]
+        battery["Raw Battery / Power Source"]
+        lm317["LM317 Regulator (5V Output)"]
     end
 
     subgraph Compute ["Compute & Control"]
@@ -60,12 +74,13 @@ flowchart TD
         motorR["Right N20 Motor"]
     end
 
-    usb_power --> pi
-    pi --> esp32
-    pi --> driver
+    battery --> lm317
+    lm317 -->|5V Rail| pi
+    lm317 -->|5V Rail| esp32
+    lm317 -->|5V Rail| driver
     pi --> camera
-    esp32 --> tof
-    esp32 --> driver
-    tof --> driver
+    pi <-->|UART| esp32
+    esp32 -->|I2C| tof
+    esp32 -->|PWM / GPIO| driver
     driver --> motorL
     driver --> motorR
