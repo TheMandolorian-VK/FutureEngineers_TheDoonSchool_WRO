@@ -1,32 +1,61 @@
 <div align="center">
 
-# 🤖 The Doon School — WRO Future Engineers 2026
+# The Doon School — WRO Future Engineers 2026
 
-### Designing a self-driving vehicle for the World Robot Olympiad Future Engineers category
+### Engineering the autonomous vehicle for the World Robot Olympiad Future Engineers category
 
-![Competition](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
 ![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
-![Project status](https://img.shields.io/badge/Project%20reference-Submission%20Configuration-F59E0B?style=for-the-badge)
-![Documentation](https://img.shields.io/badge/Documentation-Engineering%20Record-16803A?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Submission%20Configuration-F59E0B?style=for-the-badge)
+![Docs](https://img.shields.io/badge/Documentation-Engineering%20Record-16803A?style=for-the-badge)
 
-[Explore the project](#-explore-the-project) · [Meet the team](#-team) · [Project status](#-project-status)
+[Explore the project](#explore-the-project) · [System architecture](#system-architecture) · [Team](#team) · [Roadmap](#development-roadmap)
 
 </div>
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Team](#team)
+- [System Architecture](#system-architecture)
+- [Mechanical Design](#mechanical-design)
+- [Electronics and Power](#electronics-and-power)
+- [Software and Obstacle Strategy](#software-and-obstacle-strategy)
+- [Testing, Iteration and Evidence](#testing-iteration-and-evidence)
+- [Visuals](#visuals)
+- [Build and Upload](#build-and-upload)
+- [Repository Use and Attribution](#repository-use-and-attribution)
+- [Explore the Project](#explore-the-project)
+- [Robot Visualisations](#robot-visualisations)
+- [Documentation Standard](#documentation-standard)
+- [Development Roadmap](#development-roadmap)
+- [Repository History](#repository-history)
+- [License](#license)
+
+---
+
 ## Overview
 
-This repository is the public engineering record for **The Doon School Future Engineers** team. It captures the team's submitted vehicle configuration, software architecture, documentation structure, and engineering approach for WRO 2026.
+This repository is the public engineering record for **The Doon School Future Engineers** team competing at **WRO 2026 (GMR Arena, Hyderabad, 26–28 August 2026)**, with the international final in December 2026.
 
-This is the team's **submission design reference**. The final vehicle is intended to align with this reference configuration. Design specifications, source-code structure, visualisations, and measured evidence are intentionally distinguished so that a reviewer can see exactly what each item represents.
+It captures the team's submitted vehicle configuration, software architecture, documentation structure, and engineering process. The vehicle is a 4-wheel autonomous car built to the WRO 2026 Future Engineers rules:
+
+- **One driving axle + one steering actuator** (Rules 11.3, 11.5, 11.13) — differential/per-side drive is disallowed.
+- **Envelope:** ≤ 300 × 200 × 300 mm; **mass:** ≤ 1.5 kg (Rules 11.1–11.2).
+- **No wireless** control during the run.
 
 > [!IMPORTANT]
-> **Truthful documentation commitment:** Concept renders, design plans, code, and physical test evidence are kept clearly separate throughout this repository.
+> **Truthful documentation commitment:** concept renders, design plans, source code, and physical test evidence are kept clearly separate throughout this repository. Anything that is a plan or render is labelled as such; only dated, observed results count as evidence.
 
-## 👥 Team
+This is the team's **submission design reference**. The final vehicle is intended to align with this reference configuration. Specifications, source-code structure, visualisations, and measured evidence are distinguished so a reviewer can see exactly what each item represents.
 
-| Team member | Focus area |
+---
+
+## Team
+
+| Member | Focus |
 | --- | --- |
 | Dhrubo Mishra | Mechanical design |
 | Vivaan Kumbhat | Software development |
@@ -36,159 +65,184 @@ This is the team's **submission design reference**. The final vehicle is intende
 **School:** The Doon School, Dehradun, India
 **Category:** WRO 2026 — Future Engineers
 
-## 🧠 Our Intended System
+---
+
+## System Architecture
+
+The vehicle separates **high-level perception and decision-making** (Raspberry Pi 4B) from **low-level actuator control** (ESP32). The Pi interprets the camera, decides steering/speed targets, and sends bounded commands over USB serial; the ESP32 drives the servo and motor and holds the safety state machine.
 
 ```text
-Camera → Raspberry Pi → perception and decision logic → ESP32 → steering and drive actuators
+Pi Camera Module 3 Wide
+        │
+Raspberry Pi 4B  ──(USB serial, 115200 baud)──►  ESP32
+        │                                            │
+   perception +                                   MG996R servo
+     decision                                     (Ackermann)
+                                                  TB6612FNG → N20 (rear axle)
 ```
 
-The vehicle architecture separates high-level perception and decision-making from low-level actuator control. Component selections, wiring, interfaces, and software behaviour are documented as part of the submitted configuration and are refined through the team's engineering process.
-
-### Information & control flow
-
-Our design separates high-level perception from low-level actuator control. The **Raspberry Pi** receives camera frames, identifies relevant visual features, and calculates a driving decision. The **ESP32** receives bounded steering and speed targets, then produces the steering-servo and drive outputs. This separation makes individual subsystems easier to inspect, tune, and replace during development.
-
-The communication interface, packet format, power rails, controller mounting, and pin mapping are treated as controlled configuration details. The architecture below is a design map: it describes how the modules relate to each other and how the vehicle is intended to operate.
-
-| Layer | Intended input | Intended responsibility | Intended output | Status |
+| Layer | Input | Responsibility | Output | Module |
 | --- | --- | --- | --- | --- |
-| Perception | Camera frames | Detect relevant visual features | Feature observations | Vision module |
-| Decision | Observations and vehicle state | Select drive, avoid, recover, or stop action | Steering and speed targets | Decision module |
-| Control | Steering and speed targets | Constrain commands and control outputs | Servo/PWM direction signals | Control module |
-| Vehicle | Actuator signals | Steering and propulsion | Physical movement | Vehicle configuration |
+| Perception | Camera frames | Detect colour cues / geometry | Feature observations | Pi camera + `wromain.py` |
+| Decision | Observations + vehicle state | Route, avoid, recover, stop | Steering + speed targets | `wromain.py` |
+| Control | Steering + speed targets | Constrain & actuate | Servo / PWM signals | `obstacleChallenge.ino` |
+| Vehicle | Actuator signals | Steering + propulsion | Physical motion | Chassis + drivetrain |
 
 > [!NOTE]
 > This architecture is the submitted engineering reference. Test records and implementation evidence are kept separately from the configuration description.
 
-## 🚗 Mobility Management
+### Vehicle specification (submitted configuration)
 
-The mobility objective is a compact and serviceable vehicle whose steering response can be tuned and reproduced. The submitted layout uses front steering and rear propulsion, giving the team a direct relationship between a desired turn and a steering-servo command. Mechanical design priorities are secure mounting, accessible maintenance, predictable steering travel, and weight distribution that supports traction and stable cornering.
+| Item | Specification |
+| --- | --- |
+| High-level compute | Raspberry Pi 4B |
+| Low-level controller | ESP32 DevKit |
+| Camera | Raspberry Pi Camera Module 3 **Wide** |
+| Drive | **Rear-wheel drive**, 1 × N20 6 V 600 RPM on the rear axle |
+| Steering | Front **MG996R** servo + **Ackermann linkage (LEGO beams/pins)**, 40° outer lock |
+| Distance sensing | **VL53L0X** ToF (primary) + **HC-SR04** ultrasonic (redundant) |
+| Orientation | **MPU6050** 6-axis IMU (DFRobot Fermion) |
+| Motor driver | **TB6612FNG** (1 A/channel) |
+| Chassis | 3 mm laser-cut plywood (LightBurn), brass standoff offsets, two decks |
+| Battery | **11 V 3S LiPo** → motor/servo rail ~6–7.4 V; logic rail 5 V |
+| Envelope / mass | ≤ 300 × 200 × 300 mm, ≤ 1.5 kg |
 
-The design record is structured to hold dimensions, mounting photographs, steering travel, turning observations, and revision notes. The repository intentionally does not contain CAD/STL directories because the submitted configuration does not rely on 3D-printed parts.
+The rear N20 and its wheels are deliberately **smaller than the front wheels**, lowering the drive mass and giving the chassis a slight rearward tilt for corner stability.
 
-| Design topic | Why it matters | Documentation record |
-| --- | --- | --- |
-| Steering range | Defines usable turning behaviour | Steering-angle and turning test |
-| Weight distribution | Influences traction and repeatability | Mass/location record |
-| Component mounting | Limits movement and cable strain | Labelled assembly photographs |
-| Drive response | Relates command values to motion | Controlled response test |
-| Maintainability | Supports fast inspection between runs | Assembly and maintenance notes |
+---
 
-Design decisions are organised in [design/](design/README.md), while measured observations are organised in [docs/testing/](docs/testing/README.md).
+## Mechanical Design
 
-## ⚡ Power & Sense Management
+Full detail: [`design/README.md`](design/README.md).
 
-The electronics system is organised as a documented power-and-signal architecture rather than an informal collection of modules. Its documentation identifies each controller, sensor, actuator, connector, power rail, protection element, and communication path, allowing a reviewer to understand what each component contributes and how the design can be reproduced responsibly.
+Key points of the submitted configuration:
 
-The submitted software architecture uses a camera as the primary perception input. The Raspberry Pi source contains an OpenCV colour-detection module that detects red and green regions in camera frames. It converts a frame to HSV colour space, applies colour masks, reduces noise, finds contours, and displays labelled bounding boxes. Thresholds, distance interpretation, and course behaviour are controlled configuration parameters that are documented separately from measured results.
+- **Front Ackermann steering** driven by an MG996R servo. The steering arms, knuckles and tie-rod geometry are built from **LEGO beams and pins** on a front sub-frame, so the Ackermann trapezoid can be re-jigged in 8 mm steps during tuning without re-cutting the chassis. Outer lock was iterated **31° → 40°** to clear the 600 mm corridor 90° corners (see journal Entry 04).
+- **Fully rear-wheel drive** with one N20 6 V 600 RPM motor on the rear axle — Rule 11.13 compliant (one driving axle, no independent side motors). Rear wheels are smaller than the front, producing the rearward tilt described above.
+- **Two-deck 3 mm plywood chassis**, laser-cut in **LightBurn**. Upper deck carries the Raspberry Pi 4B + Camera Module 3 Wide; lower deck carries the 11 V 3S LiPo pack, ESP32 and TB6612FNG. The decks are spaced by **brass standoff offsets**, with LEGO used as adjustable mounting rails.
+- **LightBurn reproducibility:** the chassis is drawn in LightBurn and cut from 3 mm plywood; the editable `.lbrn` master and the portable export [`wooden_plate.dxf`](design/wooden_plate.dxf) define the same geometry so the chassis can be reproduced from the repository alone.
 
-The ESP32 source contains servo and motor-control constants, bounded steering targets, basic direction logic, and a safety stop routine. The wiring record distinguishes **configuration wiring** from **verified wiring**, so that hardware evidence remains traceable.
+---
 
-| Subsystem | System role | Repository location | Configuration area |
-| --- | --- | --- | --- |
-| Camera/vision | Observe course features and coloured markers | [Raspberry Pi code](software/raspberry_pi/README.md) | Perception |
-| Raspberry Pi | Run perception and decision logic | [software/raspberry_pi/](software/raspberry_pi/README.md) | High-level controller |
-| ESP32 | Command steering and drive outputs | [software/esp32/](software/esp32/README.md) | Low-level controller |
-| Power system | Supply and protect electronics | [electronics/](electronics/README.md) | Power |
-| Wiring record | Show power and signal connections | [hardware/wiring/](hardware/wiring/README.md) | Interfaces |
+## Electronics and Power
 
-## 🧭 Software & Obstacle Management
+Full detail: [`electronics/README.md`](electronics/README.md) · Wiring: [`hardware/wiring-guide/README.md`](hardware/wiring-guide/README.md).
 
-The software is organised around clearly separated responsibilities. The high-level Raspberry Pi layer handles camera input and perception. The ESP32 layer handles actuator commands and state transitions. Keeping the interface explicit allows a perception change to be evaluated without silently changing motor behaviour and makes debugging more understandable.
+- **Two-rail power from one 11 V 3S LiPo pack:** the motor/servo rail is buck-regulated to ~6–7.4 V for the N20 + MG996R; the logic rail is buck-regulated to 5 V for the Pi 4B, ESP32, HC-SR04, VL53L0X and MPU6050.
+- **Star grounding:** all logic grounds meet at one point; motor/servo currents return separately, keeping servo/motor noise out of the logic reference.
+- **Protection:** both rails fused; a logic-rail brownout drives the ESP32 into `MODE_FAULT` and stops the vehicle.
+- **Pin assignments** for the ESP32 (MG996R → GPIO 13; TB6612FNG PWMA/AIN1/AIN2/STBY → GPIO 25/26/27/32; status LEDs → GPIO 2/4) and the Pi↔ESP32 USB-serial link (115200 baud, `CMD,<steer>,<pwm>,<mode>` / `STOP` / `PING`) are documented in the wiring guide.
 
-The `software/raspberry_pi/wromain.cpp` file contains the colour-detection module. It opens a camera feed, uses HSV ranges for red and green, filters small contours, and displays visual labels. Path planning, controller communication, and distance handling are maintained as distinct parts of the architecture, with their behaviour documented through the strategy and test records.
+> [!NOTE]
+> The vehicle is in the development and integration phase; measured rail currents and calibrated values will be added to the testing records as subsystems are verified.
 
-The `software/esp32/obstacleChallenge.ino` file defines states named `DRIVING`, `RED_PILLAR`, `GREEN_PILLAR`, `PARKING`, and `FINISHED`, plus steering and motor helper functions. Communication, detection, parking, and debugging are separated into named functions so their implementation can be tracked clearly. The state model documents software organisation, while run evidence is stored separately in the testing and video areas.
+---
 
-### Intended decision sequence
+## Software and Obstacle Strategy
 
-```text
-Observe camera input
-        ↓
-Classify relevant red / green feature
-        ↓
-Evaluate intended route and safety conditions
-        ↓
-Send bounded steering and speed targets
-        ↓
-Apply actuator command
-        ↓
-Re-centre, recover, or stop as required
-```
+Full detail: [`strategy/README.md`](strategy/README.md) · Pi code: [`software/raspberry_pi/wromain.py`](software/raspberry_pi/wromain.py) · ESP32 code: [`software/esp32/obstacleChallenge.ino`](software/esp32/obstacleChallenge.ino).
 
-Strategy diagrams and pseudocode belong in [strategy/](strategy/README.md). Design reasoning and revisions are recorded in the [engineering journal](docs/engineering_journal/README.md). Measured outcomes are recorded in [testing](docs/testing/README.md).
+Two-layer software:
 
-## 🧪 Testing, Iteration & Evidence
+- **Raspberry Pi (`wromain.py`):** camera frames → 3×3 colour grid → per-cell HSV masks (red / green / blue / orange / magenta) → contour detection → target selection → lateral-error **PD steering** → dynamic drive speed. PD (not full PID) is used deliberately: no sustained steady-state error needs the integral term, and D-only damping prevents corner oscillation.
+- **ESP32 (`obstacleChallenge.ino`):** executes bounded commands through a safety state machine with modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`. Fault is entered on serial timeout or invalid command — the vehicle always fails safe.
 
-The repository uses a simple engineering rule: configuration is separate from evidence. A design choice is explained in the architecture and strategy material, while an observed conclusion is recorded in the corresponding test record. This keeps the project traceable and gives the team a clear history of why a decision was made.
+**Obstacle Challenge flow:** lane-follow by centring on the corridor (PD on vision offset, ToF wall check) → red pillar pass right / green pillar pass left (colour from camera grid, clearance verified by ToF) → after 3 laps `MODE_PARK` (magenta blocks via camera, IMU heading alignment, ToF depth stop). **Open Challenge:** corner detection from wall geometry + lap counting by orange/blue section lines, then autonomous stop.
 
-Each test record includes the date, objective, vehicle/software version, setup, procedure, raw observations or measurements, result, limitations, and next action. Unsuccessful tests are retained because they show the actual process of iteration. Any test photograph or video is linked only to the run it shows.
+Edge cases handled: lost line (re-acquire by sweep), serial dropout (fault stop), pillar too close (emergency bias), parking overshoot (small IMU-controlled steps).
 
-| Evidence type | Storage location | Required label |
+---
+
+## Testing, Iteration and Evidence
+
+Full detail: [`docs/testing/README.md`](docs/testing/README.md) · Journal: [`docs/engineering_journal/README.md`](docs/engineering_journal/README.md) · Evidence: [`evidence/README.md`](evidence/README.md).
+
+Configuration is kept separate from evidence. A design choice is explained in the architecture/strategy material; an observed conclusion is recorded in the corresponding test record. Each test record lists date, objective, vehicle/software version, setup, procedure, raw observations, result, limitations and next action. Unsuccessful tests are retained as part of the real iteration process.
+
+| Evidence type | Location | Required label |
 | --- | --- | --- |
 | Design decision | [Engineering journal](docs/engineering_journal/README.md) | Date, author, options, rationale |
-| Proposed diagram | [Diagrams](docs/diagrams/README.md) | **Proposed** and version |
-| Physical/software test | [Testing](docs/testing/README.md) | Date, setup, method, observation |
+| Proposed diagram | [Diagrams / wiring guide](hardware/wiring-guide/README.md) | Proposed + version |
+| Physical / software test | [Testing](docs/testing/README.md) | Date, setup, method, observation |
 | Test visual | [Test images](images/testing/README.md) | Date and conditions |
 | Vehicle view | [Robot images](images/robot/README.md) | Render or dated photograph |
 | Run video | [Videos](videos/README.md) | Date, challenge, setup, outcome |
 
-## 🖼️ Team & Vehicle Visuals
+---
 
-The repository keeps team, vehicle, testing, and competition visuals in separate locations so that their context stays clear. Team imagery is used with the consent of the people pictured. Vehicle views use descriptive front, rear, left, right, top, and bottom filenames.
+## Visuals
 
-With organiser guidance, near-1:1 AI visualisations are used as the vehicle's design-reference views. Each image is labelled **AI-generated concept render**, so it is not confused with a photograph or a test image. The view filenames are `front.*`, `rear.*`, `left.*`, `right.*`, `top.*`, and `bottom.*` inside [images/robot/](images/robot/README.md).
+The repository keeps team, vehicle, testing and competition visuals in separate folders so context stays clear. Vehicle views in [`images/robot/`](images/robot/README.md) are **AI-generated concept renders** based on the submitted configuration, each labelled *AI-generated concept render* — they are design-reference views, not photographs. With the WRO India Team informed via call/email, competition-day videos are recorded only on the day of the event and archived in [`videos/README.md`](videos/README.md).
 
-## 🔧 Build, Upload & Reproduction Plan
+---
 
-The submitted configuration provides the framework for build-and-upload instructions. The controlled procedure covers the operating-system setup, library versions, camera configuration, Raspberry Pi build command, ESP32 board/environment selection, required libraries, upload method, communication setup, and safe power-on sequence. Measured verification is maintained in the testing record rather than implied by the instructions themselves.
+## Build and Upload
 
-The Raspberry Pi source uses OpenCV headers and a camera input. The ESP32 source uses `ESP32Servo`. Exact dependencies, compilation commands, and controller-upload instructions are controlled configuration details and belong in the relevant software folder, linked to the corresponding journal record.
+The submitted configuration documents the build-and-upload procedure: OS setup, library versions, camera configuration, Pi build command, ESP32 board/environment selection, required libraries (`ESP32Servo`, OpenCV), upload method, communication setup and a safe power-on sequence. Measured verification is maintained in the testing record rather than implied by the instructions.
 
-## 🤝 Repository Use & Attribution
+- Pi: `software/raspberry_pi/wromain.py` (OpenCV + camera input).
+- ESP32: `software/esp32/obstacleChallenge.ino` (uses `ESP32Servo`).
 
-This repository is designed to make the submitted configuration clear to judges, mentors, and other students. It contains the team's own documentation framework and source files. The team does not copy another team's engineering claims, mechanical design, media, or code. Git history records the team's work on this project.
+Exact dependencies and compile/upload commands belong in the respective software folders, linked to the journal records.
 
-## 🗂️ Explore the Project
+---
 
-| Area | What it will contain | Status |
+## Repository Use and Attribution
+
+This repository is built to make the submitted configuration clear to judges, mentors and other students. It contains the team's own documentation framework and source files; the team does not copy another team's engineering claims, mechanical design, media or code. Git history records the team's own work on this project.
+
+---
+
+## Explore the Project
+
+| Area | Contents | Status |
 | --- | --- | --- |
-| 📐 [`design/`](design/) | Vehicle layout, mechanical decisions, dimensions | Configuration |
+| 📐 [`design/`](design/) | Vehicle layout, mechanical decisions, LightBurn/DXF | Configuration |
 | ⚡ [`electronics/`](electronics/) | Components, power plan, wiring, pin assignments | System reference |
-| 🧭 [`strategy/`](strategy/) | Open/Obstacle Challenge logic and flow diagrams | Decision architecture |
-| 💻 [`software/`](software/) | Raspberry Pi and ESP32 source code | Control software |
+| 🧭 [`strategy/`](strategy/) | Open / Obstacle Challenge logic and flow | Decision architecture |
+| 💻 [`software/`](software/) | Raspberry Pi (`wromain.py`) and ESP32 (`obstacleChallenge.ino`) source | Control software |
 | 📘 [`docs/`](docs/) | Engineering journal, diagrams, testing records | Engineering record |
-| 🖼️ [`images/`](images/) | Team, vehicle, and test visuals | Visual reference |
-| 🎥 [`videos/`](videos/) | Dated run and presentation videos | Run records |
-| 🧾 [`evidence/`](evidence/) | Dated reviews, calibration, and test summaries | Evidence archive |
+| 🖼️ [`images/`](images/) | Team, robot (renders), testing, competition visuals | Visual reference |
+| 🎥 [`videos/`](videos/) | Dated run and presentation videos (competition day) | Run records |
+| 🧾 [`evidence/`](evidence/) | Dated reviews, calibration and test summaries | Evidence archive |
 
-## 🎨 Robot Visualizations
+---
 
-Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** based on the team's submitted vehicle configuration. They are design-reference views, not photographs.
+## Robot Visualisations
 
-## 📏 Documentation Standard
+Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** of the submitted vehicle configuration — design-reference views, not photographs.
 
-We keep a clear distinction between **configuration material**, **concept renders**, **source files**, and **measured results**.
+---
 
-- Each test record states its date, setup, method, observations, and next action.
+## Documentation Standard
+
+We keep a clear distinction between **configuration material**, **concept renders**, **source files** and **measured results**.
+
+- Each test record states its date, setup, method, observations and next action.
 - Configuration material is labelled clearly and kept separate from measured evidence.
-- Concept renders, simulations, and code are not presented as evidence of physical performance.
-- Iterations and unsuccessful outcomes will be retained as part of the engineering process.
+- Concept renders, simulations and code are not presented as evidence of physical performance.
+- Iterations and unsuccessful outcomes are retained as part of the engineering process.
 
-## 🛠️ Development Roadmap
+---
+
+## Development Roadmap
 
 | Phase | Focus | Evidence added when complete |
 | --- | --- | --- |
 | `01` | Define architecture and component choices | Dated design decision |
 | `02` | Assemble and document the first prototype | Labelled photographs and wiring record |
-| `03` | Implement perception, control, and communication | Source code and software test record |
+| `03` | Implement perception, control and communication | Source code and software test record |
 | `04` | Test subsystems | Measured, dated test results |
 | `05` | Integrate the vehicle | Complete challenge evidence |
 
-## 🗃️ Repository History
+---
+
+## Repository History
 
 This repository uses GitHub to track our engineering progress. Updates are committed as the team's work evolves.
 
-## 📄 License
+---
+
+## License
 
 Published for educational use as part of WRO Future Engineers. Team materials may be updated during development.
