@@ -15,7 +15,7 @@ This document serves as the master reference for all physical connections, power
 | Reference | Purpose |
 | --- | --- |
 | Power Architecture | Voltage rails, regulation stages, decoupling paths, and current limits |
-| Interconnections | Exact pin-to-pin mappings for Pi, ESP32, ToF sensor, and motor driver |
+| Interconnections | Exact pin-to-pin mappings for Pi 4B, ESP32, ToF sensor, and motor driver |
 | Critical Integrations | Star grounding rules, UART crossing, and mandatory motor noise isolation |
 
 > [!NOTE]
@@ -23,7 +23,9 @@ This document serves as the master reference for all physical connections, power
 
 ## System Overview
 
-This platform uses a 2S LiPo battery (7.4V nominal) as the primary power source, distributed through a 5V buck regulator to logic-level devices (Raspberry Pi, ESP32) and a raw battery motor rail to the TB6612FNG motor driver. The ESP32 serves as the primary motor and sensor controller, while the Raspberry Pi handles high-level vision processing via a CSI camera. Power domains are strictly isolated to prevent motor noise from corrupting sensor and communication buses.
+This platform uses a 2S LiPo battery (7.4V nominal) as the primary power source, distributed through a 5V buck regulator to logic-level devices (**Raspberry Pi 4B**, **ESP32**) and a raw battery motor rail to the **TB6612FNG** motor driver. 
+
+The ESP32 serves as the primary motor and sensor controller (reading the Time of Flight sensor and driving the **N20 motors**), while the Raspberry Pi 4B handles high-level vision processing via the **Raspberry Pi Camera Module 3 Wide**. Power domains are strictly isolated to prevent motor noise from corrupting sensor and communication buses.
 
 ---
 
@@ -50,8 +52,8 @@ The VM rail receives raw battery voltage with a 100µF electrolytic capacitor so
 |---|---|---|---|
 | **V_Batt** | 7.4V | LiPo (2S) | Buck regulator input, TB6612FNG VM input |
 | **+5V** | 5V | LM2596 buck output | Pi Vin, ESP32 Vin |
-| **+3.3V_Pi** | 3.3V | Pi internal LDO | Pi SoC, CSI camera |
-| **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, GPIO logic, I2C pull-ups, VL53L1X VCC, TB6612FNG VCC |
+| **+3.3V_Pi** | 3.3V | Pi 4B internal LDO | Pi SoC, Camera Module 3 Wide |
+| **+3.3V_ESP** | 3.3V | ESP32 internal LDO | ESP32 core, GPIO logic, I2C pull-ups, ToF VCC, TB6612FNG VCC |
 | **VM** | 7.4V (raw) | LiPo (2S) | TB6612FNG motor outputs (AO1, AO2, BO1, BO2) |
 
 ---
@@ -69,11 +71,11 @@ architecture-beta
     service buck[5V 3A Buck Regulator] in power
     service cap_vm[100uF Capacitor VM Bus] in power
 
-    service pi[Raspberry Pi 4/5] in compute
-    service esp32[ESP32 WROOM 32E] in compute
+    service pi[Raspberry Pi 4B] in compute
+    service esp32[ESP32] in compute
 
-    service tof[VL53L1X ToF Sensor] in sensing
-    service camera[Pi Camera Module 3 CSI] in sensing
+    service tof[Time of Flight Sensor] in sensing
+    service camera[Pi Camera 3 Wide] in sensing
 
     service driver[TB6612FNG Motor Driver] in actuation
     service motorL[Left N20 Motor] in actuation
