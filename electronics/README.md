@@ -39,34 +39,68 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 
 ---
 
-## Power Distribution
+> [!NOTE]
+> This folder defines the submitted electronics and power configuration. Wiring evidence is tracked in the hardware area. The vehicle is in the development and integration phase; measured values will be added as subsystems are verified.
 
-The electrical system separates the computing/control electronics from the higher-current actuator loads.
+## 1. Bill of materials
 
-```text
-Power Source
-    │
-    ├── Logic / Compute
-    │      ├── Raspberry Pi 4B
-    │      └── ESP32
-    │
-    ├── Sensors
-    │      ├── PiCam3
-    │      ├── IMU
-    │      └── ToF
-    │
-    ├── Motor Driver
-    │      └── TB6612FNG
-    │               └── N20 6V 600RPM
-    │
-    └── Steering
-           └── MG996R
+| # | Part | Qty | Role | Status |
+| --- | --- | --- | --- | --- |
+| 1 | Raspberry Pi 4B | 1 | Vision, decision, high-level control | Owned |
+| 2 | Raspberry Pi Camera Module 3 **Wide** | 1 | Colour + geometry perception (pillars, lines, blocks) | Owned |
+| 3 | ESP32 (DevKit) | 1 | Real-time motor/servo control, safety state machine | Owned |
+| 4 | Dual Motor Driver Module **TB6612FNG** (1 A) | 1 | Drive motor H-bridge (replaces L298N) | Owned |
+| 5 | **N20 6 V 600 RPM** Micro Metal Gear Motor | 1 + spare | Rear-axle drive | Owned |
+| 6 | **TowerPro MG996R** Digital High Torque Servo | 1 + spare | Ackermann steering | Owned |
+| 7 | **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU — yaw for corners, parking alignment | Owned |
+| 8 | **VL53L0X** ToF Laser Distance Sensor | 1 | Front distance: pillars, parking gap | Owned |
+| 9 | HC-SR04 ultrasonic | 1 | Redundant wall/obstacle proximity | Owned |
+| 10 | 2S LiPo (motor rail) + battery (logic rail) | 2 | Two-rail power (Appendix D guidance) | Owned |
+| 11 | 5 V regulator / buck | 2 | Logic rail regulation | Owned |
+| 12 | MG996R servo horn + Ackermann links (3D-printed) | 1 set | Steering linkage | Printed |
+| 13 | 3 mm plywood decks (LightBurn-cut) + brass standoffs | 1 set | Chassis (see [design](../design/README.md)) | Cut |
 
-The N20 is a **6 V, 600 RPM** motor, so its final supply must be appropriate for the motor rather than being assumed to share the logic rail.
+**Design rationale for key parts** is documented in the [engineering journal](../docs/engineering_journal/README.md): entries 03 (motor), 04 (steering), 06 (TB6612FNG over L298N), 07 (power), 08 (sensors).
 
-The current design also includes an **LM317-based 5 V regulation concept**. Its final implementation, input supply, current capability, and thermal performance will be verified once the physical power system is assembled.
+## 2. Power architecture (two-rail, two-battery)
 
-All subsystems sharing signal connections should use an appropriate common ground, while high-current motor and servo paths should be kept separate from sensitive signal paths where practical.
+| Rail | Source | Consumers | Protection |
+| --- | --- | --- | --- |
+| Motor rail | 2S LiPo 7.4 V | N20 motor, MG996R servo | 2 A fuse |
+| Logic rail | Battery → 5 V regulator | Pi 4B, ESP32, HC-SR04, VL53L0X, MPU6050 | 2 A fuse |
 
-```
-```
+- **Star grounding:** all logic grounds meet at one point; motor ground returns separately to its pack negative. Motor/servo currents never flow through the logic reference.
+- **Decoupling:** 0.1 µF ceramic on every IC VCC; 100 µF electrolytic on the 5 V rail.
+- **Failure handling:** logic-rail brownout → ESP32 enters `MODE_FAULT` and stops the vehicle.
+- The current design also includes an **LM317-based 5 V regulation concept** (R1 = 240 Ω, R2 = 720 Ω; 0.1 µF input / 10 µF output decoupling). Its final implementation, input supply, current capability, and thermal performance will be verified once the physical power system is assembled.
+
+### Power budget (estimated, to be measured)
+
+| Load | Avg | Peak |
+| --- | --- | --- |
+| Raspberry Pi 4B | 0.6 A | 1.2 A |
+| ESP32 + sensors | 0.15 A | 0.3 A |
+| MG996R servo | 0.3 A | 1.2 A |
+| N20 motor | 0.5 A | 1.5 A |
+| **Logic rail total** | ~0.8 A | ~1.6 A |
+| **Motor rail total** | ~0.8 A | ~2.7 A |
+
+Measured values will be recorded in the testing records as each rail is verified.
+
+## 3. Interface plan (summary — full pin map in wiring guide)
+
+| Interface | Path | Notes |
+| --- | --- | --- |
+| Vision | Pi ↔ Camera Module 3 Wide | CSI |
+| Control link | Pi ↔ ESP32 | USB serial 115200, `MODE_DRIVE/PARK/STOP/FINISH/FAULT` |
+| Drive | ESP32 ↔ TB6612FNG ↔ N20 | PWM + direction |
+| Steering | ESP32 ↔ MG996R | PWM servo |
+| Distance | ESP32 ↔ VL53L0X (I²C), HC-SR04 (GPIO) | Median-filtered |
+| Orientation | ESP32 ↔ MPU6050 (I²C) | Yaw integration |
+
+## 4. Calibration plan
+
+- Camera: exposure locked; HSV bounds auto-tuned at boot from first frames.
+- MPU6050: zero-bias captured over 2 s at start.
+- VL53L0X: 5-sample median filter; mounted at ~15° downward to avoid shallow-angle white-mat misreads.
+- Servo: steering range re-verified after every reassembly (see design entry on 31°/40°).

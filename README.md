@@ -147,7 +147,7 @@ The Raspberry Pi source uses OpenCV headers and a camera input. The ESP32 source
 
 ## 🤝 Repository Use & Attribution
 
-This repository is designed to make the submitted configuration clear to judges, mentors, and other students. It contains the team's own documentation framework and source files. Official rules, datasheets, and permitted technical references are recorded in [resources/](resources/README.md). The team does not copy another team’s engineering claims, mechanical design, media, or code. Git history records the team's work on this project.
+This repository is designed to make the submitted configuration clear to judges, mentors, and other students. It contains the team's own documentation framework and source files. The team does not copy another team's engineering claims, mechanical design, media, or code. Git history records the team's work on this project.
 
 ## 🗂️ Explore the Project
 
@@ -161,7 +161,6 @@ This repository is designed to make the submitted configuration clear to judges,
 | 🖼️ [`images/`](images/) | Team, vehicle, and test visuals | Visual reference |
 | 🎥 [`videos/`](videos/) | Dated run and presentation videos | Run records |
 | 🧾 [`evidence/`](evidence/) | Dated reviews, calibration, and test summaries | Evidence archive |
-| 📚 [`resources/`](resources/) | Rules, datasheets, and permitted references | References |
 
 ## 🎨 Robot Visualizations
 

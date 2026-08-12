@@ -15,11 +15,21 @@
 
 | Section | Purpose | Current status |
 | --- | --- | --- |
-| [Diagrams](diagrams/README.md) | Architecture, wiring, and logic diagrams | In preparation |
-| [Engineering journal](engineering_journal/README.md) | Dated choices, iterations, and lessons | In preparation |
-| [Testing](testing/README.md) | Test plans and measured results | Reserved for testing |
+| [Diagrams](diagrams/README.md) | Architecture, wiring, and logic diagrams | Active |
+| [Engineering journal](engineering_journal/README.md) | Dated choices, iterations, and lessons (mapped to the WRO rubric) | Active |
+| [Testing](testing/README.md) | Test plans and measured results | In progress |
 | [Release notes](release_notes.md) | Repository-level milestones | Active |
 
 ## Documentation rule
 
 Use one dated file per meaningful decision or test. Keep the source of each claim clear: **plan**, **calculation**, **simulation**, **observation**, or **measurement**.
+
+## What the evaluators see (WRO 2026 rubric — max 30 points)
+
+| Criterion | Max | Where the evidence lives |
+| --- | --- | --- |
+| 1. Mobility and Mechanical Design | 6 | [Engineering journal](engineering_journal/README.md) entries 02–05, [design/](../../design/README.md) |
+| 2. Power and Sensor Architecture | 6 | Journal entries 06–08, [electronics/](../../electronics/README.md) |
+| 3. Software Architecture and Obstacle Strategy | 6 | Journal entry 09, [strategy/](../../strategy/README.md), [software/](../../software/README.md) |
+| 4. Systems Thinking and Engineering Decisions | 6 | Journal entries 01–10 (risk register) |
+| 5. Reproducibility and GitHub Quality | 6 | Root README, [hardware wiring](../../hardware/wiring-guide/README.md), models, commits |
