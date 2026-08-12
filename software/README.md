@@ -10,8 +10,6 @@
 
 ---
 
-> [!NOTE]
-> Source files in this repository are under development. Their presence does not imply completed integration, safety validation, or successful physical runs.
 
 | Component | Intended responsibility | Location |
 | --- | --- | --- |
