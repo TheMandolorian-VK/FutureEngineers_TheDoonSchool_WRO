@@ -4,7 +4,7 @@
 
 **A dated trail of real progress, observations, and engineering review.**
 
-[← Project home](../README.md) · [Testing](../docs/testing/README.md) · [Images](../images/README.md)
+[← Project home](../README.md) · [Testing](../docs/testing/README.md) · [Photos](../v-photos/README.md)
 
 </div>
 

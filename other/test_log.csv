@@ -1,0 +1,7 @@
+date,version,subsystem,test_objective,setup,result,issues,next_action
+2026-08-12,v0.1,esp32,servo sweep responds to commands,powered bench harness 5V UBEC,servo swept 0-180 deg within bounds,no response on pin 12,rewire to pin 25 and retest
+2026-08-12,v0.1,esp32,encoder counts per revolution,bench: motor free-spin 12V bench supply,456 counts/rev nominal,high variance at low speed,retest at constant PWM 150
+2026-08-12,v0.1,raspberry_pi,camera HSV detects red vs green,indoor lab lighting 640x480,green detected reliably; red bleeds at edge,threshold overlap at frame edges,clip ROI to center 80% and retune
+2026-08-12,v0.1,power,5V rail ripple under servo load,servo stalling into 5V/3A UBEC,rail dips to 4.2V,too low for Pi,switched servo to 5V/5A UBEC
+2026-08-13,v0.2,esp32,wall follow left ToF hold 120mm,straight 2m corridor on practice mat,mean error 8mm std 14mm,oscillation on wall seam,raise Kd; log loop time
+2026-08-13,v0.2,raspberry_pi,corner line orange detection at 1m approach,lab track with orange tape,detected at 0.9m avg,misses under direct window light,auto-exposure lock + HSV autocal at boot
