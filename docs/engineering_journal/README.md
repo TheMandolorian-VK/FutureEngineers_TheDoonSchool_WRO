@@ -39,6 +39,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | 09 | 2026-08-11 | Software state machine and obstacle strategy | 3, 4 |
 | 10 | 2026-08-12 | Risk register and failure-mode analysis | 4 |
 | 11 | 2026-08-13 | Consolidated confirmed configuration (11 V 3S, rear tilt, LEGO Ackermann) | 1, 2, 4, 5 |
+| 12 | 2026-08-13 | Pre-competition stress-test (SPOF review, priority list) | 4, 5 |
 
 > [!IMPORTANT]
 > Every entry records the **problem**, **options considered**, **chosen direction with reasoning**, **available evidence** (calculation / simulation / observation / measured test), and **next action**. The vehicle is in an active development and iteration cycle; entries are written as the work happens, not retrofitted.
@@ -245,6 +246,20 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 **Evidence:** chassis DXF and wiring guide committed in the repository; physical build and measured values to be added to `docs/testing/README.md` and `evidence/README.md` as on-mat testing proceeds.
 
 **Next action:** complete on-mat integration tests (T3–T10) and record measured rail currents and lap times.
+
+---
+
+### 12 — Pre-competition stress-test (2026-08-13, by Dhrubo M.)
+
+**Problem:** the submitted configuration must survive real-world friction (lighting, single battery, mechanical compliance) and WRO rule scrutiny, not just function in the lab.
+
+**Method:** a cold systems-engineering review of the documented vehicle, mapping single points of failure (SPOF) and proposing a tactical patch plus a structural override for each. Full analysis: [`docs/stress_test.md`](stress_test.md).
+
+**Highest-priority finding:** confirm the N20 gearbox drives **both** rear wheels (WRO Rule 11.3 / 11.13 compliance and rear traction). Second: add rear-wheel encoder odometry to remove the camera-only localisation single point of failure.
+
+**Evidence:** analytical only; no measured results. Physical verification belongs in `docs/testing/README.md` and `evidence/README.md`.
+
+**Next action:** answer the drivetrain question, then execute the priority list in `docs/stress_test.md`.
 
 ---
 
