@@ -20,3 +20,4 @@ This folder will hold the bill of materials, power plan, controller and sensor s
 
 > [!NOTE]
 > **Current status: Planned.** No physical wiring has been verified yet.
+x   
