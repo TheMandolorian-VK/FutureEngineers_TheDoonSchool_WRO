@@ -11,7 +11,7 @@
 ---
 
 > [!IMPORTANT]
-> Images in this folder are **AI-generated concept renders** as agreed upon by the WRO India Team and the Doon School team. It is based on the team’s submitted vehicle configuration. They are design-reference views, not photographs.
+> Images in this folder are **AI-generated concept renders** as agreed upon by the WRO India Team and the Doon School team. They are based on the team's submitted vehicle configuration and show how the robot is intended to look on **competition day** and how we plan to build and finish it. They are design-reference views, not photographs, and do not show the physical vehicle in its current development state.
 
 ## Submission view set
 
