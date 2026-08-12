@@ -52,19 +52,19 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 
 | # | Part | Qty | Role | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Raspberry Pi 4B | 1 | Vision, decision, high-level control | Owned |
-| 2 | Raspberry Pi Camera Module 3 **Wide** | 1 | Colour + geometry perception (pillars, lines, blocks) | Owned |
-| 3 | ESP32 (DevKit) | 1 | Real-time motor/servo control, safety state machine | Owned |
-| 4 | Dual Motor Driver Module **TB6612FNG** (1 A) | 1 | Drive motor H-bridge (replaces L298N) | Owned |
-| 5 | **N20 6 V 600 RPM** Micro Metal Gear Motor | 1 + spare | Rear-axle drive | Owned |
-| 6 | **TowerPro MG996R** Digital High Torque Servo | 1 + spare | Ackermann steering | Owned |
-| 7 | **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU: yaw for corners, parking alignment | Owned |
-| 8 | **VL53L0X** ToF Laser Distance Sensor | 1 | Front distance: pillars, parking gap | Owned |
-| 9 | HC-SR04 ultrasonic | 1 | Redundant wall/obstacle proximity | Owned |
-| 10 | 11 V 3S LiPo pack (motor/servo rail regulated to ~6–7.4 V; logic rail regulated to 5 V) | 1 | Two-rail power from one pack (WRO Appendix D guidance) | Owned |
-| 11 | 5 V regulator / buck | 2 | Logic rail regulation | Owned |
-| 12 | MG996R servo horn + Ackermann links (3D-printed) | 1 set | Steering linkage | Printed |
-| 13 | 3 mm plywood decks (LightBurn-cut) + brass standoffs | 1 set | Chassis (see [design](../design/README.md)) | Cut |
+| 1 | 💻 Raspberry Pi 4B | 1 | Vision, decision, high-level control | Owned |
+| 2 | 📷 Raspberry Pi Camera Module 3 **Wide** | 1 | Colour + geometry perception (pillars, lines, blocks) | Owned |
+| 3 | 🔧 ESP32 (DevKit) | 1 | Real-time motor/servo control, safety state machine | Owned |
+| 4 | ⚙️ Dual Motor Driver Module **TB6612FNG** (1 A) | 1 | Drive motor H-bridge (replaces L298N) | Owned |
+| 5 | 🔋 **N20 6 V 600 RPM** Micro Metal Gear Motor | 1 + spare | Rear-axle drive | Owned |
+| 6 | 🕹️ **TowerPro MG996R** Digital High Torque Servo | 1 + spare | Ackermann steering | Owned |
+| 7 | 🧭 **DFRobot Fermion MPU6050** 6-Axis Breakout | 1 | IMU: yaw for corners, parking alignment | Owned |
+| 8 | 📡 **VL53L0X** ToF Laser Distance Sensor | 1 | Front distance: pillars, parking gap | Owned |
+| 9 | 📶 HC-SR04 ultrasonic | 1 | Redundant wall/obstacle proximity | Owned |
+| 10 | 🔋 11 V 3S LiPo pack (motor/servo rail regulated to ~6–7.4 V; logic rail regulated to 5 V) | 1 | Two-rail power from one pack (WRO Appendix D guidance) | Owned |
+| 11 | 🔌 5 V regulator / buck | 2 | Logic rail regulation | Owned |
+| 12 | 🖨️ MG996R servo horn + Ackermann links (3D-printed) | 1 set | Steering linkage | Printed |
+| 13 | 🪵 3 mm plywood decks (LightBurn-cut) + brass standoffs | 1 set | Chassis (see [design](../design/README.md)) | Cut |
 
 **Design rationale for key parts** is documented in the [engineering journal](../docs/engineering_journal/README.md): entries 03 (motor), 04 (steering), 06 (TB6612FNG over L298N), 07 (power), 08 (sensors).
 
@@ -72,8 +72,8 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 
 | Rail | Source | Consumers | Protection |
 | --- | --- | --- | --- |
-| Motor/servo rail | 11 V 3S LiPo pack → buck-regulated to ~6–7.4 V | N20 motor, MG996R servo | 2 A fuse |
-| Logic rail | 11 V pack → 5 V buck regulator | Pi 4B, ESP32, HC-SR04, VL53L0X, MPU6050 | 2 A fuse |
+| 🔋 Motor/servo rail | 11 V 3S LiPo pack → buck-regulated to ~6–7.4 V | N20 motor, MG996R servo | 2 A fuse |
+| 💡 Logic rail | 11 V pack → 5 V buck regulator | Pi 4B, ESP32, HC-SR04, VL53L0X, MPU6050 | 2 A fuse |
 
 - **Star grounding:** all logic grounds meet at one point; motor ground returns separately to its pack negative. Motor/servo currents never flow through the logic reference.
 - **Decoupling:** 0.1 µF ceramic on every IC VCC; 100 µF electrolytic on the 5 V rail.

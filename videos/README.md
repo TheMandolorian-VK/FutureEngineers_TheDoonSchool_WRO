@@ -4,6 +4,12 @@
 
 **Run videos, demonstrations, and project presentations.**
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Videos](https://img.shields.io/badge/Videos-Competition%20Day%20Only-F59E0B?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 [← Project home](../README.md) · [Test visuals](../images/testing/README.md)
 
 </div>

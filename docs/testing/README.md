@@ -24,16 +24,16 @@ Add a dated Markdown record for every physical or software test. State the objec
 
 | # | Date | Test | Status | Result link |
 | --- | --- | --- | --- | --- |
-| T1 | 2026-08-01 | Servo sweep + steering range (31° vs 40°) | Done | steering sweep log |
-| T2 | 2026-08-03 | Motor driver comparison: L298N vs TB6612FNG dropout | Done | journal entry 06 |
-| T3 | 2026-08-06 | PD steering tuning on straight + corner | In progress | `other/pid_tuning_log.md` |
-| T4 | 2026-08-08 | Camera HSV detection under two lighting setups | In progress | vision test log |
-| T5 | 2026-08-10 | Serial protocol fail-safe (timeout → MODE_FAULT) | Planned | N/A |
-| T6 | 2026-08-12 | Wall-follow with VL53L0X in 600 mm corridor | Planned | N/A |
-| T7 | 2026-08-14 | Pillar pass logic (red right / green left) | Planned | N/A |
-| T8 | 2026-08-16 | Parallel parking sequence (camera + IMU + ToF) | Planned | N/A |
-| T9 | 2026-08-18 | Full Open Challenge: 3 laps + finish stop | Planned | N/A |
-| T10 | 2026-08-20 | Full Obstacle Challenge: 3 laps + pillars + parking | Planned | N/A |
+| T1 | 2026-08-01 | Servo sweep + steering range (31° vs 40°) | ✅ Done | steering sweep log |
+| T2 | 2026-08-03 | Motor driver comparison: L298N vs TB6612FNG dropout | ✅ Done | journal entry 06 |
+| T3 | 2026-08-06 | PD steering tuning on straight + corner | 🟡 In progress | `other/pid_tuning_log.md` |
+| T4 | 2026-08-08 | Camera HSV detection under two lighting setups | 🟡 In progress | vision test log |
+| T5 | 2026-08-10 | Serial protocol fail-safe (timeout → MODE_FAULT) | ⚪ Planned | N/A |
+| T6 | 2026-08-12 | Wall-follow with VL53L0X in 600 mm corridor | ⚪ Planned | N/A |
+| T7 | 2026-08-14 | Pillar pass logic (red right / green left) | ⚪ Planned | N/A |
+| T8 | 2026-08-16 | Parallel parking sequence (camera + IMU + ToF) | ⚪ Planned | N/A |
+| T9 | 2026-08-18 | Full Open Challenge: 3 laps + finish stop | ⚪ Planned | N/A |
+| T10 | 2026-08-20 | Full Obstacle Challenge: 3 laps + pillars + parking | ⚪ Planned | N/A |
 
 ## Standard test procedure
 

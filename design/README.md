@@ -79,8 +79,8 @@ The 300×200 mm footprint is used vertically to fit the full system:
 
 | Deck | Contents | Why |
 | --- | --- | --- |
-| **Lower deck** | 11 V 3S LiPo pack, ESP32, TB6612FNG motor driver | Battery low for CG; short motor/servo wiring; servo + drive currents kept off the logic reference |
-| **Upper deck** | Raspberry Pi 4B, Camera Module 3 Wide | Camera horizon height ~120 mm; Pi clear of motor noise sources |
+| 🔋 **Lower deck** | 11 V 3S LiPo pack, ESP32, TB6612FNG motor driver | Battery low for CG; short motor/servo wiring; servo + drive currents kept off the logic reference |
+| 💻 **Upper deck** | Raspberry Pi 4B, Camera Module 3 Wide | Camera horizon height ~120 mm; Pi clear of motor noise sources |
 
 The two decks are separated and supported by **brass standoff offsets**, giving a rigid, ventilated sandwich that uses the height envelope efficiently.
 
@@ -113,14 +113,14 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 
 | Component | Location | Justification |
 | --- | --- | --- |
-| Camera Module 3 Wide | Upper deck, forward | Sees pillars 0.5–1.5 m ahead; reaction distance at cruise speed |
-| VL53L0X ToF | Front centre | Pillar + parking-gap distance, mm-accurate, colour-independent |
-| HC-SR04 ultrasonic | Front corner | Redundant wall proximity (independent bus from I²C sensors) |
-| MPU6050 IMU | Centre of mass | Minimal lever-arm coupling into gyro; heading for turns/parking |
-| Raspberry Pi 4B | Upper deck | Vision processing, high-level decisions |
-| ESP32 | Lower deck | Real-time motor/servo control, safety state machine |
-| MG996R servo | Front axle, centre | Drives Ackermann linkage; shortest linkage run |
-| 11 V 3S LiPo battery | Lower deck, rear | Low CG; counterbalances steering assembly; sole energy source for the motor/servo rail |
+| 📷 Camera Module 3 Wide | Upper deck, forward | Sees pillars 0.5–1.5 m ahead; reaction distance at cruise speed |
+| 📡 VL53L0X ToF | Front centre | Pillar + parking-gap distance, mm-accurate, colour-independent |
+| 📶 HC-SR04 ultrasonic | Front corner | Redundant wall proximity (independent bus from I²C sensors) |
+| 🧭 MPU6050 IMU | Centre of mass | Minimal lever-arm coupling into gyro; heading for turns/parking |
+| 💻 Raspberry Pi 4B | Upper deck | Vision processing, high-level decisions |
+| 🔧 ESP32 | Lower deck | Real-time motor/servo control, safety state machine |
+| 🕹️ MG996R servo | Front axle, centre | Drives Ackermann linkage; shortest linkage run |
+| 🔋 11 V 3S LiPo battery | Lower deck, rear | Low CG; counterbalances steering assembly; sole energy source for the motor/servo rail |
 
 ---
 

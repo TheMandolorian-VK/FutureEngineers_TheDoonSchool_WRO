@@ -71,12 +71,12 @@ MG996R steering servo + TB6612FNG → N20 drive motor
 
 | Case | Behaviour |
 | --- | --- |
-| Line/colour lost | Re-acquire by a slow sweep, then resume |
-| Serial timeout Pi ↔ ESP32 | `MODE_FAULT`: safe stop (fails safe by design) |
-| Pillar too close | Emergency bias away from pillar |
-| Parking overshoot | Small IMU-controlled reverse steps |
-| Wall too close (600 mm corridor) | Speed reduction + steer correction |
-| Surprise rule (Day 2) | Strategy parameters isolated in a single config file so a new rule can be prepared without a code rewrite |
+| 🔍 Line/colour lost | Re-acquire by a slow sweep, then resume |
+| 🔌 Serial timeout Pi ↔ ESP32 | `MODE_FAULT`: safe stop (fails safe by design) |
+| 🚧 Pillar too close | Emergency bias away from pillar |
+| ↩️ Parking overshoot | Small IMU-controlled reverse steps |
+| 🧱 Wall too close (600 mm corridor) | Speed reduction + steer correction |
+| 🎲 Surprise rule (Day 2) | Strategy parameters isolated in a single config file so a new rule can be prepared without a code rewrite |
 
 ## 5. Safety behaviour
 

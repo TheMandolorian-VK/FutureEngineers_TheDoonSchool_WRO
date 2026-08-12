@@ -195,6 +195,21 @@ This repository is built to make the submitted configuration clear to judges, me
 
 ---
 
+## Project Status Dashboard
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| 🔧 Mechanical design | 🟡 In progress | Ackermann 40°, double-stack ply, rear tilt |
+| ⚡ Electronics and power | 🟡 In progress | 11 V 3S LiPo, two-rail, TB6612FNG |
+| 🧭 Strategy and software | 🟡 In progress | PD steering, `MODE_FAULT` failsafe |
+| 📘 Engineering journal | ✅ Active | 11 entries mapped to the WRO rubric |
+| 🧪 Testing | ⚪ Planned | T1 to T2 done, T3 to T10 pending |
+| 🧾 Evidence | ⚪ Pending | E1 to E5 logged |
+| 🖼️ Visuals | 🟡 Partial | AI concept renders; photos on competition day |
+
+> [!NOTE]
+> Status reflects the documentation and development phase. Physical test evidence is added as the vehicle is built and run at the Doon School lab.
+
 ## Explore the Project
 
 | Area | Contents | Status |
