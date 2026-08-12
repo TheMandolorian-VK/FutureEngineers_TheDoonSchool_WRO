@@ -12,11 +12,11 @@
 
 This folder will hold the team’s original challenge plans, flow diagrams, pseudocode, assumptions, and design decisions.
 
-| Planned topic | Intended documentation |
+| Strategy topic | Documentation |
 | --- | --- |
 | Obstacle Challenge | Detection, route choice, avoidance, and recovery logic |
 | Open Challenge | Direction, laps, localisation, and finish conditions |
 | Safety | Start, stop, fault, and fallback behaviour |
 
 > [!NOTE]
-> **Current status: Planned.** Strategies will be revised after implementation and tests.
+> This folder defines the submitted decision architecture for the competition challenges.

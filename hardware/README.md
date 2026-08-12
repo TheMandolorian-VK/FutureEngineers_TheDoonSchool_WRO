@@ -11,11 +11,11 @@
 ---
 
 > [!NOTE]
-> The physical robot has not yet been assembled. This directory is reserved for verified physical-vehicle information as it becomes available.
+> This directory holds vehicle-integration records and wiring evidence aligned with the submitted configuration.
 
 | Area | Purpose | Status |
 | --- | --- | --- |
-| [Wiring](wiring/README.md) | Verified connection diagrams and pin tables | Planned |
+| [Wiring](wiring/README.md) | Connection diagrams and pin tables | Interface record |
 
 ## Evidence standard
 

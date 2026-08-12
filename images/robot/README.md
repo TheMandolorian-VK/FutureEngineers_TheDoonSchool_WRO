@@ -11,17 +11,17 @@
 ---
 
 > [!IMPORTANT]
-> The physical vehicle has not yet been assembled. Images currently added here are **AI-generated concept renders** based on the team’s current design direction. They are not photographs of a completed robot.
+> Images in this folder are **AI-generated concept renders** based on the team’s submitted vehicle configuration. They are design-reference views, not photographs.
 
-## Planned view set
+## Submission view set
 
 | View | Intended filename | Evidence type |
 | --- | --- | --- |
-| Front | `front.*` | Concept render / future photograph |
-| Rear | `rear.*` | Concept render / future photograph |
-| Left | `left.*` | Concept render / future photograph |
-| Right | `right.*` | Concept render / future photograph |
-| Top | `top.*` | Concept render / future photograph |
-| Bottom | `bottom.*` | Concept render / future photograph |
+| Front | `front.*` | Concept render |
+| Rear | `rear.*` | Concept render |
+| Left | `left.*` | Concept render |
+| Right | `right.*` | Concept render |
+| Top | `top.*` | Concept render |
+| Bottom | `bottom.*` | Concept render |
 
-When the physical robot is built, retain this disclosure and label real photographs with the capture date.
+Retain this disclosure whenever these reference renders are presented.

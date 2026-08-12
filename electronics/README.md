@@ -12,12 +12,12 @@
 
 This folder will hold the bill of materials, power plan, controller and sensor selection rationale, pin assignments, and verified wiring evidence.
 
-| Planned record | Purpose |
+| Configuration record | Purpose |
 | --- | --- |
 | Bill of materials | Part, quantity, source, and selection reason |
 | Power plan | Voltage rails, current estimates, and protection |
 | Interface plan | Intended controller, sensor, and actuator connections |
 
 > [!NOTE]
-> **Current status: Planned.** No physical wiring has been verified yet.
+> This folder defines the submitted electronics and power configuration. Wiring evidence is tracked separately in the hardware area.
 x   

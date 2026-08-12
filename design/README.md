@@ -12,11 +12,11 @@
 
 This folder will hold the team’s original layout sketches, dimensions, steering notes, packaging decisions, and assembly information.
 
-| Planned record | Purpose |
+| Design record | Purpose |
 | --- | --- |
 | Layout | Component placement and overall dimensions |
 | Mobility | Drive and steering design decisions |
 | Assembly | Build sequence and materials once verified |
 
 > [!NOTE]
-> **Current status: Planned.** The vehicle has not yet been physically assembled.
+> This folder defines the submitted mechanical configuration and its supporting design records.
