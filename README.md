@@ -1,74 +1,71 @@
-# Future Engineers 2026 – The Doon School
+# The Doon School — WRO Future Engineers 2026
 
-## Team information
+> Designing a self-driving vehicle for the World Robot Olympiad Future Engineers category.
 
-| Item | Details |
+## Overview
+
+This repository is the public engineering record for **The Doon School Future Engineers** team. It will document how we design, build, program, test, and refine our autonomous vehicle for WRO 2026.
+
+We are currently in the **design and planning phase**. The physical vehicle is not yet assembled, and no integrated performance claims are made here. As development progresses, every completed stage will be supported by dated documentation, source files, photographs, or measured test results.
+
+## Team
+
+| Team member | Focus area |
 | --- | --- |
-| Team | The Doon School Future Engineers |
-| Competition | World Robot Olympiad (WRO) 2026, Future Engineers |
-| School | The Doon School, Dehradun, India |
-
-| Member | Responsibility |
-| --- | --- |
-| Dhrubo Mishra | Mechanical engineering |
-| Vivaan Kumbhat | Software engineering |
-| Yug Jain | Electronics, systems, and GitHub integration |
+| Dhrubo Mishra | Mechanical design |
+| Vivaan Kumbhat | Software development |
+| Yug Jain | Electronics, systems, and repository integration |
 | Mr. Ashutosh Tripathi | Head mentor |
 
-## Project status
+**School:** The Doon School, Dehradun, India
+**Category:** WRO 2026 — Future Engineers
 
-This is a design-stage repository for the team's proposed autonomous vehicle. Physical assembly and integrated testing are still in progress. Statements, images, and documents are labelled to distinguish plans, concept renders, implementation, and measured results. This repository does not claim that the vehicle has been built or tested unless dated evidence is added.
-
-## Robot visualizations
-
-The images in [`images/robot/`](images/robot/) are AI-generated concept renders based on the team's current mechanical design and specifications. They show the intended vehicle configuration and are not photographs of a completed physical robot.
-
-## Intended system architecture
+## Our intended system
 
 ```text
 Camera → Raspberry Pi → perception and decision logic → ESP32 → steering and drive actuators
 ```
 
-The Raspberry Pi is intended to run perception and decision logic. The ESP32 is intended to control steering, drive, communication, and safety functions. Hardware selections and final sensor configuration are still under evaluation.
+The intended architecture separates high-level perception and decision-making from low-level actuator control. Final components, wiring, and software behaviour will be recorded only after they are selected, assembled, and verified.
 
-## Current software
+## Explore the project
 
-- [`software/raspberry_pi/wromain.cpp`](software/raspberry_pi/wromain.cpp): Raspberry Pi program under development.
-- [`software/esp32/obstacleChallenge.ino`](software/esp32/obstacleChallenge.ino): ESP32 program under development.
+| Area | What it will contain | Status |
+| --- | --- | --- |
+| [`design/`](design/) | Vehicle layout, mechanical decisions, dimensions | Planned |
+| [`electronics/`](electronics/) | Components, power plan, wiring, pin assignments | Planned |
+| [`strategy/`](strategy/) | Open/Obstacle Challenge logic and flow diagrams | Planned |
+| [`software/`](software/) | Raspberry Pi and ESP32 source code | Under development |
+| [`docs/`](docs/) | Engineering journal, diagrams, testing records | In preparation |
+| [`images/`](images/) | Team, vehicle, and test visuals | In preparation |
+| [`videos/`](videos/) | Dated run and presentation videos | Reserved |
+| [`evidence/`](evidence/) | Dated reviews, calibration, and test summaries | Reserved |
+| [`resources/`](resources/) | Rules, datasheets, and permitted references | Reserved |
 
-Code presence alone is not evidence of completed robot integration or successful runs. Add dated test records when tests are performed.
+## Robot visualizations
 
-## Repository structure
+Until physical assembly is complete, any visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** based on the team's current design direction. They represent an intended configuration, not photographs of a completed robot.
 
-```text
-FutureEngineers_TheDoonSchool_WRO/
-├── README.md
-├── docs/
-│   ├── diagrams/                 # system, wiring, and logic diagrams
-│   ├── engineering_journal/      # dated design decisions and iterations
-│   ├── testing/                  # dated test plans and results
-│   └── release_notes.md
-├── hardware/
-│   └── wiring/                   # verified wiring diagram and pin table
-├── images/
-│   ├── competition/              # future competition evidence
-│   ├── robot/                    # labelled concept renders / future robot views
-│   ├── team/
-│   └── testing/                  # future test evidence
-├── software/
-│   ├── esp32/
-│   └── raspberry_pi/
-└── videos/                       # future run videos
-```
+## Documentation standard
 
-## Evidence policy
+We keep a clear distinction between **planned work**, **conceptual material**, **implemented work**, and **measured results**.
 
-- Put a date, conditions, method, and measured outcome in each test record.
-- Label planned work as **Planned** and unverified work as **Unverified**.
-- Do not present simulations, concept renders, or code as physical-run evidence.
-- Retain unsuccessful results and describe the next change instead of removing them.
+- Each test record will state its date, setup, method, observations, and next action.
+- Plans and proposals are labelled clearly until verified.
+- Concept renders, simulations, and code are not presented as evidence of physical performance.
+- Iterations and unsuccessful outcomes will be retained as part of the engineering process.
 
-See each folder's README for its documentation guidance.
+## Development roadmap
+
+1. Define vehicle architecture and component choices.
+2. Assemble and document the first prototype.
+3. Implement perception, control, and communication software.
+4. Test subsystems and record results.
+5. Integrate the vehicle and publish challenge evidence.
+
+## Repository history
+
+This repository uses GitHub to track our engineering progress. Updates are committed as the team's work evolves.
 
 ## License
 

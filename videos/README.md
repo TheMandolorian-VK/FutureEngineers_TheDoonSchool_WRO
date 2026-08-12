@@ -1,3 +1,22 @@
+<div align="center">
+
 # Videos
 
-Link to or store videos of actual vehicle runs here. Each entry should include the date, challenge, setup, and whether the run completed. Do not label a planned or simulated run as a physical run.
+**Run videos, demonstrations, and project presentations.**
+
+[← Project home](../README.md) · [Test visuals](../images/testing/README.md)
+
+</div>
+
+---
+
+Link to or store videos of actual vehicle runs here. Every entry should state the date, challenge, setup, and whether the run completed.
+
+| Future collection | Intended content |
+| --- | --- |
+| [obstacle_challenge](obstacle_challenge/README.md) | Complete obstacle-course attempts |
+| [open_challenge](open_challenge/README.md) | Complete open-course attempts |
+| [project_presentation](project_presentation/README.md) | Team project explanation |
+
+> [!CAUTION]
+> Do not label planned, simulated, or edited concept material as a physical vehicle run.
