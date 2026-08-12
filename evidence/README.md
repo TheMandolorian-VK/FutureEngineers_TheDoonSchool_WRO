@@ -4,7 +4,13 @@
 
 **A dated trail of real progress, observations, and engineering review.**
 
-[← Project home](../README.md) · [Testing](../docs/testing/README.md) · [Photos](../images/README.md)
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Evidence](https://img.shields.io/badge/Evidence-Pending-F59E0B?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
+[← Project home](../README.md) · [Testing](../testing/README.md) · [Photos](../images/README.md)
 
 </div>
 

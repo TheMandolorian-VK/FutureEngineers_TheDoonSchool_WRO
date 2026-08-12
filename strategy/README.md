@@ -4,6 +4,12 @@
 
 **How the team plans to reason about the Open and Obstacle Challenges.**
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Strategy](https://img.shields.io/badge/Strategy-PD%20Steering-7A2E8E?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 [← Project home](../README.md) · [Software](../software/README.md) · [Diagrams](../docs/diagrams/README.md)
 
 </div>
@@ -11,6 +17,9 @@
 ---
 
 This folder holds the team's challenge plans, flow diagrams, pseudocode, assumptions, and design decisions. The strategy is implemented in `software/raspberry_pi/wromain.py` (decision layer) and `software/esp32/obstacleChallenge.ino` (execution layer).
+
+> [!IMPORTANT]
+> **Safety is built in.** The ESP32 enters `MODE_FAULT` on serial timeout or an invalid command, so a vision or link failure stops the vehicle instead of letting it run uncontrolled.
 
 ## 1. System decision flow
 

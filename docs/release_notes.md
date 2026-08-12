@@ -1,5 +1,10 @@
 # Release notes
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Changelog](https://img.shields.io/badge/Changelog-v0.3-16803A?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 ## v0.3 (2026-08-12)
 
 - Engineering journal completed and mapped to the WRO 2026 evaluation rubric (all 5 criteria).

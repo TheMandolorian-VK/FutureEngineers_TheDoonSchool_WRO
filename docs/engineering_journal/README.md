@@ -4,6 +4,12 @@
 
 **A chronological record of decisions, iterations, and lessons.**
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Journal](https://img.shields.io/badge/Journal-11%20Entries-16803A?style=for-the-badge)
+![Rubric](https://img.shields.io/badge/Rubric-5%20Criteria%20×%206-16803A?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 [← Documentation](../README.md) · [Testing](../testing/README.md) · [Design](../../design/README.md)
 
 </div>

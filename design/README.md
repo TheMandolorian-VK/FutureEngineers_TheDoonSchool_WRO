@@ -4,6 +4,12 @@
 
 **Mechanical design of the WRO 2026 Future Engineers vehicle.**
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Design](https://img.shields.io/badge/Design-Laser%20Ply%203mm-16803A?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 [← Project home](../README.md) · [Electronics](../electronics/README.md) · [Engineering journal](../docs/engineering_journal/README.md)
 
 </div>
@@ -19,6 +25,9 @@ Three constraints drive every mechanical choice:
 3. **Reproducibility:** everything must be rebuildable from files in this repository (LightBurn/DXF, STL, BOM).
 
 The vehicle uses **front Ackermann steering with a servo** and **fully rear-wheel drive with one N20 motor**, on a **laser-cut 3 mm plywood double-stack chassis**. The rear N20 and its wheels are deliberately smaller than the front wheels, which lowers the drive/steering mass and gives the chassis a slight rearward (backward) tilt for stability through the 90° corners.
+
+> [!IMPORTANT]
+> **Rule compliance is non-negotiable.** WRO 2026 requires one driving axle and one steering actuator (Rules 11.3, 11.5, 11.13). Differential drive is disqualified. The build must confirm both rear wheels receive drive torque.
 
 ---
 

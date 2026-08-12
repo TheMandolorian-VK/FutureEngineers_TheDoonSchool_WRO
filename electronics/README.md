@@ -4,6 +4,12 @@
 
 **Pin assignments and basic power-distribution reference for the WRO Future Engineers vehicle.**
 
+![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
+![Power](https://img.shields.io/badge/Power-11V%203S%20LiPo-0B7A3B?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
+![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
 [← Project home](../README.md) · [Hardware](../hardware/README.md) · [Wiring Guide](../hardware/wiring-guide/README.md) · [Diagrams](../docs/diagrams/README.md)
 
 </div>
@@ -86,6 +92,9 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 | **Motor rail total** | ~0.8 A | ~2.7 A |
 
 Measured values will be recorded in the testing records as each rail is verified.
+
+> [!WARNING]
+> The 11 V 3S LiPo stores high energy. Balance-charge before every run, never exceed the N20 (6 V) and MG996R (4.8 to 7.2 V) rated voltages after regulation, and fit a fuse on each rail.
 
 ## 3. Interface plan (summary: full pin map in wiring guide)
 
