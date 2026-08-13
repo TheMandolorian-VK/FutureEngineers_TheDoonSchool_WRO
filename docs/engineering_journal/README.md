@@ -259,4 +259,4 @@ Click an entry number to jump to its section.
 
 ## Process note
 
-Entries are added as the design is developed and tested. Each entry lists what was considered, what was chosen, why, and what evidence exists. The repository is the living engineering record; the journal, testing records, and evidence archive together show the iteration cycle the rubric asks for.
+We add entries as we work on the design. Each entry explains what we considered, what we chose, and why.

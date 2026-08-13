@@ -1,6 +1,6 @@
 # Design Decision Log
 
-A dated record of the significant mechanical and system decisions, with the alternatives that were rejected and the reason. This is the evidence for Criterion 4 (engineering decisions) in the [docs hub](../docs/README.md). Decisions that were reversed are kept in the log with their supersession noted, because a decision log that hides reversals is not an honest engineering record.
+A dated record of mechanical and system decisions, with the alternatives we rejected and why. Reversed decisions are kept with notes on what replaced them.
 
 Status legend: **adopted** (current), **superseded** (a later decision replaced it), **pending** (not yet executed).
 

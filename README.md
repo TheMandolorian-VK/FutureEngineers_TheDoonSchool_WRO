@@ -36,7 +36,7 @@
 
 ## Overview
 
-This repository is the public engineering record for **The Doon School Future Engineers** team competing at **WRO 2026 (GMR Arena, Hyderabad, 26–28 August 2026)**, with the international final in December 2026.
+This repository documents our work for **The Doon School Future Engineers** team competing at **WRO 2026 (GMR Arena, Hyderabad, 26–28 August 2026)**.
 
 It captures the team's submitted vehicle configuration, software architecture, documentation structure, and engineering process. The vehicle is a 4-wheel autonomous car built to the WRO 2026 Future Engineers rules:
 
@@ -45,7 +45,7 @@ It captures the team's submitted vehicle configuration, software architecture, d
 - **No wireless** control during the run.
 
 
-This is the team's **submission design reference**. The final vehicle is intended to align with this reference configuration. Specifications, source-code structure, visualisations, and measured evidence are distinguished so a reviewer can see exactly what each item represents.
+This documents our current vehicle design. Specifications, code, renders, and test results are in separate sections.
 
 ---
 
@@ -189,7 +189,7 @@ Exact dependencies and compile/upload commands belong in the respective software
 
 ## Repository Use and Attribution
 
-This repository is built to make the submitted configuration clear to judges, mentors and other students. It contains the team's own documentation framework and source files; the team does not copy another team's engineering claims, mechanical design, media or code. Git history records the team's own work on this project.
+This repository contains our own work. We do not copy other teams' designs or code. Git history records our progress.
 
 The documentation is organised against the five WRO 2026 Future Engineers criteria (Mobility & Mechanical Design, Power & Sensor Architecture, Software Architecture & Obstacle Strategy, Systems Thinking & Engineering Decisions, Reproducibility & GitHub Quality). The mapping from each criterion to the relevant files is maintained in [`docs/README.md`](docs/README.md).
 
@@ -217,12 +217,11 @@ Visuals in [`images/robot/`](images/robot/) are concept renders of the submitted
 
 ## Documentation Standard
 
-We keep a clear distinction between **configuration material**, **source files** and **measured results**.
+We keep design docs, code, and test results separate.
 
-- Each test record states its date, setup, method, observations and next action.
-- Configuration material is labelled clearly and kept separate from measured evidence.
-- Concept renders, simulations and code are not presented as evidence of physical performance.
-- Iterations and unsuccessful outcomes are retained as part of the engineering process.
+- Each test record has date, setup, method, observations and next action.
+- Renders are not photographs of the real vehicle.
+- We keep unsuccessful attempts as part of the learning process.
 
 ---
 
