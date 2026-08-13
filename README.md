@@ -40,8 +40,8 @@ This repository is the public engineering record for **The Doon School Future En
 
 It captures the team's submitted vehicle configuration, software architecture, documentation structure, and engineering process. The vehicle is a 4-wheel autonomous car built to the WRO 2026 Future Engineers rules:
 
-- **One driving axle + one steering actuator** (Rules 11.3, 11.5, 11.13): differential/per-side drive is disallowed.
-- **Envelope:** ≤ 300 × 200 × 300 mm; **mass:** ≤ 1.5 kg (Rules 11.1–11.2).
+- **One driving axle + one steering actuator** per WRO rules.
+- **Envelope:** ≤ 300 × 200 × 300 mm; **mass:** ≤ 1.5 kg.
 - **No wireless** control during the run.
 
 
@@ -116,7 +116,7 @@ Key points of the submitted configuration:
 - **Front Ackermann steering** driven by an MG996R servo. The steering arms, knuckles and tie-rod geometry are built from **LEGO beams and pins** on a front sub-frame, so the Ackermann trapezoid can be re-jigged in 8 mm steps during tuning without re-cutting the chassis. Outer lock was iterated **31° → 40°** to clear the 600 mm corridor 90° corners (see journal Entry 04).
 - **Fully rear-wheel drive** with one N20 6 V 600 RPM motor on the rear axle: Rule 11.13 compliant (one driving axle, no independent side motors). Rear wheels are smaller than the front, producing the rearward tilt described above.
 - **Two-deck 3 mm plywood chassis**, laser-cut in **LightBurn**. Upper deck carries the Raspberry Pi 4B + Camera Module 3 Wide; lower deck carries the 11 V 3S LiPo pack, ESP32 and TB6612FNG. The decks are spaced by **brass standoff offsets**, with LEGO used as adjustable mounting rails.
-- **LightBurn reproducibility:** the chassis is drawn in LightBurn and cut from 3 mm plywood. The portable export [`wooden_plate.dxf`](design/wooden_plate.dxf) is committed today and currently holds the validation geometry (see [cut file notes](design/dxf_notes.md)); the full deck patterns and the editable `.lbrn` LightBurn project are team-maintained and will be added so the chassis becomes reproducible from the repository alone.
+- **Chassis:** 3 mm plywood, laser-cut in LightBurn. The DXF export [`wooden_plate.dxf`](design/wooden_plate.dxf) is committed (currently a placeholder rectangle; see [cut file notes](design/dxf_notes.md)). The full deck patterns and `.lbrn` LightBurn project are pending.
 - **Mechanical BOM:** [`design/bom_mechanical.md`](design/bom_mechanical.md) lists every chassis and drivetrain part with status; the electronics parts list is in [`electronics/README.md`](electronics/README.md) (Bill of materials section).
 
 ---

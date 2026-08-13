@@ -42,7 +42,7 @@ For small slip the turning radius follows R = wheelbase / tan(outer steer angle)
 - At 31°: 150 mm / tan(31°) ≈ 250 mm (design estimate)
 - At 40°: 150 mm / tan(40°) ≈ 180 mm (design estimate)
 
-The 40 degree lock is what makes the sharp 90° corners of the 600 mm corridor configuration reachable with margin. The PD controller softens the servo gain near lock so the slightly harsher transition at 40° does not produce jerky steering.
+The 40 degree lock reaches the 600 mm corridor corners with margin. The PD controller softens servo gain near lock.
 
 ## Verification plan
 

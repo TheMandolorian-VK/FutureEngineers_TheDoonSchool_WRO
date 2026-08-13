@@ -15,7 +15,7 @@
 
 | Section | Purpose | Current status |
 | --- | --- | --- |
-| [Diagrams](diagrams/README.md) | Architecture, wiring, and logic diagrams | Pending (no diagrams committed yet) |
+| [Diagrams](diagrams/README.md) | Architecture, wiring, and logic diagrams | 5 Mermaid diagrams committed; chassis/layout diagrams pending |
 | [Engineering journal](engineering_journal/README.md) | Dated choices, iterations, and lessons (mapped to the WRO rubric) | Active |
 | [Testing](testing/README.md) | Test plans and measured results | In progress |
 | [Release notes](release_notes.md) | Repository-level milestones | Active |
@@ -28,11 +28,11 @@ Use one dated file per meaningful decision or test. Keep the source of each clai
 
 | Criterion | Max | Journal entries | Key files a judge should open |
 | --- | --- | --- | --- |
-| 1. Mobility and Mechanical Design | 6 | 01–05 | [engineering_journal](engineering_journal/README.md) entries 01–05, [design/](../design/README.md) (Ackermann geometry, assembly guide, rules checklist, mechanical BOM; committed `wooden_plate.dxf` is validation geometry, `.lbrn` and full deck patterns pending) |
+| 1. Mobility and Mechanical Design | 6 | 01–05 | [engineering_journal](engineering_journal/README.md) entries 01–05, [design/](../design/README.md) (Ackermann geometry, assembly guide, rules checklist, mechanical BOM; `wooden_plate.dxf` is placeholder, `.lbrn` and full deck patterns pending) |
 | 2. Power and Sensor Architecture | 6 | 06, 08, 11 | [engineering_journal](engineering_journal/README.md) entries 06/08/11, [electronics/](../electronics/README.md) (BOM + power architecture), [hardware/wiring-guide](../hardware/wiring-guide/README.md) |
 | 3. Software Architecture and Obstacle Strategy | 6 | 08, 09, 10 | [strategy/](../strategy/README.md) (overview + [software_architecture.md](../strategy/software_architecture.md) deep-dive), [engineering_journal](engineering_journal/README.md) entries 08/09/10, [software/](../software/README.md) |
 | 4. Systems Thinking and Engineering Decisions | 6 | 02–10 | [engineering_journal](engineering_journal/README.md) entries 02–10 (risk register in entry 10), [design/design_decisions.md](../design/design_decisions.md) |
-| 5. Reproducibility and GitHub Quality | 6 | 01–11 + repo structure | Root [README.md](../README.md), [docs/README.md](README.md), [engineering_journal](engineering_journal/README.md) (all entries), [hardware/wiring-guide](../hardware/wiring-guide/README.md), [testing/procedures.md](testing/procedures.md), committed `design/wooden_plate.dxf`; diagrams/STL/`.lbrn` pending |
+| 5. Reproducibility and GitHub Quality | 6 | 01–11 + repo structure | Root [README.md](../README.md), [docs/README.md](README.md), [engineering_journal](engineering_journal/README.md) (all entries), [hardware/wiring-guide](../hardware/wiring-guide/README.md), [testing/procedures.md](testing/procedures.md), `design/wooden_plate.dxf` (placeholder); diagrams/STL/`.lbrn` pending |
 
 ## How this repository maps to the five documentation criteria
 
@@ -42,7 +42,7 @@ Use one dated file per meaningful decision or test. Keep the source of each clai
 | C2 Power & Sensor Architecture | Single-battery two-rail power, sensor choices, calibration | docs/engineering_journal/README.md (06, 08, 11), electronics/README.md, hardware/wiring-guide/README.md |
 | C3 Software Architecture & Obstacle Strategy | State machine, PD steering, obstacle logic | strategy/README.md, strategy/software_architecture.md, docs/engineering_journal/README.md (08-10), software/ |
 | C4 Systems Thinking & Engineering Decisions | "Chose X over Y because...", constraints, risks, iteration | docs/engineering_journal/README.md (02-10), design/design_decisions.md |
-| C5 Reproducibility & GitHub Quality | Clear README, reproducible CAD, wiring, commits | README.md (root), docs/README.md, hardware/wiring-guide/README.md, docs/testing/procedures.md, design/wooden_plate.dxf |
+| C5 Reproducibility & GitHub Quality | Clear README, CAD, wiring, commits | README.md (root), docs/README.md, hardware/wiring-guide/README.md, docs/testing/procedures.md, design/wooden_plate.dxf (placeholder) |
 
 > [!NOTE]
-> Diagrams, STL models, and the LightBurn `.lbrn` chassis source are not committed yet. Currently only `design/wooden_plate.dxf` is in the repository; the rest are pending and will be added as the build is finalised.
+> STL models and the LightBurn `.lbrn` chassis source are not yet committed. The five Mermaid diagrams are committed. `design/wooden_plate.dxf` is a placeholder rectangle.

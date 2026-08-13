@@ -75,7 +75,7 @@ Click an entry number to jump to its section.
 - C) Fully 3D-printed frame.
 - D) Aluminium sheet.
 
-**Chosen: B, with C for brackets.** Plywood is lighter than acrylic of equal stiffness, damps motor vibration better, and cuts cleanly at speed on the school's laser cutter. Acrylic cracks at screw holes under servo load; plywood does not. The DXF export is committed (currently the validation geometry; full deck patterns pending) and the editable `.lbrn` master will be published so the chassis is reproducible from the repository alone. Small brackets and sensor mounts are 3D-printed (PLA) where complex geometry is needed (servo horn mount, camera mount).
+**Chosen: B, with C for brackets.** Plywood is lighter than acrylic of equal stiffness, damps motor vibration better, and cuts cleanly on the school's laser cutter. Acrylic cracks at screw holes under servo load. The DXF export is committed (currently a placeholder rectangle; full deck patterns pending). Small brackets and sensor mounts are 3D-printed (PLA) where complex geometry is needed.
 
 **Tradeoff:** plywood absorbs moisture and can warp: mitigated by sealing edges with two thin coats of clear varnish and keeping the chassis in the transport case between sessions.
 
@@ -98,7 +98,7 @@ Click an entry number to jump to its section.
 
 **Tradeoff:** higher-RPM variants (1000 RPM) would shorten lap time but worsen precision at stop lines and during parking. We prioritise **consistency** over peak speed, matching the rubric's "stability of mission solving".
 
-**Chosen:** N20 6 V 600 RPM, one drive motor on the rear axle through the gearbox, in a mechanically coupled layout (compliant with WRO 2026 Rule 11.3/11.13: one driving axle; two motors are not used independently per side).
+**Chosen:** N20 6 V 600 RPM, one drive motor on the rear axle through the gearbox.
 
 **Next action:** log actual wheel speed with an encoder on the rear axle.
 
@@ -137,7 +137,7 @@ Click an entry number to jump to its section.
 
 **Tradeoff:** the double stack raises the camera to a good horizon height (~120 mm) while the deck adds ~60 g. Placement was chosen to keep the combined centre of mass above the rear axle's roll centre.
 
-**Next action:** measure the actual mass and CG; the chassis CAD is committed as `design/wooden_plate.dxf`.
+**Next action:** measure the actual mass and CG; the DXF placeholder is committed as `design/wooden_plate.dxf`.
 
 ---
 
@@ -242,16 +242,16 @@ Click an entry number to jump to its section.
 **Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised. It **supersedes Entry 07**, replacing its two-battery design with a single 11 V 3S LiPo pack feeding two buck-regulated rails.
 
 **Confirmed configuration:**
-- **Structure:** laser-cut 3 mm plywood double-stack chassis (LightBurn source → DXF export `design/wooden_plate.dxf`, currently the validation geometry; `.lbrn` master and full deck patterns pending), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting + steering rails.
+- **Structure:** laser-cut 3 mm plywood double-stack chassis (DXF export `design/wooden_plate.dxf` is a placeholder; `.lbrn` master and full deck patterns pending), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting rails.
 - **Decks:** upper deck = Raspberry Pi 4B + Camera Module 3 Wide; lower deck = 11 V 3S LiPo pack + ESP32 + TB6612FNG.
-- **Drive:** fully rear-wheel drive, one N20 6 V 600 RPM motor on the rear axle (Rule 11.3/11.13 compliant: one driving axle, no independent side motors). Rear wheels and the rear N20 are smaller than the front wheels, giving the chassis a slight rearward tilt.
+- **Drive:** rear-wheel drive, one N20 6 V 600 RPM motor on the rear axle. Rear wheels are smaller than the front, giving the chassis a slight rearward tilt.
 - **Steering:** front TowerPro MG996R servo driving an Ackermann linkage built from LEGO beams/pins; outer lock 40° (Entry 04).
 - **Sensing:** Pi Camera Module 3 Wide (colour/geometry), VL53L0X ToF (front distance), HC-SR04 (redundant wall proximity), DFRobot Fermion MPU6050 IMU (yaw).
 - **Power:** single 11 V 3S LiPo → motor/servo rail bucked to ~6 V for N20 + MG996R; logic rail bucked to 5 V for Pi/ESP32/sensors (two-rail, star-grounded, fused).
 
 **Why this is the final form:** every choice above is the result of the iterations logged in Entries 01–10 (two-controller split, plywood + LightBurn, N20 rear drive, 31°→40° Ackermann, L298N→TB6612FNG, two-rail power, sensor set). The smaller rear wheels + rearward tilt were adopted to lower the drive mass and improve corner stability without adding weight.
 
-**Evidence:** chassis DXF and wiring guide committed in the repository; physical build and measured values to be added to `docs/testing/README.md` and `evidence/README.md` as on-mat testing proceeds.
+**Evidence:** DXF placeholder and wiring guide committed; physical build and measured values to be added as on-mat testing proceeds.
 
 **Next action:** complete on-mat integration tests (T3–T10) and record measured rail currents and lap times.
 

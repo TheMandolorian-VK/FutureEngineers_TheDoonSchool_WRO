@@ -1,0 +1,27 @@
+stateDiagram-v2
+    [*] --> MODE_STOP : Boot
+
+    MODE_STOP --> MODE_DRIVE : CMD,...,DRIVE
+    MODE_STOP --> MODE_PARK : CMD,...,PARK
+    MODE_STOP --> MODE_FINISH : CMD,...,FINISH
+    MODE_STOP --> MODE_FAULT : Timeout / Invalid
+
+    MODE_DRIVE --> MODE_DRIVE : CMD,...,DRIVE
+    MODE_DRIVE --> MODE_PARK : CMD,...,PARK
+    MODE_DRIVE --> MODE_FINISH : CMD,...,FINISH
+    MODE_DRIVE --> MODE_FAULT : Timeout / Invalid
+
+    MODE_PARK --> MODE_PARK : CMD,...,PARK
+    MODE_PARK --> MODE_FINISH : CMD,...,FINISH
+    MODE_PARK --> MODE_FAULT : Timeout / Invalid
+
+    MODE_FINISH --> MODE_STOP : STOP
+    MODE_FINISH --> MODE_FAULT : Timeout / Invalid
+
+    MODE_FAULT --> MODE_STOP : STOP / PING
+
+    note right of MODE_FAULT
+        Motor stop + centred steering
+        Entered on serial timeout (>350ms)
+        or invalid command
+    end note

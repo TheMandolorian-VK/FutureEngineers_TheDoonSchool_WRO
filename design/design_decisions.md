@@ -9,7 +9,7 @@ Status legend: **adopted** (current), **superseded** (a later decision replaced 
 | 12-08-26 | Chassis material | Plywood, acrylic, 3D-printed PLA/PETG, aluminium | 3 mm plywood | Lightest per stiffness on the school laser, damps motor vibration, does not crack at screw points | Adopted |
 | 12-08-26 | Steering geometry | Parallel vs Ackermann | Ackermann | Inner wheel turns tighter, no tyre scrub, stable through 90° corners | Adopted |
 | 12-08-26 | Steering actuator | One MG996R vs two motors | One MG996R | One steering actuator is the rule; servo torque suits the LEGO linkage | Adopted |
-| 12-08-26 | Drive layout | Two motors (one per side) vs one N20 rear axle | One N20 rear axle | Differential/per-side drive is disqualified; a coupled axle keeps one driving axle | Adopted |
+| 12-08-26 | Drive layout | Two motors (one per side) vs one N20 rear axle | One N20 rear axle | Simpler, fewer parts, single axle drives both wheels | Adopted |
 | 12-08-26 | Rear wheel size | Equal wheels vs smaller rear wheels | ~30 mm rear, ~40 mm front | Rear bias lightens the drive end and gives a rearward tilt for cornering stability | Adopted |
 | 12-08-26 | Mounting system | Dedicated drilled holes vs LEGO grid + brass standoffs | LEGO 8 mm grid + standoffs | Iterative by construction: move sensors/brackets in 8 mm steps without re-cutting the chassis | Adopted |
 | 13-08-26 | Deck stack | Single deck vs double stack | Double stack | Uses the height envelope; battery low for CG, Pi/camera up for horizon | Adopted |

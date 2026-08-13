@@ -1,0 +1,34 @@
+graph TD
+    subgraph Power
+        BAT[11V 3S LiPo] --> BUCK1[Buck ~6V<br/>Motor/Servo Rail]
+        BAT --> BUCK2[Buck 5V<br/>Logic Rail]
+    end
+
+    subgraph Motor/Servo Rail ~6V
+        BUCK1 --> MOT[N20 Motor<br/>via TB6612FNG]
+        BUCK1 --> SRV[MG996R Servo]
+    end
+
+    subgraph Logic Rail 5V
+        BUCK2 --> PI[Raspberry Pi 4B]
+        BUCK2 --> ESP[ESP32]
+        BUCK2 --> CAM[Camera Module 3]
+        BUCK2 --> TOF[VL53L0X ToF]
+        BUCK2 --> IMU[MPU6050 IMU]
+        BUCK2 --> USR[HC-SR04 Ultrasonic]
+    end
+
+    subgraph Control
+        PI -->|USB Serial| ESP
+        ESP --> MOT
+        ESP --> SRV
+        ESP --> TOF
+        ESP --> IMU
+        ESP --> USR
+    end
+
+    style BAT fill:#ffecb3
+    style BUCK1 fill:#ffe0b2
+    style BUCK2 fill:#c8e6c9
+    style PI fill:#e1f5fe
+    style ESP fill:#e8f5e9

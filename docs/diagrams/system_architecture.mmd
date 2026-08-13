@@ -1,0 +1,16 @@
+graph LR
+    A[Pi Camera Module 3 Wide] --> B[Raspberry Pi 4B]
+    B -->|USB serial 115200| C[ESP32]
+    C --> D[MG996R Servo<br/>Ackermann Steering]
+    C --> E[TB6612FNG<br/>Motor Driver]
+    E --> F[N20 6V Motor<br/>Rear Axle]
+
+    B -->|Perception + Decision| B
+    C -->|Control + Safety| C
+
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e9
+    style D fill:#fff3e0
+    style E fill:#fff3e0
+    style F fill:#fce4ec

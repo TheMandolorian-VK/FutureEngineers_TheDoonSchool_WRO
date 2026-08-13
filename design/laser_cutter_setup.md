@@ -1,6 +1,6 @@
 # Laser Cutter Setup
 
-Procedure for cutting the plywood decks on the school laser cutter. Following this exactly is what makes the chassis reproducible (Criterion 5). The specific power/speed values are recorded in the LightBurn master and are copied here when they are confirmed on the school machine.
+Procedure for cutting the plywood decks on the school laser cutter. The specific power/speed values are recorded in the LightBurn master and are copied here when confirmed.
 
 ## Material
 

@@ -1,0 +1,29 @@
+graph TD
+    A[Lane Following] --> B{Pillar Detected?}
+    B -->|No| A
+    B -->|Yes| C{Pillar Colour?}
+    C -->|Red| D[Bias right +12°]
+    C -->|Green| E[Bias left -12°]
+    D --> F{Too Close?}
+    E --> F
+    F -->|Yes| G[Emergency Bias Away]
+    F -->|No| H[Pass Pillar]
+    G --> H
+    H --> I{Lap Complete?}
+    I -->|No| A
+    I -->|Yes| J{Laps >= 3?}
+    J -->|No| A
+    J -->|Yes| K[Send PARK]
+    K --> L[Detect Purple Blocks]
+    L --> M[IMU Align Parallel]
+    M --> N[Enter Parking Lot]
+    N --> O[ToF Measure Gap]
+    O --> P{Inside Tolerance?}
+    P -->|No| Q[Adjust Position]
+    Q --> O
+    P -->|Yes| R[Finish]
+
+    style D fill:#ffcdd2
+    style E fill:#c8e6c9
+    style K fill:#e1bee7
+    style R fill:#c8e6c9

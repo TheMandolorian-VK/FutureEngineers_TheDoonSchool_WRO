@@ -36,8 +36,8 @@ Three constraints drive every mechanical choice:
 
 The vehicle uses **front Ackermann steering with a servo** and **fully rear-wheel drive with one N20 motor**, on a **laser-cut 3 mm plywood double-stack chassis**. The rear N20 and its wheels are deliberately smaller than the front wheels, which lowers the drive/steering mass and gives the chassis a slight rearward (backward) tilt for stability through the 90° corners.
 
-> [!IMPORTANT]
-> **Rule compliance is non-negotiable.** WRO 2026 requires one driving axle and one steering actuator (Rules 11.3, 11.5, 11.13). Differential drive is disqualified. The build must confirm both rear wheels receive drive torque.
+> [!NOTE]
+> The design uses one driving axle (rear) and one steering actuator (front servo). Physical verification that both rear wheels receive torque is pending.
 
 ---
 
@@ -90,11 +90,11 @@ The 40° lock lets the car execute the sharp 90° corners of the 600 mm corridor
 ## 4. Chassis: laser-cut 3 mm plywood (LightBurn)
 
 - **Material:** 3 mm plywood: lighter than acrylic at equal stiffness, damps motor vibration, doesn't crack at screw points, cuts cleanly and fast.
-- **Tool:** school laser cutter, designed in **LightBurn**. The authoritative 2D cut file is committed as [`wooden_plate.dxf`](wooden_plate.dxf). The editable `.lbrn` LightBurn project is team-maintained and will be added to the repository so the chassis is reproducible from the repo alone (currently kept with the design records, not yet committed).
+- **Tool:** school laser cutter, designed in **LightBurn**. The DXF export is committed as [`wooden_plate.dxf`](wooden_plate.dxf) (currently a placeholder rectangle; see [cut file notes](dxf_notes.md)). The editable `.lbrn` LightBurn project and full deck patterns are pending.
 - **Edge treatment:** two thin coats of clear varnish seal the cut edges against moisture and warp.
 
 > [!NOTE]
-> The DXF is a 2D laser-cut flat pattern (the cut geometry), not a full 3D CAD model of the vehicle. It is the authoritative file for re-cutting the plywood decks. The editable `.lbrn` master will be committed alongside it so a future team can reproduce the chassis from this repository without external design files.
+> The DXF is a 2D laser-cut flat pattern (the cut geometry), not a full 3D CAD model. It currently contains only a placeholder rectangle (150 x 120 mm). The full deck patterns and `.lbrn` master are pending.
 
 ### Material tradeoff
 
@@ -113,7 +113,7 @@ The chassis is drawn in **LightBurn** and cut on the school laser cutter from 3 
 
 - **Layers:** the lower deck carries the drivetrain/electronics cut-outs; the upper deck carries the Pi + camera-mount cut-outs and the brass-standoff holes.
 - **Parameters recorded per file:** material (3 mm plywood), kerf compensation, and the cutter's power/speed setting for that material.
-- **Files:** the authoritative, version-controlled cut file is [`wooden_plate.dxf`](wooden_plate.dxf). The editable `.lbrn` master is team-maintained and will be committed so the geometry is fully reproducible from the repository. The DXF defines the same flat geometry as the `.lbrn`; the `.lbrn` adds the cut layers, kerf and power/speed settings needed to drive the cutter.
+- **Files:** the DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed (currently a placeholder). The editable `.lbrn` master and full deck patterns are pending.
 
 ### Double-stack layout: space utilisation
 
@@ -140,17 +140,17 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 
 ## 5. Why this layout satisfies the rules
 
-- **One driving axle:** a single N20 6 V motor is mechanically coupled to the rear axle through its gearbox, driving both rear wheels via that one axle (Rule 11.3/11.5). There are no independent side motors and no differential, so the design is not differential/per-side drive, which the rules disqualify.
-- **One steering actuator:** a single TowerPro MG996R servo drives the front Ackermann linkage; there is no second steering motor or caster actuator (Rule 11.13).
-- **No wireless:** all control and power stays on the vehicle; there is no radio link between the car and an external controller, consistent with the no-wireless requirement.
-- **Envelope and mass:** the double-stack plywood layout is designed to stay within ≤ 300×200×300 mm and ≤ 1.5 kg (Rules 11.1–11.2), with the mass budget in §2 kept under the limit.
+- **One driving axle:** a single N20 motor on the rear axle. Both rear wheels driven through one mechanically coupled axle.
+- **One steering actuator:** a single MG996R servo on the front Ackermann linkage.
+- **No wireless:** all control and power on board.
+- **Envelope and mass:** designed to stay within 300x200x300 mm and 1.5 kg (physical verification pending).
 
 ---
 
 ## 6. Drive: rear axle, single N20 motor
 
 - **Motor:** N20 6 V 600 RPM micro metal gear motor (spare unit carried).
-- **Transmission:** motor drives the rear axle through the gearbox in a mechanically coupled layout (compliant with Rule 11.13: drive wheels are physically connected through the axle; no independent side motors).
+- **Transmission:** motor drives the rear axle through the gearbox.
 - **Wheel:** front wheels ~40 mm diameter, high-traction rubber; **rear wheels are smaller (~30 mm design estimate)**, matched to the smaller rear N20. The rear bias lightens the drive end and produces the slight rearward chassis tilt described in §1; the axle is mechanically coupled (Rule 11.13 compliant: one driving axle, no independent side motors).
 
 ### Speed / torque reasoning
@@ -177,4 +177,4 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 
 ## 8. Current development status
 
-The mechanical design is through its second iteration (31°→40° steering, double-stack chassis assembled, drive train bench-tested). Integration and tuning are ongoing at the school lab; every change is logged in the [engineering journal](../docs/engineering_journal/README.md) and photographed in [images/robot/](../images/robot/README.md). The authoritative cut file [`wooden_plate.dxf`](wooden_plate.dxf) is committed; the editable `.lbrn` LightBurn project is team-maintained and will be added so the chassis is reproducible from the repository alone.
+The mechanical design is through its second iteration (31°→40° steering, double-stack chassis assembled). Integration and tuning are ongoing at the school lab; every change is logged in the [engineering journal](../docs/engineering_journal/README.md). The DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed (placeholder); the `.lbrn` master and full deck patterns are pending.

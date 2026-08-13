@@ -1,6 +1,14 @@
 # Release notes
 
 
+## v0.6 (2026-08-13)
+
+- Cleaned up overclaiming across all docs: removed "authoritative" DXF claims, softened rule-compliance language, marked all placeholders honestly.
+- Added 5 Mermaid diagrams: system_architecture, state_machine, challenge_flow, wiring_overview, obstacle_strategy.
+- Added CI link-check workflow (`.github/workflows/link-check.yml`).
+- Added competition day checklist (`docs/competition_day_checklist.md`).
+- Updated diagrams README to reflect committed Mermaid files.
+
 ## v0.5 (2026-08-13)
 
 - Full cross-file consistency audit and fix: corrected every verifiable overclaim against the actual source code (`wromain.py`, `obstacleChallenge.ino`).

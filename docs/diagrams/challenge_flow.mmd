@@ -1,0 +1,27 @@
+graph TD
+    A[Start] --> B[Camera Frame]
+    B --> C[3x3 Colour Grid]
+    C --> D[HSV Mask: red/green/purple/orange/blue/black]
+    D --> E[Contour Detection]
+    E --> F{Target Selection}
+    F -->|Corridor| G[Centre on lane]
+    F -->|Red Pillar| H[Pass right +12°]
+    F -->|Green Pillar| I[Pass left -12°]
+    F -->|Parking| J[Detect purple blocks]
+    G --> K[PD Steering]
+    H --> K
+    I --> K
+    J --> K
+    K --> L[Dynamic Drive Speed]
+    L --> M[Send CMD to ESP32]
+    M --> N{Lap Count >= 3?}
+    N -->|No| B
+    N -->|Yes| O[Send PARK]
+    O --> P[IMU Align + ToF Stop]
+    P --> Q[Finish]
+
+    style A fill:#c8e6c9
+    style Q fill:#ffcdd2
+    style H fill:#ffcdd2
+    style I fill:#c8e6c9
+    style J fill:#e1bee7

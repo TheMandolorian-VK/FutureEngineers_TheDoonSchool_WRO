@@ -1,6 +1,6 @@
 # Chassis Assembly Guide
 
-Step-by-step build sequence for the laser-cut plywood chassis. This is the reproducibility record (Criterion 5): a future team rebuilds the vehicle by following this guide with the cut file and the [mechanical BOM](bom_mechanical.md).
+Step-by-step build sequence for the laser-cut plywood chassis. A future team rebuilds the vehicle by following this guide with the cut file and the [mechanical BOM](bom_mechanical.md).
 
 Read the [design overview](README.md) first. Follow the [electronics guide](../electronics/README.md) for the wiring that is referenced below.
 

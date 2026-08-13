@@ -14,21 +14,21 @@ Each diagram is named by subject and version, and captioned **Planned** (to be p
 
 | Diagram | Type | Source | Status |
 | --- | --- | --- | --- |
-| Chassis cutting layout | LightBurn file (`.lbrn` + DXF) | Design records | Planned (`.lbrn` and full DXF deck patterns pending) |
-| Chassis assembly / double-stack layout | LightBurn + annotated photo | Design records | Planned |
-| Wiring flowchart | Mermaid + PDF export | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Planned |
-| Power distribution flow | Mermaid | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Planned |
-| System architecture (Pi ↔ ESP32 ↔ actuators) | Mermaid | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Planned |
-| Software state machine | Mermaid | `strategy/` | Planned |
-| Obstacle strategy flow (pillars, parking) | Mermaid | `strategy/` | Planned |
+| Chassis cutting layout | LightBurn file (`.lbrn` + DXF) | Design records | Pending (`.lbrn` and full DXF deck patterns not yet committed) |
+| Chassis assembly / double-stack layout | LightBurn + annotated photo | Design records | Pending |
+| Wiring flowchart | Mermaid | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Committed: `wiring_overview.mmd` |
+| Power distribution flow | Mermaid | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Committed: `wiring_overview.mmd` |
+| System architecture (Pi to ESP32 to actuators) | Mermaid | [hardware/wiring-guide/](../../hardware/wiring-guide/README.md) | Committed: `system_architecture.mmd` |
+| Software state machine | Mermaid | `strategy/` | Committed: `state_machine.mmd` |
+| Obstacle strategy flow (pillars, parking) | Mermaid | `strategy/` | Committed: `challenge_flow.mmd`, `obstacle_strategy.mmd` |
 
 ## Chassis cutting files (LightBurn)
 
 The chassis is cut from **3 mm plywood** on the school's laser cutter using **LightBurn**.
 
-- Source files: `.lbrn` project (editable) + exported DXF (portable) + PDF (print), stored with the design records. Only the DXF validation geometry is committed today ([cut file notes](../../design/dxf_notes.md)); the `.lbrn` master and full deck patterns are pending.
+- Source files: `.lbrn` project (editable) + exported DXF (portable) + PDF (print). Only the DXF placeholder is committed today ([cut file notes](../../design/dxf_notes.md)); the `.lbrn` master and full deck patterns are pending.
 - Two decks: lower deck (electronics, battery) + upper deck (Pi + camera), spaced by brass standoff offsets.
 - Every cut file lists: material, thickness, kerf setting, power/speed parameters used.
 
 > [!NOTE]
-> The LightBurn files are the planned primary mechanical source for Criterion 5 (Reproducibility). They are not in the repository yet; the [design](../../design/README.md) documentation tracks when they land.
+> The LightBurn `.lbrn` file and full DXF deck patterns are not yet committed. The five Mermaid diagrams above are committed.
