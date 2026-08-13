@@ -13,4 +13,4 @@
 Add a team photograph here only if every pictured person has agreed to its use in this public repository. Use a descriptive filename, for example `team-2026-08-12.jpg`.
 
 > [!NOTE]
-> This folder is currently reserved for a future team photograph.
+> This folder is currently empty. It is reserved for a future team photograph and identification material, to be added once consent is confirmed. No media is present yet.

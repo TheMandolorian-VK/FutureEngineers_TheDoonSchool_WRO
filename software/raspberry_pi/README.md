@@ -12,4 +12,4 @@
 
 ## Current contents
 
-- `wromain.cpp` — development-stage Raspberry Pi program.
+- `wromain.py` — development-stage Raspberry Pi program.

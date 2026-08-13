@@ -4,7 +4,7 @@
 
 **A dated trail of real progress, observations, and engineering review.**
 
-[← Project home](../README.md) · [Testing](../docs/testing/README.md) · [Photos](../images/README.md)
+[← Project home](../README.md) · [Testing records](../docs/testing/README.md) · [Photos](../images/README.md)
 
 </div>
 
@@ -26,3 +26,6 @@ For every record, state the date, what was observed, the configuration used, and
 
 > [!NOTE]
 > The archive grows as the development cycle continues. Evidence is added when observed: simulated or predicted results are never recorded as physical-test evidence.
+
+> [!IMPORTANT]
+> No raw evidence files (photographs, data logs, or videos) are present in this archive yet. They will be archived here as the vehicle is built and tested, and only observed results will ever be recorded.

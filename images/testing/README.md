@@ -13,4 +13,4 @@
 Add dated photographs or screenshots from actual tests here. Captions should state what is shown, the date, and relevant conditions.
 
 > [!CAUTION]
-> This directory is reserved for real evidence. Do not add predicted, simulated, or concept material as test proof.
+> This directory is currently empty. It is reserved for real evidence from dated tests. Do not add predicted, simulated, or concept material as test proof.
