@@ -1,6 +1,22 @@
 # Release notes
 
 
+## v0.5 (2026-08-13)
+
+- Full cross-file consistency audit and fix: corrected every verifiable overclaim against the actual source code (`wromain.py`, `obstacleChallenge.ino`).
+- Removed all invented mass, power, and torque estimates from design docs and journal; replaced with honest TBD measurement frameworks.
+- Fixed challenge-flow description in root README: ToF/IMU/parking/start-zone are now clearly marked as planned, not implemented.
+- Fixed strategy README: corrected wire-token statements, marked ToF/IMU-dependent behaviours as planned.
+- Fixed evidence archive: added status column (Analysis/Planned/Measured); corrected E3 journal reference, E5 status.
+- Fixed testing records: corrected T1/T4 result links, fixed `v-photos/` path.
+- Fixed diagrams README: marked all non-existent diagrams as Planned (not Verified).
+- Fixed wiring guide: marked LM317 as dropped (replaced by single-pack two-rail buck).
+- Fixed journal entries 02, 03, 04, 07, 08, 09, 10, 11 for overclaims.
+- Added mechanical BOM (`design/bom_mechanical.md`), Ackermann geometry spec, assembly guide, laser cutter setup, camera mount design, steering tuning plan, WRO rules checklist, design decision log, DXF notes, and mass budget framework.
+- Added detailed test procedures (`docs/testing/procedures.md`) for T1-T10.
+- Added software architecture deep-dive (`strategy/software_architecture.md`) grounded in actual code.
+- Linked BOMs from root README.
+
 ## v0.4 (2026-08-13)
 
 - Documentation consistency cleanup across all docs: removed decorative badges and emoji, aligned the serial protocol and power architecture descriptions, corrected broken links, and added an explicit rubric-to-criteria mapping.
