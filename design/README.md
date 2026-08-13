@@ -11,6 +11,21 @@
 
 ---
 
+## Documentation index
+
+- [Rule compliance checklist](rules_checklist.md) - WRO 2026 requirements mapped to the design
+- [Ackermann geometry](ackermann_geometry.md) - steering geometry, iterations and cornering analysis
+- [Mass budget](mass_budget.md) - component mass estimates and margins
+- [Assembly guide](assembly_guide.md) - step-by-step build sequence
+- [Mechanical BOM](bom_mechanical.md) - chassis and drivetrain parts
+- [Cut file notes](dxf_notes.md) - what wooden_plate.dxf contains today
+- [Design decision log](design_decisions.md) - decisions and rejected alternatives
+- [Laser cutter setup](laser_cutter_setup.md) - school laser workflow and kerf
+- [Camera mount design](camera_mount.md) - camera placement and mount
+- [Steering tuning plan](steering_tuning_plan.md) - on-mat steering verification
+
+---
+
 ## 1. Design philosophy
 
 Three constraints drive every mechanical choice:
