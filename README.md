@@ -48,8 +48,6 @@ It captures the team's submitted vehicle configuration, software architecture, d
 - **Envelope:** ≤ 300 × 200 × 300 mm; **mass:** ≤ 1.5 kg (Rules 11.1–11.2).
 - **No wireless** control during the run.
 
-> [!IMPORTANT]
-> **Truthful documentation commitment:** concept renders, design plans, source code, and physical test evidence are kept clearly separate throughout this repository. Anything that is a plan or render is labelled as such; only dated, observed results count as evidence.
 
 This is the team's **submission design reference**. The final vehicle is intended to align with this reference configuration. Specifications, source-code structure, visualisations, and measured evidence are distinguished so a reviewer can see exactly what each item represents.
 
