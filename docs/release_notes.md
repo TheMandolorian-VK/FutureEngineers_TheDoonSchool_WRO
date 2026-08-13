@@ -1,17 +1,20 @@
 # Release notes
 
-![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
-![Changelog](https://img.shields.io/badge/Changelog-v0.3-16803A?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
-![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
+
+## v0.4 (2026-08-13)
+
+- Documentation consistency cleanup across all docs: removed decorative badges and emoji, aligned the serial protocol and power architecture descriptions, corrected broken links, and added an explicit rubric-to-criteria mapping.
+- Power architecture restated consistently: single 11 V 3S LiPo driving two buck-regulated rails (motor/servo rail ~6 V, logic rail 5 V). The previously documented two-battery design (journal entry 07) is retained only as a historical record and is superseded by journal entry 11.
+- Serial protocol restated consistently: the Pi sends wire tokens `DRIVE`, `PARK`, `FINISH`, `STOP`, and `PING`; the `MODE_*` names are internal ESP32 firmware states and are never sent on the wire.
+- Added `docs/other/pid_tuning_log.md` as an honest, empty tuning template.
 
 ## v0.3 (2026-08-12)
 
 - Engineering journal completed and mapped to the WRO 2026 evaluation rubric (all 5 criteria).
 - Design documentation expanded: Ackermann steering geometry (31°→40° iteration), 3 mm plywood LightBurn chassis, double-stack layout (wood + LEGO + brass offsets).
-- Power and sensor architecture documented: two-rail/two-battery design, TB6612FNG driver (replacing L298N), VL53L0X + HC-SR04 + MPU6050 + Camera Module 3 Wide sensor suite.
+- Power and sensor architecture documented: single 11 V 3S LiPo with two buck-regulated rails (motor/servo rail ~6 V, logic rail 5 V), TB6612FNG driver (replacing L298N), VL53L0X + HC-SR04 + MPU6050 + Camera Module 3 Wide sensor suite.
 - Bill of materials published in `electronics/`.
-- Testing framework and test plan (T1–T10) published.
+- Testing framework and test plan (T1â€“T10) published.
 - Robot visualizations labelled as AI-generated concept renders showing the intended competition-day look.
 - Videos note: recordings are for competition day only; none made yet (vehicle in development stage): WRO India Team informed via calls/emails.
 
