@@ -13,16 +13,18 @@
 
 Add a dated Markdown record for every physical or software test. State the objective, setup, hardware/software version, procedure, raw measurements or observations, outcome, and next action.
 
+Detailed methodology for each test (T1-T10) is in [`procedures.md`](procedures.md).
+
 **Suggested filename:** `YYYY-MM-DD-short-test-name.md`
 
 ## Test plan summary
 
 | # | Date | Test | Status | Result link |
 | --- | --- | --- | --- | --- |
-| T1 | 2026-08-01 | Servo sweep + steering range (31° vs 40°) |  Done | steering sweep log |
-| T2 | 2026-08-03 | Motor driver comparison: L298N vs TB6612FNG dropout |  Done | journal entry 06 |
+| T1 | 2026-08-01 | Servo sweep + steering range (31° vs 40°) |  In progress | [geometry + analysis](../../design/ackermann_geometry.md) |
+| T2 | 2026-08-03 | Motor driver comparison: L298N vs TB6612FNG dropout |  In progress | journal entry 06 |
 | T3 | 2026-08-06 | PD steering tuning on straight + corner |  In progress | [`../other/pid_tuning_log.md`](../other/pid_tuning_log.md) |
-| T4 | 2026-08-08 | Camera HSV detection under two lighting setups |  In progress | vision test log |
+| T4 | 2026-08-08 | Camera HSV detection under two lighting setups |  In progress | N/A |
 | T5 | 2026-08-10 | Serial protocol fail-safe (timeout → MODE_FAULT) |  Planned | N/A |
 | T6 | 2026-08-12 | Wall-follow with VL53L0X in 600 mm corridor |  Planned | N/A |
 | T7 | 2026-08-14 | Pillar pass logic (red right / green left) |  Planned | N/A |
@@ -36,7 +38,7 @@ Add a dated Markdown record for every physical or software test. State the objec
 2. Define pass/fail metric before running.
 3. Run ≥5 repetitions; log all outcomes (pass/fail/partial).
 4. Keep failing runs: they document the iteration cycle.
-5. Link every result to a photo or video in `v-photos/` / `videos/`.
+5. Link every result to a photo or video in [`images/testing/`](../../images/testing/README.md) or [`videos/`](../../videos/README.md).
 
 ## Test-record template
 
