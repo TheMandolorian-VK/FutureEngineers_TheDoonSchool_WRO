@@ -75,21 +75,21 @@ The exact IMU and ToF pin assignments will be added after the final physical mod
 - **Failure handling:** logic-rail brownout → ESP32 enters `MODE_FAULT` and stops the vehicle.
 - The logic rail is produced by a **5 V buck regulator** from the 11 V pack (an earlier LM317 concept, R1 = 240 Ω / R2 = 720 Ω with 0.1 µF input / 10 µF output decoupling, was dropped because the 11 V input would make the linear regulator run hot). Final regulation, current capability, and thermal performance will be verified once the physical power system is assembled.
 
-### Power budget (estimated / design target; to be measured during integration)
+### Power budget (to be measured during integration)
 
-All figures below are estimates, not measured values.
+Component currents to be measured with a multimeter on each rail once the physical power system is assembled.
 
-| Load | Rail | Avg (estimated) | Peak (estimated) |
+| Load | Rail | Avg (measured) | Peak (measured) |
 | --- | --- | --- | --- |
-| Raspberry Pi 4B | Logic 5 V | 0.6 A | 1.2 A |
-| ESP32 | Logic 5 V | 0.12 A | 0.2 A |
-| Sensors (HC-SR04, VL53L0X, MPU6050) | Logic 5 V | 0.03 A | 0.1 A |
-| MG996R servo | Motor/servo ~6 V | 0.3 A | 1.2 A |
-| N20 motor | Motor/servo ~6 V | 0.5 A | 1.5 A |
-| **Logic rail total (estimated)** | 5 V | ~0.75 A | ~1.5 A |
-| **Motor rail total (estimated)** | ~6 V | ~0.8 A | ~2.7 A |
+| Raspberry Pi 4B | Logic 5 V | TBD | TBD |
+| ESP32 | Logic 5 V | TBD | TBD |
+| Sensors (HC-SR04, VL53L0X, MPU6050) | Logic 5 V | TBD | TBD |
+| MG996R servo | Motor/servo ~6 V | TBD | TBD |
+| N20 motor | Motor/servo ~6 V | TBD | TBD |
+| **Logic rail total** | 5 V | TBD | TBD |
+| **Motor rail total** | ~6 V | TBD | TBD |
 
-Estimated / design target values will be confirmed and recorded during integration as each rail is measured.
+Measured values will be recorded here as each rail is tested.
 
 ### Two-rail, single-pack confirmation
 

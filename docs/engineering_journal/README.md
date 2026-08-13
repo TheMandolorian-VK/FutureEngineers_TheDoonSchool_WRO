@@ -75,11 +75,11 @@ Click an entry number to jump to its section.
 - C) Fully 3D-printed frame.
 - D) Aluminium sheet.
 
-**Chosen: B, with C for brackets.** Plywood is lighter than acrylic of equal stiffness, damps motor vibration better, and cuts cleanly at speed on the school's laser cutter. Acrylic cracks at screw holes under servo load; plywood does not. The `.lbrn`/DXF source files are published so the chassis is fully reproducible. Small brackets and sensor mounts are 3D-printed (PLA) where complex geometry is needed (servo horn mount, camera mount).
+**Chosen: B, with C for brackets.** Plywood is lighter than acrylic of equal stiffness, damps motor vibration better, and cuts cleanly at speed on the school's laser cutter. Acrylic cracks at screw holes under servo load; plywood does not. The DXF export is committed (currently the validation geometry; full deck patterns pending) and the editable `.lbrn` master will be published so the chassis is reproducible from the repository alone. Small brackets and sensor mounts are 3D-printed (PLA) where complex geometry is needed (servo horn mount, camera mount).
 
 **Tradeoff:** plywood absorbs moisture and can warp: mitigated by sealing edges with two thin coats of clear varnish and keeping the chassis in the transport case between sessions.
 
-**Evidence:** LightBurn source files in the repo; cut parts photographed in `images/robot/`.
+**Evidence:** DXF export committed (see [cut file notes](../../design/dxf_notes.md)); concept renders in [`images/robot/`](../../images/robot/README.md). Photographs of cut parts will be added as the decks are cut.
 
 **Next action:** test a 2.4 mm plywood variant to compare stiffness-to-mass.
 
@@ -87,11 +87,14 @@ Click an entry number to jump to its section.
 
 ### 03: Drive system: N20 600 RPM motor (2026-07-22, by Vivaan K.)
 
-**Problem:** choose a drive motor with enough speed to complete 3 laps inside 3 minutes and enough torque to accelerate a ~1.3 kg car reliably.
+**Problem:** choose a drive motor with enough speed to complete 3 laps inside 3 minutes and enough torque to accelerate the vehicle reliably.
 
-**Calculation (speed):** track centre-line lap ≈ 11–13 m ⇒ 3 laps ≈ 36–40 m. At a cruise of 0.55 m/s, 3 laps ≈ 66–72 s, leaving ~110 s of margin for corners and parking. N20 at 6 V free-runs at 600 RPM; with a ~40 mm wheel this is ≈ 1.2 m/s theoretical, so we operate comfortably mid-throttle.
+> [!NOTE]
+> Corrected 2026-08-13 to match the confirmed configuration (Entry 11): the driven rear wheels are the smaller ~30 mm ones; front wheels ~40 mm.
 
-**Calculation (torque):** N20 gearbox output torque is roughly 0.8–1.0 kg·cm at stall for this ratio. Rolling-resistance force for 1.3 kg ≈ 1.3–2.6 N; wheel radius 0.02 m ⇒ required torque ≈ 0.03–0.06 kg·cm. Stall torque exceeds requirement by >10×, so the limit is speed, not torque: correct for a flat, low-friction mat.
+**Calculation (speed):** N20 at 6 V free-runs at 600 RPM (10 rev/s). On the ~30 mm driven rear wheels (circumference ≈ π × 30 mm ≈ 94 mm) this gives a theoretical no-load speed ≈ 0.94 m/s. Real cruise speed will be lower under load; the plan is to cruise near 0.55 m/s for consistency, well inside the 3-minute round.
+
+**Calculation (torque):** the N20 stall torque is datasheet-typical and will be confirmed by bench test. Rolling-resistance force for the vehicle mass is to be measured on the mat. The design is expected to be speed-limited, not torque-limited: correct for a flat, low-friction mat.
 
 **Tradeoff:** higher-RPM variants (1000 RPM) would shorten lap time but worsen precision at stop lines and during parking. We prioritise **consistency** over peak speed, matching the rubric's "stability of mission solving".
 
@@ -117,7 +120,7 @@ Click an entry number to jump to its section.
 - Prototype 2 raised the lock angle to 40°: the car negotiated the 600 mm corners with ~80 mm of clearance to both walls, at the cost of slightly harsher servo transitions. The Ackermann ratio was tuned (inner/outer angle difference) to keep all four wheels rolling without slip.
 - Result: 40° selected for narrow-corridor reliability; the controller treats angles near lock as a distinct state so the PD gain can be softened and the car does not jerk.
 
-**Evidence:** steering sweep measurements and turn-radius logs captured during bench tests; geometry documented in `design/`.
+**Evidence:** geometry and analysis documented in [`design/`](../../design/README.md) (Ackermann spec and turning-radius calculations); a dated steering-sweep record is pending in [testing T1](../testing/README.md).
 
 **Next action:** add toe-in verification per side after every reassembly.
 
@@ -167,9 +170,9 @@ Click an entry number to jump to its section.
 - Star grounding: all logic grounds meet at a single point; motor ground returns separately to its pack negative, keeping servo/motor currents out of the logic reference.
 - Decoupling: 0.1 µF ceramic on every IC VCC; 100 µF electrolytic on the 5 V rail.
 
-**Power budget (estimated, to be verified):** Pi 4B ~0.6 A avg; ESP32 ~0.1 A; sensors ~0.05 A; servo ~0.3 A avg (1.2 A peak); N20 ~0.5 A avg (1.5 A stall). Total logic rail ≈ 0.8 A, motor rail ≈ 0.8 A avg / 2.7 A peak. Both rails fused.
+**Power budget (to be measured):** component currents per rail to be measured with a multimeter once the physical system is assembled (see [electronics/](../../electronics/README.md) power budget section). Both rails fused.
 
-**Failure consideration:** if the logic rail browns out, the ESP32's `MODE_FAULT` logic stops the vehicle rather than letting it run uncontrolled.
+**Failure consideration:** a logic-rail brownout resets the ESP32, which starts in `MODE_STOP` (motor off, steering centred), so the vehicle does not run uncontrolled. `MODE_FAULT` is triggered by a serial timeout (>350 ms) or an invalid command.
 
 **Next action:** record measured currents per rail in the power section of `electronics/README.md` as each subsystem is verified.
 
@@ -187,7 +190,7 @@ Click an entry number to jump to its section.
 
 **Placement justification (field geometry):** the camera is mounted forward on the upper deck to see pillars ~0.5–1.5 m ahead (reaction distance at 0.55 m/s ≈ 0.9–2.7 m). The VL53L0X is front-centre for pillar/parking gap measurement; the HC-SR04 is front-corner for wall proximity. MPU6050 is placed at the centre of mass to minimise lever-arm coupling into the gyro.
 
-**Calibration:** camera exposure locked; HSV bounds auto-tuned at boot against the first frames. MPU6050 zero-bias captured for 2 s at start. ToF readings median-filtered (5 samples).
+**Calibration (plan):** camera exposure locked; HSV tolerance is adjustable live (trackbar) in `wromain.py`, with boot-time auto-tuning to be added. MPU6050 zero-bias capture over 2 s at start and the VL53L0X 5-sample median filter are planned once the modules are wired; nothing is calibrated in code yet.
 
 **Next action:** add I²C bus test + VL53L0X address-shift to avoid conflicts with the IMU.
 
@@ -207,16 +210,16 @@ Click an entry number to jump to its section.
 - The Pi sends wire tokens `DRIVE`, `PARK`, `FINISH`, `STOP`, and `PING` over a 115200-baud serial protocol (format `CMD,<steer>,<pwm>,<mode>`). These map to the internal firmware states `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, and `MODE_FAULT`. Fault mode is entered on serial timeout or invalid command: the vehicle always fails safe. The `MODE_*` names are internal states and are never sent on the wire.
 
 **Obstacle strategy (Obstacle Challenge):**
-1. Lane-follow by centring on the corridor (PD steering on vision offset, wall-distance check via VL53L0X).
-2. Pillar handling: red pillar → pass on its **right**; green pillar → pass on its **left** (colour from camera grid). The car biases the centring target toward the correct side and verifies clearance with the ToF before re-centring.
-3. After 3 laps → `PARK`: detect magenta parking-limit blocks with the camera, align parallel using the IMU heading, and use the ToF to stop at the correct depth inside the 20 cm-wide lot.
-4. Open Challenge: corner detection from wall geometry + lap counting by crossing section lines (orange/blue), then autonomous stop in the finish section.
+1. Lane-follow by centring on the corridor (PD steering on vision offset; wall-distance check via VL53L0X planned once the ToF is wired).
+2. Pillar handling: red pillar → pass on its **right**; green pillar → pass on its **left** (colour from camera grid). The code biases the centring target toward the correct side (+12°, reduced to 35% when the pillar is already on the required side). The ToF clearance re-check before re-centring is planned.
+3. After 3 laps → the Pi sends `PARK`. The parking manoeuvre itself is **planned, not yet in code**: detect magenta parking-limit blocks with the camera, align parallel using the IMU heading, and use the ToF to stop at the correct depth inside the 20 cm-wide lot.
+4. Open Challenge: corner handling via the PD controller today; wall-geometry corner detection and orange/blue section-line lap counting are planned. The lap counter depends on a start-zone detector that is not yet wired.
 
-**Edge cases handled:** lost line (re-acquire by sweeping), serial timeout (fault stop), pillar too close (emergency bias), parking overshoot (back up in small IMU-controlled steps).
+**Edge cases handled:** lost line (re-acquire by sweeping), serial timeout (fault stop), pillar too close (emergency bias). Planned: parking overshoot (back up in small IMU-controlled steps once the IMU is integrated).
 
-**Testing/tuning method:** per-lap intervention count is logged; the PD gains were tuned to minimise interventions (see [`../other/pid_tuning_log.md`](../other/pid_tuning_log.md)).
+**Testing/tuning method:** per-lap intervention count is logged; PD gains are set (KP = 32, KD = 10) and will be tuned against that metric, with results recorded in the [PID tuning log](../other/pid_tuning_log.md) (currently empty).
 
-**Next action:** complete orange/blue line following and lap counting (tracked in the code header's "not yet implemented" list).
+**Next action:** wire the start-zone detector and the parking manoeuvre in `wromain.py` (the IMU and ToF interfaces are currently placeholders).
 
 ---
 
@@ -224,12 +227,12 @@ Click an entry number to jump to its section.
 
 | Risk | Likelihood | Impact | Mitigation |
 | --- | --- | --- | --- |
-| Camera glare / lighting change | Medium | High | exposure lock + boot-time HSV recalibration; tested under fluorescent + spot lighting |
+| Camera glare / lighting change | Medium | High | exposure lock + boot-time HSV recalibration (planned); to be tested under fluorescent + spot lighting (T4) |
 | Battery sag under servo+motor peak | Medium | High | single 11 V 3S LiPo feeding two-rail buck power; fused rails; pack with adequate C rating |
-| Wall collision in 600 mm corridor | Medium | High | 40° steering, speed reduction near walls (proximity-driven speed), ToF wall check |
-| Serial dropout Pi↔ESP32 | Low | High | fault state + re-sync on checksum failure; USB cable strain-relieved |
-| ToF misread on white mat at shallow angle | Medium | Medium | 5-sample median filter; mount at 15° downward |
-| Wheel slip during parking | Medium | Medium | low speed, IMU heading feedback, short move steps |
+| Wall collision in 600 mm corridor | Medium | High | 40° steering, speed reduction near walls (planned: proximity-driven speed via VL53L0X once wired), ToF wall check (planned) |
+| Serial dropout Pi↔ESP32 | Low | High | watchdog fault state + re-sync on checksum failure; USB cable strain-relieved |
+| ToF misread on white mat at shallow angle | Medium | Medium | 5-sample median filter (planned); mount at 15° downward |
+| Wheel slip during parking | Medium | Medium | low speed, IMU heading feedback (planned), short move steps |
 | Sudden rule change (surprise rule, Day 2) | Medium | Medium | modular code: strategy params in one config file; reserve a config slot per round |
 
 ---
@@ -239,7 +242,7 @@ Click an entry number to jump to its section.
 **Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised. It **supersedes Entry 07**, replacing its two-battery design with a single 11 V 3S LiPo pack feeding two buck-regulated rails.
 
 **Confirmed configuration:**
-- **Structure:** laser-cut 3 mm plywood double-stack chassis (LightBurn source → `design/wooden_plate.dxf`), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting + steering rails.
+- **Structure:** laser-cut 3 mm plywood double-stack chassis (LightBurn source → DXF export `design/wooden_plate.dxf`, currently the validation geometry; `.lbrn` master and full deck patterns pending), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting + steering rails.
 - **Decks:** upper deck = Raspberry Pi 4B + Camera Module 3 Wide; lower deck = 11 V 3S LiPo pack + ESP32 + TB6612FNG.
 - **Drive:** fully rear-wheel drive, one N20 6 V 600 RPM motor on the rear axle (Rule 11.3/11.13 compliant: one driving axle, no independent side motors). Rear wheels and the rear N20 are smaller than the front wheels, giving the chassis a slight rearward tilt.
 - **Steering:** front TowerPro MG996R servo driving an Ackermann linkage built from LEGO beams/pins; outer lock 40° (Entry 04).

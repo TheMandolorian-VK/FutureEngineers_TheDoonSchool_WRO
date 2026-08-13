@@ -13,7 +13,7 @@ Status legend:
 | Rule | Requirement | Design answer | Status |
 | --- | --- | --- | --- |
 | 11.1-11.2 | Envelope ≤ 300x200x300 mm | Double-stack plywood layout keeps the 300x200 mm footprint; deck spacing ~35 mm keeps height low | To verify with the envelope gauge at the build |
-| 11.1-11.2 | Mass ≤ 1.5 kg | [Mass budget](mass_budget.md) estimates ~776 g with margin | To verify with a scale |
+| 11.1-11.2 | Mass ≤ 1.5 kg | [Mass budget](mass_budget.md) framework ready; to be measured with a scale | To verify with a scale |
 | 11.3 / 11.5 | Exactly **one driving axle** | Single N20 6 V motor drives the rear axle; both rear wheels driven through one mechanically coupled axle | To verify both rear wheels receive torque |
 | 11.3 / 11.5 | No differential drive, no one-motor-per-side | No independent side motors, no differential fitted | Designed |
 | 11.13 | Exactly **one steering actuator** | Single TowerPro MG996R servo drives the front Ackermann linkage | Designed |

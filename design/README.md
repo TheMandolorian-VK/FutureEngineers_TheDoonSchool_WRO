@@ -54,24 +54,9 @@ The values below are **design targets** captured from the CAD layout and the cur
 | Ground clearance | ~12 mm | Chassis underside to mat; set by deck height and wheel size |
 | Total mass | ≤ 1.5 kg | Target; see mass budget below |
 
-### Mass budget (component mass estimates)
+### Mass budget
 
-All figures are **design estimates** from datasheets and quoted part weights, not weighed values. The total is kept well under the 1.5 kg rule limit to leave tuning margin.
-
-| Component | Est. mass (g) |
-| --- | --- |
-| Two plywood decks + brass standoffs | 120 |
-| 11 V 3S LiPo battery | 150 |
-| N20 6 V motor + gearbox | 30 |
-| MG996R servo | 55 |
-| Raspberry Pi 4B | 46 |
-| Camera Module 3 Wide | 25 |
-| ESP32 dev board | 25 |
-| TB6612FNG driver + wiring | 15 |
-| Four wheels (front ~40 mm, rear ~30 mm) | 60 |
-| LEGO rails and mounting hardware | 150 |
-| Misc (screws, tie rods, connectors) | 100 |
-| **Estimated total** | **776** |
+Component masses to be measured once the vehicle is assembled (see [mass budget](mass_budget.md)). The rule limit is 1.5 kg.
 
 ---
 
@@ -171,7 +156,7 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 ### Speed / torque reasoning
 
 - **Top speed (driven wheel):** the driven rear wheels are the smaller ones (~30 mm design estimate), not the ~40 mm front wheels. Circumference ≈ π × 30 mm ≈ 94.2 mm. At the N20 free-run speed of 600 RPM (10 rev/s), the **theoretical no-load speed (design estimate)** is ≈ 94.2 mm × 10 ≈ 0.94 m/s. Real cruise speed is lower because of load, tyre slip, and the PD speed controller leaving margin for corners and parking. We plan to cruise near 0.55 m/s for consistency, well inside the 3-minute round.
-- **Torque:** rolling resistance for ~0.8 kg (design mass estimate) ≈ 0.8–1.6 N → required torque ≈ 0.012–0.024 N·m at the wheel. The N20 stall torque is **datasheet-typical, to be confirmed by bench test** (≈ 0.08–0.10 N·m typical); this gives a comfortable margin on a flat, low-friction mat. The design is speed-limited, not torque-limited.
+- **Torque:** rolling resistance force for the vehicle mass is to be measured on the mat. The N20 stall torque is datasheet-typical and to be bench-confirmed. The design is expected to be speed-limited, not torque-limited: correct for a flat, low-friction mat.
 
 ---
 

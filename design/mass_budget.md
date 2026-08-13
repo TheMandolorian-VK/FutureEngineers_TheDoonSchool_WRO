@@ -1,34 +1,30 @@
 # Mass Budget
 
-Component mass estimates for the WRO 2026 Future Engineers vehicle. All figures are **design estimates** from datasheets and quoted part weights. Nothing here is a weighed value; the whole budget is confirmed with a scale once the vehicle is assembled.
+Component masses to be measured once the vehicle is assembled. The rule limit is 1.5 kg (Rules 11.1-11.2).
 
-## Budget
+## Budget (to be filled in with a scale)
 
-| Component | Est. mass (g) | Notes |
+| Component | Measured mass (g) | Notes |
 | --- | --- | --- |
-| Two plywood decks + brass standoffs | 120 | 3 mm plywood, 4-6 standoffs |
-| 11 V 3S LiPo battery | 150 | Sole energy source |
-| N20 6 V motor + gearbox | 30 | Rear drive |
-| MG996R servo | 55 | Steering |
-| Raspberry Pi 4B | 46 | Vision and decisions |
-| Camera Module 3 Wide | 25 | Upper deck, forward |
-| ESP32 dev board | 25 | Real-time control |
-| TB6612FNG driver + wiring | 15 | Motor/servo driver |
-| Four wheels (front ~40 mm, rear ~30 mm) | 60 | Rear wheels smaller |
-| LEGO rails and mounting hardware | 150 | 8 mm grid mounting |
-| Misc (screws, tie rods, connectors) | 100 | Hardware allowance |
-| **Estimated total** | **776** | Under the 1.5 kg limit |
+| Two plywood decks + brass standoffs | TBD | 3 mm plywood, 4-6 standoffs |
+| 11 V 3S LiPo battery | TBD | Sole energy source |
+| N20 6 V motor + gearbox | TBD | Rear drive |
+| MG996R servo | TBD | Steering |
+| Raspberry Pi 4B | TBD | Vision and decisions |
+| Camera Module 3 Wide | TBD | Upper deck, forward |
+| ESP32 dev board | TBD | Real-time control |
+| TB6612FNG driver + wiring | TBD | Motor/servo driver |
+| Four wheels (front ~40 mm, rear ~30 mm) | TBD | Rear wheels smaller |
+| LEGO rails and mounting hardware | TBD | 8 mm grid mounting |
+| Misc (screws, tie rods, connectors) | TBD | Hardware allowance |
+| **Total** | **TBD** | Must be under 1.5 kg |
 
-## Margin
+## Procedure
 
-The rule limit is 1.5 kg (1500 g). The estimate leaves roughly 720 g of margin, which is reserved for:
-
-- wiring and cable ties not yet accounted for,
-- the 3D-printed steering knuckles,
-- the camera bracket and any brackets made during integration,
-- spare-fastener weight during field repairs.
-
-If the weighed total approaches 1.4 kg the first candidates to trim are the LEGO rail allowance and the hardware allowance, not the battery or the drive train.
+1. Weigh each component individually on a digital scale.
+2. Record the value in this table.
+3. Sum the total and confirm it is under 1.5 kg.
+4. Log the result in the [engineering journal](../docs/engineering_journal/README.md).
 
 ## Centre of gravity
 
@@ -38,7 +34,7 @@ The CG is intended to sit low and slightly rearward:
 - The steering assembly (servo, knuckles, tie rod) is lighter than the drive end, so the front stays light.
 - Lower-deck mass keeps the CG low, which limits body roll through corners.
 
-A rear-biased low CG is a deliberate design choice for stability in the 90° corners, not an accident of layout. Once built, the CG is checked by balancing the vehicle on a thin fulcrum fore and aft of the axles and recorded in the [engineering journal](../docs/engineering_journal/README.md).
+Once built, the CG is checked by balancing the vehicle on a thin fulcrum fore and aft of the axles and recorded in the [engineering journal](../docs/engineering_journal/README.md).
 
 ## Related documents
 
