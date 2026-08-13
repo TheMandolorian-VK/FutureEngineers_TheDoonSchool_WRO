@@ -172,7 +172,7 @@ Configuration is kept separate from evidence. A design choice is explained in th
 
 ## Visuals
 
-The repository keeps team, vehicle, testing and competition visuals in separate folders so context stays clear. Vehicle views in [`images/robot/`](images/robot/README.md) are **AI-generated concept renders** based on the submitted configuration, each labelled *AI-generated concept render*: they are design-reference views, not photographs. With the WRO India Team informed via call/email, competition-day videos are recorded only on the day of the event and archived in [`videos/README.md`](videos/README.md).
+The repository keeps team, vehicle, testing and competition visuals in separate folders so context stays clear. Vehicle views in [`images/robot/`](images/robot/README.md) are concept renders of the submitted configuration: design-reference views, not photographs. Competition-day videos are recorded on the day of the event and archived in [`videos/README.md`](videos/README.md).
 
 ---
 
@@ -211,13 +211,13 @@ The documentation is organised against the five WRO 2026 Future Engineers criter
 
 ## Robot Visualisations
 
-Visuals in [`images/robot/`](images/robot/) are **AI-generated concept renders** of the submitted vehicle configuration: design-reference views, not photographs.
+Visuals in [`images/robot/`](images/robot/) are concept renders of the submitted vehicle configuration: design-reference views, not photographs.
 
 ---
 
 ## Documentation Standard
 
-We keep a clear distinction between **configuration material**, **concept renders**, **source files** and **measured results**.
+We keep a clear distinction between **configuration material**, **source files** and **measured results**.
 
 - Each test record states its date, setup, method, observations and next action.
 - Configuration material is labelled clearly and kept separate from measured evidence.

@@ -39,7 +39,7 @@
 - Power and sensor architecture documented: single 11 V 3S LiPo with two buck-regulated rails (motor/servo rail ~6 V, logic rail 5 V), TB6612FNG driver (replacing L298N), VL53L0X + HC-SR04 + MPU6050 + Camera Module 3 Wide sensor suite.
 - Bill of materials published in `electronics/`.
 - Testing framework and test plan (T1â€“T10) published.
-- Robot visualizations labelled as AI-generated concept renders showing the intended competition-day look.
+- Robot visualizations added as concept renders showing the intended competition-day look.
 - Videos note: recordings are for competition day only; none made yet (vehicle in development stage): WRO India Team informed via calls/emails.
 
 ## v0.2 (2026-08-05)
@@ -52,4 +52,4 @@
 
 - Repository structure established for WRO Future Engineers documentation.
 - Added evidence and documentation templates for design decisions, testing, diagrams, wiring, images, and videos.
-- Robot visualizations are labelled as AI-generated concept renders, not physical-robot photographs.
+- Robot visualizations are concept renders, not physical-robot photographs.

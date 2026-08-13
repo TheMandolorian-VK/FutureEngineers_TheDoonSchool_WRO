@@ -79,7 +79,7 @@ Click an entry number to jump to its section.
 
 **Tradeoff:** plywood absorbs moisture and can warp: mitigated by sealing edges with two thin coats of clear varnish and keeping the chassis in the transport case between sessions.
 
-**Evidence:** DXF export committed (see [cut file notes](../../design/dxf_notes.md)); concept renders in [`images/robot/`](../../images/robot/README.md). Photographs of cut parts will be added as the decks are cut.
+**Evidence:** DXF export committed (see [cut file notes](../../design/dxf_notes.md)); vehicle renders in [`images/robot/`](../../images/robot/README.md). Photographs of cut parts will be added as the decks are cut.
 
 **Next action:** test a 2.4 mm plywood variant to compare stiffness-to-mass.
 
