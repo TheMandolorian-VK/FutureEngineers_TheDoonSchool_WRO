@@ -6,10 +6,6 @@
 
 ### Engineering the autonomous vehicle for the World Robot Olympiad Future Engineers category
 
-![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
-![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Submission%20Configuration-F59E0B?style=for-the-badge)
-![Docs](https://img.shields.io/badge/Documentation-Engineering%20Record-16803A?style=for-the-badge)
 
 [Explore the project](#explore-the-project) · [System architecture](#system-architecture) · [Team](#team) · [Roadmap](#development-roadmap)
 
@@ -104,7 +100,7 @@ Raspberry Pi 4B  ──(USB serial, 115200 baud)──►  ESP32
 | Orientation | **MPU6050** 6-axis IMU (DFRobot Fermion) |
 | Motor driver | **TB6612FNG** (1 A/channel) |
 | Chassis | 3 mm laser-cut plywood (LightBurn), brass standoff offsets, two decks |
-| Battery | **11 V 3S LiPo** → motor/servo rail ~6–7.4 V; logic rail 5 V |
+| Battery | **11 V 3S LiPo** → motor/servo rail ~6 V (within N20 6 V and MG996R 4.8–7.2 V ratings); logic rail 5 V |
 | Envelope / mass | ≤ 300 × 200 × 300 mm, ≤ 1.5 kg |
 
 The rear N20 and its wheels are deliberately **smaller than the front wheels**, lowering the drive mass and giving the chassis a slight rearward tilt for corner stability.
@@ -120,7 +116,7 @@ Key points of the submitted configuration:
 - **Front Ackermann steering** driven by an MG996R servo. The steering arms, knuckles and tie-rod geometry are built from **LEGO beams and pins** on a front sub-frame, so the Ackermann trapezoid can be re-jigged in 8 mm steps during tuning without re-cutting the chassis. Outer lock was iterated **31° → 40°** to clear the 600 mm corridor 90° corners (see journal Entry 04).
 - **Fully rear-wheel drive** with one N20 6 V 600 RPM motor on the rear axle: Rule 11.13 compliant (one driving axle, no independent side motors). Rear wheels are smaller than the front, producing the rearward tilt described above.
 - **Two-deck 3 mm plywood chassis**, laser-cut in **LightBurn**. Upper deck carries the Raspberry Pi 4B + Camera Module 3 Wide; lower deck carries the 11 V 3S LiPo pack, ESP32 and TB6612FNG. The decks are spaced by **brass standoff offsets**, with LEGO used as adjustable mounting rails.
-- **LightBurn reproducibility:** the chassis is drawn in LightBurn and cut from 3 mm plywood; the editable `.lbrn` master and the portable export [`wooden_plate.dxf`](design/wooden_plate.dxf) define the same geometry so the chassis can be reproduced from the repository alone.
+- **LightBurn reproducibility:** the chassis is drawn in LightBurn and cut from 3 mm plywood; the portable export [`wooden_plate.dxf`](design/wooden_plate.dxf) is the authoritative 2D cut file (flat pattern) committed to the repository. The editable `.lbrn` LightBurn project is team-maintained and will be added so the chassis is reproducible from the repository alone.
 
 ---
 
@@ -128,10 +124,10 @@ Key points of the submitted configuration:
 
 Full detail: [`electronics/README.md`](electronics/README.md) · Wiring: [`hardware/wiring-guide/README.md`](hardware/wiring-guide/README.md).
 
-- **Two-rail power from one 11 V 3S LiPo pack:** the motor/servo rail is buck-regulated to ~6–7.4 V for the N20 + MG996R; the logic rail is buck-regulated to 5 V for the Pi 4B, ESP32, HC-SR04, VL53L0X and MPU6050.
+- **Two-rail power from one 11 V 3S LiPo pack:** the motor/servo rail is buck-regulated to ~6 V (within the N20 6 V and MG996R 4.8–7.2 V ratings) for the N20 + MG996R; the logic rail is buck-regulated to 5 V for the Pi 4B, ESP32, HC-SR04, VL53L0X and MPU6050.
 - **Star grounding:** all logic grounds meet at one point; motor/servo currents return separately, keeping servo/motor noise out of the logic reference.
 - **Protection:** both rails fused; a logic-rail brownout drives the ESP32 into `MODE_FAULT` and stops the vehicle.
-- **Pin assignments** for the ESP32 (MG996R → GPIO 13; TB6612FNG PWMA/AIN1/AIN2/STBY → GPIO 25/26/27/32; status LEDs → GPIO 2/4) and the Pi↔ESP32 USB-serial link (115200 baud, `CMD,<steer>,<pwm>,<mode>` / `STOP` / `PING`) are documented in the wiring guide.
+- **Pin assignments** for the ESP32 (MG996R → GPIO 13; TB6612FNG PWMA/AIN1/AIN2/STBY → GPIO 25/26/27/32; status LEDs → GPIO 2/4) and the Pi↔ESP32 USB-serial link (115200 baud; messages `CMD,<steer>,<pwm>,<mode>` with `<mode>` ∈ {`DRIVE`, `PARK`, `FINISH`, `STOP`}, plus bare `STOP` and `PING`) are documented in the wiring guide.
 
 > [!NOTE]
 > The vehicle is in the development and integration phase; measured rail currents and calibrated values will be added to the testing records as subsystems are verified.
@@ -144,10 +140,10 @@ Full detail: [`strategy/README.md`](strategy/README.md) · Pi code: [`software/r
 
 Two-layer software:
 
-- **Raspberry Pi (`wromain.py`):** camera frames → 3×3 colour grid → per-cell HSV masks (red / green / blue / orange / magenta) → contour detection → target selection → lateral-error **PD steering** → dynamic drive speed. PD (not full PID) is used deliberately: no sustained steady-state error needs the integral term, and D-only damping prevents corner oscillation.
-- **ESP32 (`obstacleChallenge.ino`):** executes bounded commands through a safety state machine with modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`. Fault is entered on serial timeout or invalid command: the vehicle always fails safe.
+- **Raspberry Pi (`wromain.py`):** camera frames → 3×3 colour grid → per-cell HSV masks (red, green, purple (the WRO magenta parking blocks), orange and blue; black is the neutral background cell) → contour detection → target selection → lateral-error **PD steering** → dynamic drive speed. PD (not full PID) is used deliberately: no sustained steady-state error needs the integral term, and D-only damping prevents corner oscillation.
+- **ESP32 (`obstacleChallenge.ino`):** executes bounded commands through a safety state machine with internal states `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT` (the Pi sends only the wire tokens `DRIVE`, `PARK`, `FINISH`, `STOP` and `PING`; invalid input drives `MODE_FAULT`). Fault is entered on serial timeout or invalid command: the vehicle always fails safe.
 
-**Obstacle Challenge flow:** lane-follow by centring on the corridor (PD on vision offset, ToF wall check) → red pillar pass right / green pillar pass left (colour from camera grid, clearance verified by ToF) → after 3 laps `MODE_PARK` (magenta blocks via camera, IMU heading alignment, ToF depth stop). **Open Challenge:** corner detection from wall geometry + lap counting by orange/blue section lines, then autonomous stop.
+**Obstacle Challenge flow:** lane-follow by centring on the corridor (PD on vision offset, ToF wall check) → red pillar pass right / green pillar pass left (colour from camera grid, clearance verified by ToF) → after 3 laps the Pi sends `PARK` and the firmware enters `MODE_PARK` (purple / the WRO magenta parking blocks via camera, IMU heading alignment, ToF depth stop). **Open Challenge:** corner detection from wall geometry + lap counting by orange/blue section lines, then autonomous stop.
 
 Edge cases handled: lost line (re-acquire by sweep), serial dropout (fault stop), pillar too close (emergency bias), parking overshoot (small IMU-controlled steps).
 
@@ -191,35 +187,21 @@ Exact dependencies and compile/upload commands belong in the respective software
 
 This repository is built to make the submitted configuration clear to judges, mentors and other students. It contains the team's own documentation framework and source files; the team does not copy another team's engineering claims, mechanical design, media or code. Git history records the team's own work on this project.
 
+The documentation is organised against the five WRO 2026 Future Engineers criteria (Mobility & Mechanical Design, Power & Sensor Architecture, Software Architecture & Obstacle Strategy, Systems Thinking & Engineering Decisions, Reproducibility & GitHub Quality). The mapping from each criterion to the relevant files is maintained in [`docs/README.md`](docs/README.md).
+
 ---
-
-## Project Status Dashboard
-
-| Area | Status | Notes |
-| --- | --- | --- |
-| 🔧 Mechanical design | 🟡 In progress | Ackermann 40°, double-stack ply, rear tilt |
-| ⚡ Electronics and power | 🟡 In progress | 11 V 3S LiPo, two-rail, TB6612FNG |
-| 🧭 Strategy and software | 🟡 In progress | PD steering, `MODE_FAULT` failsafe |
-| 📘 Engineering journal | ✅ Active | 11 entries mapped to the WRO rubric |
-| 🧪 Testing | ⚪ Planned | T1 to T2 done, T3 to T10 pending |
-| 🧾 Evidence | ⚪ Pending | E1 to E5 logged |
-| 🖼️ Visuals | 🟡 Partial | AI concept renders; photos on competition day |
-
-> [!NOTE]
-> Status reflects the documentation and development phase. Physical test evidence is added as the vehicle is built and run at the Doon School lab.
-
 ## Explore the Project
 
 | Area | Contents | Status |
 | --- | --- | --- |
-| 📐 [`design/`](design/) | Vehicle layout, mechanical decisions, LightBurn/DXF | Configuration |
-| ⚡ [`electronics/`](electronics/) | Components, power plan, wiring, pin assignments | System reference |
-| 🧭 [`strategy/`](strategy/) | Open / Obstacle Challenge logic and flow | Decision architecture |
-| 💻 [`software/`](software/) | Raspberry Pi (`wromain.py`) and ESP32 (`obstacleChallenge.ino`) source | Control software |
-| 📘 [`docs/`](docs/) | Engineering journal, diagrams, testing records | Engineering record |
-| 🖼️ [`images/`](images/) | Team, robot (renders), testing, competition visuals | Visual reference |
-| 🎥 [`videos/`](videos/) | Dated run and presentation videos (competition day) | Run records |
-| 🧾 [`evidence/`](evidence/) | Dated reviews, calibration and test summaries | Evidence archive |
+| [`design/`](design/) | Vehicle layout, mechanical decisions, LightBurn/DXF | Configuration |
+| [`electronics/`](electronics/) | Components, power plan, wiring, pin assignments | System reference |
+| [`strategy/`](strategy/) | Open / Obstacle Challenge logic and flow | Decision architecture |
+| [`software/`](software/) | Raspberry Pi (`wromain.py`) and ESP32 (`obstacleChallenge.ino`) source | Control software |
+| [`docs/`](docs/) | Engineering journal, diagrams, testing records | Engineering record |
+| [`images/`](images/) | Team, robot (renders), testing, competition visuals | Visual reference |
+| [`videos/`](videos/) | Dated run and presentation videos (competition day) | Run records |
+| [`evidence/`](evidence/) | Dated reviews, calibration and test summaries | Evidence archive |
 
 ---
 
