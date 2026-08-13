@@ -204,5 +204,5 @@ Until these are wired and implemented, the vehicle runs on vision + PD only. The
 ## Related documents
 
 - [Strategy overview](README.md)
-- [Testing procedures](../testing/procedures.md)
-- [Engineering journal entry 09](../engineering_journal/README.md)
+- [Testing procedures](../docs/testing/procedures.md)
+- [Engineering journal entry 09](../docs/engineering_journal/README.md)
