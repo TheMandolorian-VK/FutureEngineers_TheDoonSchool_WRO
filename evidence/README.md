@@ -4,13 +4,7 @@
 
 **A dated trail of real progress, observations, and engineering review.**
 
-![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
-![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
-![Evidence](https://img.shields.io/badge/Evidence-Pending-F59E0B?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Development%20Phase-F59E0B?style=for-the-badge)
-![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
-
-[← Project home](../README.md) · [Testing](../testing/README.md) · [Photos](../images/README.md)
+[← Project home](../README.md) · [Testing records](../docs/testing/README.md) · [Photos](../images/README.md)
 
 </div>
 
@@ -24,11 +18,14 @@ For every record, state the date, what was observed, the configuration used, and
 
 | # | Date | Type | Summary | Link |
 | --- | --- | --- | --- | --- |
-| E1 | 2026-08-01 | 🎯 Steering sweep | 31° vs 40° lock-angle comparison; 40° clears the 600 mm corridor with ~80 mm margin | journal 04 |
-| E2 | 2026-08-03 | ⚡ Driver comparison | L298N dropout ~1.8 V vs TB6612FNG ~0.4 V at stall → driver changed | journal 06 |
-| E3 | 2026-08-05 | 🔋 Power bench test | Single-shared-battery brown-out observed → two-rail design adopted | journal 07 |
-| E4 | 2026-08-09 | 📡 Sensor bench | VL53L0X median filter improves stability on white mat at 15° mount | journal 08 |
-| E5 | 2026-08-11 | 💻 Software | ESP32 serial protocol + fail-safe verified on bench (MODE_FAULT on timeout) | testing T5 |
+| E1 | 2026-08-01 | Steering sweep | 31° vs 40° lock-angle comparison; 40° clears the 600 mm corridor with ~80 mm margin | journal 04 |
+| E2 | 2026-08-03 | Driver comparison | L298N dropout ~1.8 V vs TB6612FNG ~0.4 V at stall → driver changed | journal 06 |
+| E3 | 2026-08-05 | Power bench test | Single-shared-battery brown-out observed → two-rail design adopted | journal 07 |
+| E4 | 2026-08-09 | Sensor bench | VL53L0X median filter improves stability on white mat at 15° mount | journal 08 |
+| E5 | 2026-08-11 | Software | ESP32 serial protocol + fail-safe verified on bench (MODE_FAULT on timeout) | testing T5 |
 
 > [!NOTE]
 > The archive grows as the development cycle continues. Evidence is added when observed: simulated or predicted results are never recorded as physical-test evidence.
+
+> [!IMPORTANT]
+> No raw evidence files (photographs, data logs, or videos) are present in this archive yet. They will be archived here as the vehicle is built and tested, and only observed results will ever be recorded.
