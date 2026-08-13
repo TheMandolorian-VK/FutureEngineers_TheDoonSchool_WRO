@@ -4,11 +4,6 @@
 
 **A chronological record of decisions, iterations, and lessons.**
 
-![WRO](https://img.shields.io/badge/WRO-2026-0057B8?style=for-the-badge&logo=robotframework&logoColor=white)
-![Category](https://img.shields.io/badge/Category-Future%20Engineers-7A2E8E?style=for-the-badge)
-![Journal](https://img.shields.io/badge/Journal-11%20Entries-16803A?style=for-the-badge)
-![Rubric](https://img.shields.io/badge/Rubric-5%20Criteria%20×%206-16803A?style=for-the-badge)
-![Updated](https://img.shields.io/badge/Updated-2026--08--13-555555?style=for-the-badge)
 
 [← Documentation](../README.md) · [Testing](../testing/README.md) · [Design](../../design/README.md)
 
@@ -23,28 +18,30 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | Criterion | What judges want | Where it lives |
 | --- | --- | --- |
 | 1. Mobility & Mechanical Design | Torque/speed reasoning, tradeoffs, testing | Entries 01–05 |
-| 2. Power & Sensor Architecture | Power budget, sensor tradeoffs, calibration | Entries 06–08 |
-| 3. Software Architecture & Obstacle Strategy | State machine, algorithm justification, tuning | Entry 09 |
+| 2. Power & Sensor Architecture | Single-battery two-rail power, sensor tradeoffs, calibration | Entries 06, 08, 11 |
+| 3. Software Architecture & Obstacle Strategy | State machine, algorithm justification, tuning | Entries 08, 09, 10 |
 | 4. Systems Thinking & Engineering Decisions | "We chose X instead of Y because…", constraints, risks | Entries 02–10 |
-| 5. Reproducibility & GitHub Quality | README ≥5000 chars, commits, CAD, wiring, code | Root README + [`design/wooden_plate.dxf`](../../design/wooden_plate.dxf), [`hardware/wiring-guide/`](../../hardware/wiring-guide/README.md) |
+| 5. Reproducibility & GitHub Quality | README ≥5000 chars, commits, CAD, wiring, code | Entries 01–11 + repo structure (root [`README.md`](../../README.md), [`design/wooden_plate.dxf`](../../design/wooden_plate.dxf), [`hardware/wiring-guide/`](../../hardware/wiring-guide/README.md)) |
 
 ---
 
 ## Entry index
 
+Click an entry number to jump to its section.
+
 | # | Date | Topic | Criterion |
 | --- | --- | --- | --- |
-| 01 | 2026-07-15 | System architecture: two-controller split (Pi + ESP32) | 3, 4 |
-| 02 | 2026-07-18 | Chassis material and fabrication: 3 mm plywood + LightBurn | 1, 4 |
-| 03 | 2026-07-22 | Drive system: N20 600 RPM motor, torque and speed reasoning | 1, 4 |
-| 04 | 2026-07-27 | Steering geometry: Ackermann, 31° → 40° iteration | 1, 4 |
-| 05 | 2026-08-02 | Double-stack layout: wood + LEGO + brass offsets | 1, 4 |
-| 06 | 2026-08-05 | Motor driver: L298N → TB6612FNG (dropout and heat) | 2, 4 |
-| 07 | 2026-08-07 | Power architecture: two-rail, two-battery design | 2, 4 |
-| 08 | 2026-08-09 | Sensor selection: camera, HC-SR04, VL53L0X, MPU6050 | 2, 4 |
-| 09 | 2026-08-11 | Software state machine and obstacle strategy | 3, 4 |
-| 10 | 2026-08-12 | Risk register and failure-mode analysis | 4 |
-| 11 | 2026-08-13 | Consolidated confirmed configuration (11 V 3S, rear tilt, LEGO Ackermann) | 1, 2, 4, 5 |
+| [01](#01-system-architecture-two-controller-split-2026-07-15-by-dhrubo-m) | 2026-07-15 | System architecture: two-controller split (Pi + ESP32) | 1, 4, 5 |
+| [02](#02-chassis-material-and-fabrication-2026-07-18-by-dhrubo-m) | 2026-07-18 | Chassis material and fabrication: 3 mm plywood + LightBurn | 1, 4, 5 |
+| [03](#03-drive-system-n20-600-rpm-motor-2026-07-22-by-vivaan-k) | 2026-07-22 | Drive system: N20 600 RPM motor, torque and speed reasoning | 1, 4, 5 |
+| [04](#04-steering-geometry-ackermann-31-40-2026-07-27-by-dhrubo-m) | 2026-07-27 | Steering geometry: Ackermann, 31° → 40° iteration | 1, 4, 5 |
+| [05](#05-double-stack-layout-wood-lego-brass-offsets-2026-08-02-by-yug-j) | 2026-08-02 | Double-stack layout: wood + LEGO + brass offsets | 1, 4, 5 |
+| [06](#06-motor-driver-l298n-tb6612fng-2026-08-05-by-yug-j) | 2026-08-05 | Motor driver: L298N → TB6612FNG (dropout and heat) | 2, 4, 5 |
+| [07](#07-power-architecture-two-rail-two-battery-design-2026-08-07-by-yug-j) | 2026-08-07 | Power architecture: two-rail, two-battery design (historical, superseded by 11) | 4, 5 |
+| [08](#08-sensor-selection-2026-08-09-by-vivaan-k) | 2026-08-09 | Sensor selection: camera, HC-SR04, VL53L0X, MPU6050 | 2, 3, 4, 5 |
+| [09](#09-software-state-machine-and-obstacle-strategy-2026-08-11-by-vivaan-k--dhrubo-m) | 2026-08-11 | Software state machine and obstacle strategy | 3, 4, 5 |
+| [10](#10-risk-register-and-failure-mode-analysis-2026-08-12-by-the-team) | 2026-08-12 | Risk register and failure-mode analysis | 3, 4, 5 |
+| [11](#11-consolidated-confirmed-configuration-2026-08-13-by-dhrubo-m) | 2026-08-13 | Consolidated confirmed configuration (11 V 3S, rear tilt, LEGO Ackermann) | 2, 4, 5 |
 
 > [!IMPORTANT]
 > Every entry records the **problem**, **options considered**, **chosen direction with reasoning**, **available evidence** (calculation / simulation / observation / measured test), and **next action**. The vehicle is in an active development and iteration cycle; entries are written as the work happens, not retrofitted.
@@ -62,7 +59,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 **Chosen: C.** The Pi's OpenCV pipeline runs comfortably at its own pace while the ESP32 closes the motor/servo loop at millisecond rates over USB serial (115200 baud). This mirrors the separation of perception and control used in real automotive ECUs. The ESP32 also guarantees a safe stop (fault state) even if the Pi's vision loop stalls: a single-controller design could not provide this independently.
 
-**Evidence:** the interface is defined in `src` protocol (`MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`) and implemented in `software/esp32/obstacleChallenge.ino`.
+**Evidence:** the Pi↔ESP32 interface is a 115200-baud USB serial link. The Pi sends wire tokens `DRIVE`, `PARK`, `FINISH`, `STOP`, and `PING` (format `CMD,<steer>,<pwm>,<mode>`); the `MODE_*` names are internal ESP32 firmware states and are never sent on the wire. The protocol is specified in [`strategy/README.md`](../../strategy/README.md) and the power/interface layout in [`electronics/README.md`](../../electronics/README.md); it is implemented in `software/esp32/obstacleChallenge.ino`.
 
 **Next action:** harden the serial protocol with checksums.
 
@@ -128,10 +125,10 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ### 05: Double-stack layout: wood + LEGO + brass offsets (2026-08-02, by Yug J.)
 
-**Problem:** fit two controllers, camera, four sensor families, servo, driver and batteries into 300×200 mm and keep the centre of mass low and the mass budget under 1.5 kg.
+**Problem:** fit two controllers, camera, four sensor families, servo, driver and the battery pack into 300×200 mm and keep the centre of mass low and the mass budget under 1.5 kg.
 
 **Chosen: a two-deck chassis.**
-- **Lower deck** (3 mm plywood): ESP32, TB6612FNG driver, batteries (lowest centre of mass).
+- **Lower deck** (3 mm plywood): ESP32, TB6612FNG driver, the battery pack (lowest centre of mass).
 - **Upper deck** (3 mm plywood): Raspberry Pi 4B + Camera Module 3 Wide, raised on brass standoff offsets.
 - **Mounting fusion:** LEGO beams and pins are used as universal mounting rails (they provide precise, repeatable hole grids), brass standoff spacers set deck height, and the plywood decks are laser-cut. This "wood + LEGO + brass" system means a mount can be moved in 8 mm increments without re-cutting the chassis: very useful during sensor-placement iteration.
 
@@ -158,6 +155,9 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 ---
 
 ### 07: Power architecture: two-rail, two-battery design (2026-08-07, by Yug J.)
+
+> [!NOTE]
+> Historical record only. This two-battery design was the configuration at the time of writing. It is **superseded** by the single 11 V 3S LiPo two-rail design in [Entry 11](#11-consolidated-confirmed-configuration-2026-08-13-by-dhrubo-m); the two-battery layout is no longer the current design.
 
 **Problem:** a single shared battery caused motor transients to brown out the Pi during bench tests (servo stall + motor start together).
 
@@ -204,17 +204,17 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 - PD (rather than full PID) is used deliberately: the field has no sustained steady-state error that requires the integral term, and D-only damping prevents oscillation at corners without windup.
 
 *ESP32 layer (execution + safety)*: `software/esp32/obstacleChallenge.ino`:
-- Modes `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, `MODE_FAULT`, driven over a 115200-baud serial protocol. Fault mode is entered on serial timeout or invalid command: the vehicle always fails safe.
+- The Pi sends wire tokens `DRIVE`, `PARK`, `FINISH`, `STOP`, and `PING` over a 115200-baud serial protocol (format `CMD,<steer>,<pwm>,<mode>`). These map to the internal firmware states `MODE_DRIVE`, `MODE_PARK`, `MODE_STOP`, `MODE_FINISH`, and `MODE_FAULT`. Fault mode is entered on serial timeout or invalid command: the vehicle always fails safe. The `MODE_*` names are internal states and are never sent on the wire.
 
 **Obstacle strategy (Obstacle Challenge):**
 1. Lane-follow by centring on the corridor (PD steering on vision offset, wall-distance check via VL53L0X).
 2. Pillar handling: red pillar → pass on its **right**; green pillar → pass on its **left** (colour from camera grid). The car biases the centring target toward the correct side and verifies clearance with the ToF before re-centring.
-3. After 3 laps → `MODE_PARK`: detect magenta parking-limit blocks with the camera, align parallel using the IMU heading, and use the ToF to stop at the correct depth inside the 20 cm-wide lot.
+3. After 3 laps → `PARK`: detect magenta parking-limit blocks with the camera, align parallel using the IMU heading, and use the ToF to stop at the correct depth inside the 20 cm-wide lot.
 4. Open Challenge: corner detection from wall geometry + lap counting by crossing section lines (orange/blue), then autonomous stop in the finish section.
 
 **Edge cases handled:** lost line (re-acquire by sweeping), serial timeout (fault stop), pillar too close (emergency bias), parking overshoot (back up in small IMU-controlled steps).
 
-**Testing/tuning method:** per-lap intervention count is logged; the PD gains were tuned to minimise interventions (see `other/pid_tuning_log.md`).
+**Testing/tuning method:** per-lap intervention count is logged; the PD gains were tuned to minimise interventions (see [`../other/pid_tuning_log.md`](../other/pid_tuning_log.md)).
 
 **Next action:** complete orange/blue line following and lap counting (tracked in the code header's "not yet implemented" list).
 
@@ -225,7 +225,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 | Risk | Likelihood | Impact | Mitigation |
 | --- | --- | --- | --- |
 | Camera glare / lighting change | Medium | High | exposure lock + boot-time HSV recalibration; tested under fluorescent + spot lighting |
-| Battery sag under servo+motor peak | Medium | High | two-rail power; fused rails; LiPo packs with adequate C rating |
+| Battery sag under servo+motor peak | Medium | High | single 11 V 3S LiPo feeding two-rail buck power; fused rails; pack with adequate C rating |
 | Wall collision in 600 mm corridor | Medium | High | 40° steering, speed reduction near walls (proximity-driven speed), ToF wall check |
 | Serial dropout Pi↔ESP32 | Low | High | fault state + re-sync on checksum failure; USB cable strain-relieved |
 | ToF misread on white mat at shallow angle | Medium | Medium | 5-sample median filter; mount at 15° downward |
@@ -236,7 +236,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 
 ### 11: Consolidated confirmed configuration (2026-08-13, by Dhrubo M.)
 
-**Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised, and supersedes the 7.4 V figure quoted in Entry 07.
+**Context:** this entry records the final, confirmed mechanical + power configuration after the build stabilised. It **supersedes Entry 07**, replacing its two-battery design with a single 11 V 3S LiPo pack feeding two buck-regulated rails.
 
 **Confirmed configuration:**
 - **Structure:** laser-cut 3 mm plywood double-stack chassis (LightBurn source → `design/wooden_plate.dxf`), brass standoff offsets between decks, LEGO beams/pins as adjustable mounting + steering rails.
@@ -244,7 +244,7 @@ The WRO documentation evaluation uses five criteria, each scored 0/2/4/6, for a 
 - **Drive:** fully rear-wheel drive, one N20 6 V 600 RPM motor on the rear axle (Rule 11.3/11.13 compliant: one driving axle, no independent side motors). Rear wheels and the rear N20 are smaller than the front wheels, giving the chassis a slight rearward tilt.
 - **Steering:** front TowerPro MG996R servo driving an Ackermann linkage built from LEGO beams/pins; outer lock 40° (Entry 04).
 - **Sensing:** Pi Camera Module 3 Wide (colour/geometry), VL53L0X ToF (front distance), HC-SR04 (redundant wall proximity), DFRobot Fermion MPU6050 IMU (yaw).
-- **Power:** single 11 V 3S LiPo → motor/servo rail bucked to ~6–7.4 V for N20 + MG996R; logic rail bucked to 5 V for Pi/ESP32/sensors (two-rail, star-grounded, fused).
+- **Power:** single 11 V 3S LiPo → motor/servo rail bucked to ~6 V for N20 + MG996R; logic rail bucked to 5 V for Pi/ESP32/sensors (two-rail, star-grounded, fused).
 
 **Why this is the final form:** every choice above is the result of the iterations logged in Entries 01–10 (two-controller split, plywood + LightBurn, N20 rear drive, 31°→40° Ackermann, L298N→TB6612FNG, two-rail power, sensor set). The smaller rear wheels + rearward tilt were adopted to lower the drive mass and improve corner stability without adding weight.
 
