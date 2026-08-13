@@ -171,7 +171,7 @@ The actual battery, regulator, rail voltages, and current requirements will be d
 
 The N20 is a **6 V, 600 RPM motor**, so the motor supply must be compatible with its specification and should not automatically be treated as the same rail used for logic electronics.
 
-The current design record also contains an LM317-based 5 V regulation concept using:
+An earlier design record contained an LM317-based 5 V regulation concept using:
 
 ```text
 R1 = 240 Ω
@@ -185,7 +185,7 @@ with:
 10 µF output decoupling
 ```
 
-This remains a design reference until the final assembled power architecture is verified.
+This was **dropped**: a linear regulator on the 11 V input runs hot and wastes power. The current design uses a single 11 V 3S LiPo pack feeding two buck regulators (motor/servo rail ~6 V, logic rail 5 V), per [electronics/](../../electronics/README.md).
 
 ## Grounding and Cable Routing
 
