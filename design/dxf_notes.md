@@ -24,8 +24,6 @@ The committed file currently carries a single rectangular test outline (150 x 12
 3. Commit the updated file and reference the geometry from the [design overview](README.md).
 4. Photograph the cut decks against the drawing for the [engineering journal](../docs/engineering_journal/README.md).
 
-Until step 1 is done, treat this DXF as a placeholder: do not claim the chassis is reproducible from the repository alone.
-
 ## Related documents
 
 - [Design overview](README.md), chassis section
