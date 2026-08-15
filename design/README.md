@@ -90,7 +90,7 @@ The 40° lock lets the car execute the sharp 90° corners of the 600 mm corridor
 ## 4. Chassis: laser-cut 3 mm plywood (LightBurn)
 
 - **Material:** 3 mm plywood: lighter than acrylic at equal stiffness, damps motor vibration, doesn't crack at screw points, cuts cleanly and fast.
-- **Tool:** school laser cutter, designed in **LightBurn**. The DXF export is committed as [`wooden_plate.dxf`](wooden_plate.dxf) (currently a placeholder rectangle; see [cut file notes](dxf_notes.md)). The editable `.lbrn` LightBurn project and full deck patterns are pending.
+- **Tool:** school laser cutter, designed in **LightBurn**. The DXF export is committed as [`wooden_plate.dxf`](wooden_plate.dxf); see [cut file notes](dxf_notes.md)). The editable `.lbrn` LightBurn project and full deck patterns are pending.
 - **Edge treatment:** two thin coats of clear varnish seal the cut edges against moisture and warp.
 
 
@@ -111,7 +111,7 @@ The chassis is drawn in **LightBurn** and cut on the school laser cutter from 3 
 
 - **Layers:** the lower deck carries the drivetrain/electronics cut-outs; the upper deck carries the Pi + camera-mount cut-outs and the brass-standoff holes.
 - **Parameters recorded per file:** material (3 mm plywood), kerf compensation, and the cutter's power/speed setting for that material.
-- **Files:** the DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed (currently a placeholder). The editable `.lbrn` master and full deck patterns are pending.
+- **Files:** the DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed. The editable `.lbrn` master and full deck patterns are pending.
 
 ### Double-stack layout: space utilisation
 
@@ -175,4 +175,4 @@ This hybrid makes the mechanical design **iterative by construction**: a camera 
 
 ## 8. Current development status
 
-The mechanical design is through its second iteration (31°→40° steering, double-stack chassis assembled). Integration and tuning are ongoing at the school lab; every change is logged in the [engineering journal](../docs/engineering_journal/README.md). The DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed (placeholder); the `.lbrn` master and full deck patterns are pending.
+The mechanical design is through its second iteration (31°→40° steering, double-stack chassis assembled). Integration and tuning are ongoing at the school lab; every change is logged in the [engineering journal](../docs/engineering_journal/README.md). The DXF export [`wooden_plate.dxf`](wooden_plate.dxf) is committed; the `.lbrn` master and full deck patterns are pending.
