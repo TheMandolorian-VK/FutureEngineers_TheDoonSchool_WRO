@@ -93,8 +93,6 @@ The 40° lock lets the car execute the sharp 90° corners of the 600 mm corridor
 - **Tool:** school laser cutter, designed in **LightBurn**. The DXF export is committed as [`wooden_plate.dxf`](wooden_plate.dxf) (currently a placeholder rectangle; see [cut file notes](dxf_notes.md)). The editable `.lbrn` LightBurn project and full deck patterns are pending.
 - **Edge treatment:** two thin coats of clear varnish seal the cut edges against moisture and warp.
 
-> [!NOTE]
-> The DXF is a 2D laser-cut flat pattern (the cut geometry), not a full 3D CAD model. It currently contains only a placeholder rectangle (150 x 120 mm). The full deck patterns and `.lbrn` master are pending.
 
 ### Material tradeoff
 
